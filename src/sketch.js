@@ -1,0 +1,688 @@
+let cnv;
+let shapes = [];
+let currentSeed = null;
+let coverageProbeCanvas = null;
+let coverageProbeCtx = null;
+
+// Global configuration (foundational/default project settings)
+const BACKGROUND_COLOR = "#031f60";
+const PALETTE = ["#072d75", "#083c8a", "#0158ad", "#3598f8"];
+const CORNER_SHAPE = {
+  path: new Path2D(
+    "M360 360V224C360 100.5 259.5 0 136 0H0v160h136c35.3 0 64 28.7 64 64v136h160Z",
+  ),
+  viewBoxSize: 360,
+};
+const STROKE_WIDTH_RATIOS = [0.0037, 0.0148];
+const EXPORT_SIZE = {
+  width: 8000,
+  height: 4500,
+};
+
+// UI control configuration (defaults + bounds)
+const UI_BALANCE_PERCENT_DEFAULT = 50;
+const UI_DENSITY_MAX = 30;
+const UI_DENSITY_PERCENT_DEFAULT = 0;
+const UI_MIRROR_PERCENT_DEFAULT = 0;
+const UI_OPACITY_PERCENT_DEFAULT = 75;
+const UI_OUTLINE_PERCENT_DEFAULT = 0;
+const UI_SCALE_PERCENT_DEFAULT = 75;
+
+// Internal tuning constants (engine behavior / performance guards)
+const COVERAGE_CELL_SIZE = 12;
+const MAX_GENERATION_ATTEMPTS = 9000;
+const MIN_COVERAGE_GAIN_EARLY = 0.01;
+const MIN_COVERAGE_GAIN_LATE = 0.0015;
+const MIN_STROKE_WIDTH = 1;
+const STROKE_WIDTH_VARIANT_PROBABILITY = 0.5;
+
+// Default values for runtime UI controls
+const runtimeConfig = {
+  shapeCountPercent: UI_DENSITY_PERCENT_DEFAULT,
+  strokeOnlyProbability: UI_OUTLINE_PERCENT_DEFAULT / 100,
+  flipProbability: UI_MIRROR_PERCENT_DEFAULT / 100,
+  overlapAlpha: UI_OPACITY_PERCENT_DEFAULT / 100,
+  sizePercent: UI_SCALE_PERCENT_DEFAULT,
+  balancePercent: UI_BALANCE_PERCENT_DEFAULT,
+};
+const URL_PARAMS = {
+  seed: "s",
+  balancePct: "bl",
+  densityPct: "dn",
+  scalePct: "sc",
+  outlinePct: "ot",
+  mirrorPct: "mr",
+  opacityPct: "op",
+};
+
+function shapesOverlap(a, b) {
+  // Approximate overlap using circular bounds based on nominal size.
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+  const distance = Math.hypot(dx, dy);
+  const minDistance = (a.size + b.size) * 0.5;
+  return distance < minDistance;
+}
+
+function rgbaFromHex(hex, alpha) {
+  const value = hex.replace("#", "");
+  const r = Number.parseInt(value.slice(0, 2), 16);
+  const g = Number.parseInt(value.slice(2, 4), 16);
+  const b = Number.parseInt(value.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function drawCompositionToContext(
+  ctx,
+  renderWidth,
+  renderHeight,
+  positionScale = 1,
+  sizeScale = 1,
+  offsetX = 0,
+  offsetY = 0,
+) {
+  ctx.save();
+  ctx.fillStyle = BACKGROUND_COLOR;
+  ctx.fillRect(0, 0, renderWidth, renderHeight);
+
+  shapes.forEach((s, index) => {
+    const hasLowerOverlap = shapes
+      .slice(0, index)
+      .some(
+        (lowerShape) =>
+          lowerShape.styleMode !== "stroke" && shapesOverlap(s, lowerShape),
+      );
+    const alpha = hasLowerOverlap ? runtimeConfig.overlapAlpha : 1;
+    const drawX = offsetX + s.x * positionScale;
+    const drawY = offsetY + s.y * positionScale;
+    const drawSize = s.size * sizeScale;
+
+    const scale = drawSize / CORNER_SHAPE.viewBoxSize;
+    const viewBoxHalf = CORNER_SHAPE.viewBoxSize * 0.5;
+    const signX = s.flipX ? -1 : 1;
+    const signY = s.flipY ? -1 : 1;
+
+    ctx.save();
+    ctx.translate(drawX, drawY);
+    ctx.scale(scale * signX, scale * signY);
+    ctx.translate(-viewBoxHalf, -viewBoxHalf);
+
+    if (s.styleMode === "stroke") {
+      const ratio = s.strokeWidthRatio ?? STROKE_WIDTH_RATIOS[0];
+      const strokeWidth = Math.max(
+        MIN_STROKE_WIDTH * sizeScale,
+        drawSize * ratio,
+      );
+      ctx.strokeStyle = rgbaFromHex(s.color, alpha);
+      ctx.lineWidth = strokeWidth / scale;
+      ctx.stroke(CORNER_SHAPE.path);
+    } else {
+      ctx.fillStyle = rgbaFromHex(s.color, alpha);
+      ctx.fill(CORNER_SHAPE.path);
+    }
+    ctx.restore();
+  });
+
+  ctx.restore();
+}
+
+function exportCurrentComposition(filename) {
+  const exportCanvas = document.createElement("canvas");
+  exportCanvas.width = EXPORT_SIZE.width;
+  exportCanvas.height = EXPORT_SIZE.height;
+  const exportCtx = exportCanvas.getContext("2d");
+  if (!exportCtx) return;
+
+  const scaleX = EXPORT_SIZE.width / width;
+  const scaleY = EXPORT_SIZE.height / height;
+  const uniformScale = Math.min(scaleX, scaleY);
+  const offsetX = (EXPORT_SIZE.width - width * uniformScale) * 0.5;
+  const offsetY = (EXPORT_SIZE.height - height * uniformScale) * 0.5;
+
+  drawCompositionToContext(
+    exportCtx,
+    EXPORT_SIZE.width,
+    EXPORT_SIZE.height,
+    uniformScale,
+    uniformScale,
+    offsetX,
+    offsetY,
+  );
+
+  exportCanvas.toBlob((blob) => {
+    if (!blob) return;
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `${filename}.png`;
+    link.click();
+    URL.revokeObjectURL(downloadUrl);
+  }, "image/png");
+}
+
+function pointInShape(shape, px, py, ctx) {
+  if (shape.type === "svg") {
+    const scale = shape.size / CORNER_SHAPE.viewBoxSize;
+    const viewBoxHalf = CORNER_SHAPE.viewBoxSize * 0.5;
+    const signX = shape.flipX ? -1 : 1;
+    const signY = shape.flipY ? -1 : 1;
+    const dx = px - shape.x;
+    const dy = py - shape.y;
+    const lx = dx / (scale * signX) + viewBoxHalf;
+    const ly = dy / (scale * signY) + viewBoxHalf;
+    return ctx.isPointInPath(CORNER_SHAPE.path, lx, ly);
+  }
+
+  return false;
+}
+
+function ensureCoverageProbe(widthPx, heightPx) {
+  if (!coverageProbeCanvas) {
+    coverageProbeCanvas = document.createElement("canvas");
+    coverageProbeCtx = coverageProbeCanvas.getContext("2d");
+  }
+  if (!coverageProbeCtx || !coverageProbeCanvas) return null;
+  if (coverageProbeCanvas.width !== widthPx)
+    coverageProbeCanvas.width = widthPx;
+  if (coverageProbeCanvas.height !== heightPx)
+    coverageProbeCanvas.height = heightPx;
+  return coverageProbeCtx;
+}
+
+function estimateCoverageRatio(shapeList, widthPx, heightPx, probeCtx) {
+  if (!probeCtx) return 0;
+
+  let covered = 0;
+  let total = 0;
+
+  for (
+    let y = COVERAGE_CELL_SIZE * 0.5;
+    y < heightPx;
+    y += COVERAGE_CELL_SIZE
+  ) {
+    for (
+      let x = COVERAGE_CELL_SIZE * 0.5;
+      x < widthPx;
+      x += COVERAGE_CELL_SIZE
+    ) {
+      total += 1;
+      const isCovered = shapeList.some((shape) =>
+        pointInShape(shape, x, y, probeCtx),
+      );
+      if (isCovered) covered += 1;
+    }
+  }
+
+  return total > 0 ? covered / total : 0;
+}
+
+function parseSeed(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || Number.isNaN(parsed)) return null;
+  return Math.floor(parsed);
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function getSizeControlFromPercent(sizePercent) {
+  const clampedPercent = clamp(sizePercent, 0, 100);
+  if (clampedPercent <= 75) {
+    const t = clampedPercent / 75;
+    return lerp(0.01, 1.0, t);
+  }
+  const t = (clampedPercent - 75) / 25;
+  return lerp(1.0, 2.0, t);
+}
+
+function getSizeRatioRange(sizePercent) {
+  const spread = 0.5;
+  const minRatio = 0.01;
+  const maxRatio = 2.0;
+  const sizeControl = getSizeControlFromPercent(sizePercent);
+  return {
+    min: clamp(sizeControl - spread, minRatio, maxRatio),
+    max: clamp(sizeControl + spread, minRatio, maxRatio),
+  };
+}
+
+function getShapeCountFromPercent(shapeCountPercent) {
+  const p = clamp(shapeCountPercent, 0, 100) / 100;
+  return Math.round(1 + p * (UI_DENSITY_MAX - 1));
+}
+
+function getCenterBalanceConfig(balancePercent) {
+  const t = clamp(balancePercent, 0, 100) / 100;
+  return {
+    positionBias: lerp(0.1, 0.56, t),
+    targetOffset: lerp(0.45, 0.05, t),
+    slack: lerp(0.035, 0.005, t),
+  };
+}
+
+function updateRuntimeControlDisplay() {
+  const balanceValue = document.getElementById("balanceValue");
+  const densityValue = document.getElementById("densityValue");
+  const outlineValue = document.getElementById("outlineValue");
+  const mirrorValue = document.getElementById("mirrorValue");
+  const opacityValue = document.getElementById("opacityValue");
+  const scaleValue = document.getElementById("scaleValue");
+
+  if (balanceValue) {
+    balanceValue.textContent = `${Math.round(runtimeConfig.balancePercent)}%`;
+  }
+  if (densityValue) {
+    densityValue.textContent = `${Math.round(runtimeConfig.shapeCountPercent)}%`;
+  }
+  if (outlineValue) {
+    outlineValue.textContent = `${Math.round(
+      runtimeConfig.strokeOnlyProbability * 100,
+    )}%`;
+  }
+  if (mirrorValue) {
+    mirrorValue.textContent = `${Math.round(
+      runtimeConfig.flipProbability * 100,
+    )}%`;
+  }
+  if (opacityValue) {
+    opacityValue.textContent = `${Math.round(runtimeConfig.overlapAlpha * 100)}%`;
+  }
+  if (scaleValue) {
+    scaleValue.textContent = `${Math.round(runtimeConfig.sizePercent)}%`;
+  }
+}
+
+function syncRuntimeControlsToInputs() {
+  const balanceInput = document.getElementById("balanceInput");
+  const densityInput = document.getElementById("densityInput");
+  const outlineInput = document.getElementById("outlineInput");
+  const mirrorInput = document.getElementById("mirrorInput");
+  const opacityInput = document.getElementById("opacityInput");
+  const scaleInput = document.getElementById("scaleInput");
+
+  if (balanceInput) {
+    balanceInput.value = String(Math.round(runtimeConfig.balancePercent));
+  }
+  if (densityInput) {
+    densityInput.value = String(Math.round(runtimeConfig.shapeCountPercent));
+  }
+  if (outlineInput) {
+    outlineInput.value = String(
+      Math.round(runtimeConfig.strokeOnlyProbability * 100),
+    );
+  }
+  if (mirrorInput) {
+    mirrorInput.value = String(Math.round(runtimeConfig.flipProbability * 100));
+  }
+  if (opacityInput) {
+    opacityInput.value = String(Math.round(runtimeConfig.overlapAlpha * 100));
+  }
+  if (scaleInput) {
+    scaleInput.value = String(runtimeConfig.sizePercent);
+  }
+}
+
+function bindRuntimeControls() {
+  const balanceInput = document.getElementById("balanceInput");
+  const densityInput = document.getElementById("densityInput");
+  const outlineInput = document.getElementById("outlineInput");
+  const mirrorInput = document.getElementById("mirrorInput");
+  const opacityInput = document.getElementById("opacityInput");
+  const scaleInput = document.getElementById("scaleInput");
+  const resetBtn = document.getElementById("resetBtn");
+  const randomBtn = document.getElementById("randomBtn");
+
+  if (
+    !balanceInput ||
+    !densityInput ||
+    !outlineInput ||
+    !mirrorInput ||
+    !opacityInput ||
+    !scaleInput ||
+    !resetBtn ||
+    !randomBtn
+  ) {
+    return;
+  }
+
+  syncRuntimeControlsToInputs();
+  updateRuntimeControlDisplay();
+
+  balanceInput.addEventListener("input", () => {
+    const nextValue = Number(balanceInput.value);
+    runtimeConfig.balancePercent = clamp(nextValue, 0, 100);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  densityInput.addEventListener("input", () => {
+    const nextValue = Number(densityInput.value);
+    runtimeConfig.shapeCountPercent = clamp(nextValue, 0, 100);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  outlineInput.addEventListener("input", () => {
+    const nextValue = Number(outlineInput.value) / 100;
+    runtimeConfig.strokeOnlyProbability = clamp(nextValue, 0, 1);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  mirrorInput.addEventListener("input", () => {
+    const nextValue = Number(mirrorInput.value) / 100;
+    runtimeConfig.flipProbability = clamp(nextValue, 0, 1);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  opacityInput.addEventListener("input", () => {
+    const nextValue = Number(opacityInput.value) / 100;
+    runtimeConfig.overlapAlpha = clamp(nextValue, 0, 1);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  scaleInput.addEventListener("input", () => {
+    const nextValue = Number(scaleInput.value);
+    runtimeConfig.sizePercent = clamp(nextValue, 0, 100);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  resetBtn.addEventListener("click", () => {
+    runtimeConfig.balancePercent = UI_BALANCE_PERCENT_DEFAULT;
+    runtimeConfig.shapeCountPercent = UI_DENSITY_PERCENT_DEFAULT;
+    runtimeConfig.strokeOnlyProbability = UI_OUTLINE_PERCENT_DEFAULT / 100;
+    runtimeConfig.flipProbability = UI_MIRROR_PERCENT_DEFAULT / 100;
+    runtimeConfig.overlapAlpha = UI_OPACITY_PERCENT_DEFAULT / 100;
+    runtimeConfig.sizePercent = UI_SCALE_PERCENT_DEFAULT;
+    syncRuntimeControlsToInputs();
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  randomBtn.addEventListener("click", () => {
+    runtimeConfig.balancePercent = Math.round(Math.random() * 100);
+    runtimeConfig.shapeCountPercent = Math.round(Math.random() * 100);
+    runtimeConfig.flipProbability = Math.random();
+    runtimeConfig.overlapAlpha = Math.random();
+    runtimeConfig.strokeOnlyProbability = Math.random();
+    runtimeConfig.sizePercent = Math.round(Math.random() * 100);
+    syncRuntimeControlsToInputs();
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+}
+
+function readSeedFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return parseSeed(params.get(URL_PARAMS.seed));
+}
+
+function readRuntimeConfigFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+
+  const balancePctRaw = params.get(URL_PARAMS.balancePct);
+  if (balancePctRaw !== null) {
+    const balancePct = Number(balancePctRaw);
+    if (Number.isFinite(balancePct) && !Number.isNaN(balancePct)) {
+      runtimeConfig.balancePercent = clamp(balancePct, 0, 100);
+    }
+  }
+
+  const shapePctRaw = params.get(URL_PARAMS.densityPct);
+  if (shapePctRaw !== null) {
+    const shapePct = Number(shapePctRaw);
+    if (Number.isFinite(shapePct) && !Number.isNaN(shapePct)) {
+      runtimeConfig.shapeCountPercent = clamp(shapePct, 0, 100);
+    }
+  }
+
+  const strokePctRaw = params.get(URL_PARAMS.outlinePct);
+  if (strokePctRaw !== null) {
+    const strokePct = Number(strokePctRaw);
+    if (Number.isFinite(strokePct) && !Number.isNaN(strokePct)) {
+      runtimeConfig.strokeOnlyProbability = clamp(strokePct / 100, 0, 1);
+    }
+  }
+
+  const flipPctRaw = params.get(URL_PARAMS.mirrorPct);
+  if (flipPctRaw !== null) {
+    const flipPct = Number(flipPctRaw);
+    if (Number.isFinite(flipPct) && !Number.isNaN(flipPct)) {
+      runtimeConfig.flipProbability = clamp(flipPct / 100, 0, 1);
+    }
+  }
+
+  const overlapPctRaw = params.get(URL_PARAMS.opacityPct);
+  if (overlapPctRaw !== null) {
+    const overlapPct = Number(overlapPctRaw);
+    if (Number.isFinite(overlapPct) && !Number.isNaN(overlapPct)) {
+      runtimeConfig.overlapAlpha = clamp(overlapPct / 100, 0, 1);
+    }
+  }
+
+  const sizeRatioRaw = params.get(URL_PARAMS.scalePct);
+  if (sizeRatioRaw !== null) {
+    const sizePercent = Number(sizeRatioRaw);
+    if (Number.isFinite(sizePercent) && !Number.isNaN(sizePercent)) {
+      runtimeConfig.sizePercent = clamp(sizePercent, 0, 100);
+    }
+  }
+}
+
+function writeUrlState(seed) {
+  const url = new URL(window.location.href);
+  const orderedParams = new URLSearchParams();
+
+  if (Number.isFinite(seed)) {
+    orderedParams.set(URL_PARAMS.seed, String(Math.floor(seed)));
+  }
+
+  // Keep URL ordering aligned to UI control order.
+  orderedParams.set(
+    URL_PARAMS.balancePct,
+    String(Math.round(runtimeConfig.balancePercent)),
+  );
+  orderedParams.set(
+    URL_PARAMS.densityPct,
+    String(Math.round(runtimeConfig.shapeCountPercent)),
+  );
+  orderedParams.set(
+    URL_PARAMS.mirrorPct,
+    String(Math.round(runtimeConfig.flipProbability * 100)),
+  );
+  orderedParams.set(
+    URL_PARAMS.opacityPct,
+    String(Math.round(runtimeConfig.overlapAlpha * 100)),
+  );
+  orderedParams.set(
+    URL_PARAMS.outlinePct,
+    String(Math.round(runtimeConfig.strokeOnlyProbability * 100)),
+  );
+  orderedParams.set(
+    URL_PARAMS.scalePct,
+    String(Math.round(runtimeConfig.sizePercent)),
+  );
+
+  url.search = orderedParams.toString();
+  window.history.replaceState(null, "", url);
+}
+
+function setup() {
+  const container = document.getElementById("sketchContainer");
+  cnv = createCanvas(800, 450);
+  cnv.parent(container);
+  noLoop();
+
+  // wire controls
+  const genBtn = document.getElementById("generateBtn");
+  const downloadBtn = document.getElementById("downloadBtn");
+  readRuntimeConfigFromUrl();
+  bindRuntimeControls();
+
+  genBtn.addEventListener("click", () => {
+    const seed = Math.floor(Math.random() * 1e9);
+    writeUrlState(seed);
+    generateFromSeed(seed);
+  });
+
+  downloadBtn.addEventListener("click", () => {
+    const filename = `facet-${currentSeed || "random"}`;
+    exportCurrentComposition(filename);
+  });
+
+  // initial generate
+  const initialSeed = readSeedFromUrl() ?? Math.floor(Math.random() * 1e9);
+  writeUrlState(initialSeed);
+  generateFromSeed(initialSeed);
+}
+
+function draw() {
+  drawCompositionToContext(drawingContext, width, height);
+}
+
+function overlapsSameColor(candidate, existingShapes) {
+  return existingShapes.some((shape) => {
+    if (shape.color !== candidate.color) return false;
+    return shapesOverlap(shape, candidate);
+  });
+}
+
+function applyLayeringOrder(shapeList) {
+  const filled = shapeList.filter((shape) => shape.styleMode !== "stroke");
+  const stroked = shapeList.filter((shape) => shape.styleMode === "stroke");
+  return [...filled, ...stroked];
+}
+
+function getCenterOffsetRatio(shapeList, canvasWidth, canvasHeight) {
+  if (shapeList.length === 0) return 0;
+
+  let weightedX = 0;
+  let weightedY = 0;
+  let totalWeight = 0;
+  shapeList.forEach((shape) => {
+    const weight = Math.max(1, shape.size * shape.size);
+    weightedX += shape.x * weight;
+    weightedY += shape.y * weight;
+    totalWeight += weight;
+  });
+
+  if (totalWeight <= 0) return 0;
+
+  const centroidX = weightedX / totalWeight;
+  const centroidY = weightedY / totalWeight;
+  const dx = centroidX - canvasWidth * 0.5;
+  const dy = centroidY - canvasHeight * 0.5;
+  const dist = Math.hypot(dx, dy);
+  const maxDist = Math.hypot(canvasWidth * 0.5, canvasHeight * 0.5);
+  return maxDist > 0 ? dist / maxDist : 0;
+}
+
+function generateFromSeed(seed) {
+  currentSeed = seed;
+  randomSeed(seed);
+  noiseSeed(seed);
+
+  shapes = [];
+  const { min: minSizeRatio, max: maxSizeRatio } = getSizeRatioRange(
+    runtimeConfig.sizePercent,
+  );
+  const centerBalance = getCenterBalanceConfig(runtimeConfig.balancePercent);
+  const probeCtx = ensureCoverageProbe(width, height);
+  const minSize = Math.min(width, height) * minSizeRatio;
+  const maxSize = Math.min(width, height) * maxSizeRatio;
+
+  let coverageRatio = 0;
+  let centerOffsetRatio = 0;
+  let guard = 0;
+  while (
+    guard < MAX_GENERATION_ATTEMPTS &&
+    shapes.length < getShapeCountFromPercent(runtimeConfig.shapeCountPercent)
+  ) {
+    guard += 1;
+    const color = random(PALETTE);
+    const styleMode =
+      random() < runtimeConfig.strokeOnlyProbability ? "stroke" : "fill";
+    const strokeWidthRatio =
+      random() < STROKE_WIDTH_VARIANT_PROBABILITY
+        ? STROKE_WIDTH_RATIOS[0]
+        : STROKE_WIDTH_RATIOS[1];
+    const size = lerp(minSize, maxSize, Math.pow(random(), 0.35));
+    const uniformX = random(-size * 0.6, width + size * 0.2);
+    const uniformY = random(-size * 0.6, height + size * 0.2);
+    const centeredX = randomGaussian(width * 0.5, width * 0.2);
+    const centeredY = randomGaussian(height * 0.5, height * 0.2);
+    const x = lerp(uniformX, centeredX, centerBalance.positionBias);
+    const y = lerp(uniformY, centeredY, centerBalance.positionBias);
+    const shouldFlip = random() < runtimeConfig.flipProbability;
+    const flipMode = shouldFlip ? Math.floor(random(1, 4)) : 0;
+    const flipX = flipMode === 1 || flipMode === 3;
+    const flipY = flipMode === 2 || flipMode === 3;
+
+    const candidate = {
+      type: "svg",
+      x,
+      y,
+      size,
+      color,
+      styleMode,
+      strokeWidthRatio,
+      flipX,
+      flipY,
+    };
+    if (!overlapsSameColor(candidate, shapes)) {
+      const nextShapes = [...shapes, candidate];
+      const nextCoverage = estimateCoverageRatio(
+        nextShapes,
+        width,
+        height,
+        probeCtx,
+      );
+      const nextCenterOffsetRatio = getCenterOffsetRatio(
+        nextShapes,
+        width,
+        height,
+      );
+      const coverageGain = nextCoverage - coverageRatio;
+      const minGain =
+        coverageRatio < 0.9 ? MIN_COVERAGE_GAIN_EARLY : MIN_COVERAGE_GAIN_LATE;
+      const withinCenterTarget =
+        nextCenterOffsetRatio <= centerBalance.targetOffset;
+      const improvesCenterBalance =
+        nextCenterOffsetRatio <= centerOffsetRatio + centerBalance.slack;
+      const centerBalanced = withinCenterTarget || improvesCenterBalance;
+
+      if (coverageGain >= minGain && centerBalanced) {
+        shapes.push(candidate);
+        coverageRatio = nextCoverage;
+        centerOffsetRatio = nextCenterOffsetRatio;
+      }
+    }
+  }
+
+  shapes = applyLayeringOrder(shapes);
+  redraw();
+}
+
+function windowResized() {
+  const container = document.getElementById("sketchContainer");
+  const w = container.clientWidth || 800;
+  resizeCanvas(w, Math.round(w * (9 / 16)));
+  if (currentSeed !== null) generateFromSeed(currentSeed);
+}
+
+// responsive on first layout
+window.addEventListener("load", () => {
+  windowResized();
+});
