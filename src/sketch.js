@@ -155,6 +155,26 @@ function exportCurrentComposition(filename) {
   }, "image/png");
 }
 
+function buildExportFilename(seed) {
+  const safeSeed = Number.isFinite(seed) ? Math.floor(seed) : "random";
+  const balancePct = Math.round(runtimeConfig.balancePercent);
+  const densityPct = Math.round(runtimeConfig.shapeCountPercent);
+  const mirrorPct = Math.round(runtimeConfig.flipProbability * 100);
+  const opacityPct = Math.round(runtimeConfig.overlapAlpha * 100);
+  const outlinePct = Math.round(runtimeConfig.strokeOnlyProbability * 100);
+  const scalePct = Math.round(runtimeConfig.sizePercent);
+
+  return [
+    `facet-s${safeSeed}`,
+    `${URL_PARAMS.balancePct}${balancePct}`,
+    `${URL_PARAMS.densityPct}${densityPct}`,
+    `${URL_PARAMS.mirrorPct}${mirrorPct}`,
+    `${URL_PARAMS.opacityPct}${opacityPct}`,
+    `${URL_PARAMS.outlinePct}${outlinePct}`,
+    `${URL_PARAMS.scalePct}${scalePct}`,
+  ].join("-");
+}
+
 function parseSeed(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || Number.isNaN(parsed)) return null;
@@ -477,7 +497,7 @@ function setup() {
   });
 
   downloadBtn.addEventListener("click", () => {
-    const filename = `facet-${currentSeed || "random"}`;
+    const filename = buildExportFilename(currentSeed);
     exportCurrentComposition(filename);
   });
 

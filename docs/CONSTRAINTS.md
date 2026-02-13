@@ -130,4 +130,4 @@ Canonical order:
 
 - Export format: PNG
 - Export resolution: fixed `8000x4500` (16:9)
-- Filename includes seed (`facet-{seed}.png`)
+- Filename includes seed + control params (`facet-s{seed}-bl{bl}-dn{dn}-mr{mr}-op{op}-ot{ot}-sc{sc}.png`)
