@@ -8,7 +8,7 @@ Define deterministic and probabilistic rules so generated images follow Measured
 
 ## References
 
-- /_Measured_Brand_Refresh_Version_05.pdf
+- /\_Measured_Brand_Refresh_Version_05.pdf
 
 ## Current scope
 
@@ -67,12 +67,10 @@ Define deterministic and probabilistic rules so generated images follow Measured
   - Candidate placement blends uniform and center-biased sampling.
   - Candidate acceptance also checks centroid balance target/slack.
 
-## Coverage and acceptance behavior
+## Acceptance behavior
 
-- Coverage estimation exists and affects candidate acceptance.
-- Coverage is estimated via sampled grid probes (`COVERAGE_CELL_SIZE`).
-- Candidates must pass both:
-  - Minimum coverage gain threshold (early/late thresholds)
+- Candidate acceptance is currently based on:
+  - Same-color overlap rejection
   - Center-balance acceptance check
 - Practical result:
   - Density behaves as a max-cap, not an exact target count.
@@ -100,8 +98,10 @@ Current defaults:
 
 Control semantics:
 
-- `Density` maps `0..100%` to shape max `1..UI_DENSITY_MAX` (currently 30).
-- `Scale` maps non-linearly to internal size control.
+- `Density` maps `0..100%` to shape max `1..UI_DENSITY_MAX` (currently 100).
+- `Scale` maps non-linearly to internal size control:
+  - `0..75%` maps to size control `0.1..1.0`
+  - `75..100%` maps to size control `1.0..2.0`
 - `Balance` maps to center-bias + centroid acceptance behavior.
 
 ## URL parameter persistence
@@ -131,22 +131,3 @@ Canonical order:
 - Export format: PNG
 - Export resolution: fixed `8000x4500` (16:9)
 - Filename includes seed (`facet-{seed}.png`)
-
-## Not implemented yet
-
-- Secondary/tertiary primitives in generation
-- SVG export
-- Preset system (`brand-muted`, `brand-bold`, `grid-centric`)
-- Strict constraints validator module
-
-## Decisions currently locked
-
-- Keep strict-mode intent as the long-term validation direction (`reject`).
-- Keep current palette/background as canonical until brand update is provided.
-- Keep single-primitive generation for current iteration phase.
-
-## Next iteration focus
-
-- Decide whether to keep or relax coverage-driven acceptance.
-- Add a thin validator module to enforce constraints in one place.
-- Evaluate whether fixed `8000x4500` PNG is sufficient or SVG should be added.

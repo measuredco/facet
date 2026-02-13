@@ -1,8 +1,6 @@
 let cnv;
 let shapes = [];
 let currentSeed = null;
-let coverageProbeCanvas = null;
-let coverageProbeCtx = null;
 
 // Global configuration (foundational/default project settings)
 const BACKGROUND_COLOR = "#031f60";
@@ -21,7 +19,7 @@ const EXPORT_SIZE = {
 
 // UI control configuration (defaults + bounds)
 const UI_BALANCE_PERCENT_DEFAULT = 50;
-const UI_DENSITY_MAX = 30;
+const UI_DENSITY_MAX = 50;
 const UI_DENSITY_PERCENT_DEFAULT = 0;
 const UI_MIRROR_PERCENT_DEFAULT = 0;
 const UI_OPACITY_PERCENT_DEFAULT = 75;
@@ -29,10 +27,7 @@ const UI_OUTLINE_PERCENT_DEFAULT = 0;
 const UI_SCALE_PERCENT_DEFAULT = 75;
 
 // Internal tuning constants (engine behavior / performance guards)
-const COVERAGE_CELL_SIZE = 12;
 const MAX_GENERATION_ATTEMPTS = 9000;
-const MIN_COVERAGE_GAIN_EARLY = 0.01;
-const MIN_COVERAGE_GAIN_LATE = 0.0015;
 const MIN_STROKE_WIDTH = 1;
 const STROKE_WIDTH_VARIANT_PROBABILITY = 0.5;
 
@@ -160,62 +155,6 @@ function exportCurrentComposition(filename) {
   }, "image/png");
 }
 
-function pointInShape(shape, px, py, ctx) {
-  if (shape.type === "svg") {
-    const scale = shape.size / CORNER_SHAPE.viewBoxSize;
-    const viewBoxHalf = CORNER_SHAPE.viewBoxSize * 0.5;
-    const signX = shape.flipX ? -1 : 1;
-    const signY = shape.flipY ? -1 : 1;
-    const dx = px - shape.x;
-    const dy = py - shape.y;
-    const lx = dx / (scale * signX) + viewBoxHalf;
-    const ly = dy / (scale * signY) + viewBoxHalf;
-    return ctx.isPointInPath(CORNER_SHAPE.path, lx, ly);
-  }
-
-  return false;
-}
-
-function ensureCoverageProbe(widthPx, heightPx) {
-  if (!coverageProbeCanvas) {
-    coverageProbeCanvas = document.createElement("canvas");
-    coverageProbeCtx = coverageProbeCanvas.getContext("2d");
-  }
-  if (!coverageProbeCtx || !coverageProbeCanvas) return null;
-  if (coverageProbeCanvas.width !== widthPx)
-    coverageProbeCanvas.width = widthPx;
-  if (coverageProbeCanvas.height !== heightPx)
-    coverageProbeCanvas.height = heightPx;
-  return coverageProbeCtx;
-}
-
-function estimateCoverageRatio(shapeList, widthPx, heightPx, probeCtx) {
-  if (!probeCtx) return 0;
-
-  let covered = 0;
-  let total = 0;
-
-  for (
-    let y = COVERAGE_CELL_SIZE * 0.5;
-    y < heightPx;
-    y += COVERAGE_CELL_SIZE
-  ) {
-    for (
-      let x = COVERAGE_CELL_SIZE * 0.5;
-      x < widthPx;
-      x += COVERAGE_CELL_SIZE
-    ) {
-      total += 1;
-      const isCovered = shapeList.some((shape) =>
-        pointInShape(shape, x, y, probeCtx),
-      );
-      if (isCovered) covered += 1;
-    }
-  }
-
-  return total > 0 ? covered / total : 0;
-}
-
 function parseSeed(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || Number.isNaN(parsed)) return null;
@@ -230,7 +169,7 @@ function getSizeControlFromPercent(sizePercent) {
   const clampedPercent = clamp(sizePercent, 0, 100);
   if (clampedPercent <= 75) {
     const t = clampedPercent / 75;
-    return lerp(0.01, 1.0, t);
+    return lerp(0.1, 1.0, t);
   }
   const t = (clampedPercent - 75) / 25;
   return lerp(1.0, 2.0, t);
@@ -238,7 +177,7 @@ function getSizeControlFromPercent(sizePercent) {
 
 function getSizeRatioRange(sizePercent) {
   const spread = 0.5;
-  const minRatio = 0.01;
+  const minRatio = 0.1;
   const maxRatio = 2.0;
   const sizeControl = getSizeControlFromPercent(sizePercent);
   return {
@@ -599,11 +538,9 @@ function generateFromSeed(seed) {
     runtimeConfig.sizePercent,
   );
   const centerBalance = getCenterBalanceConfig(runtimeConfig.balancePercent);
-  const probeCtx = ensureCoverageProbe(width, height);
   const minSize = Math.min(width, height) * minSizeRatio;
   const maxSize = Math.min(width, height) * maxSizeRatio;
 
-  let coverageRatio = 0;
   let centerOffsetRatio = 0;
   let guard = 0;
   while (
@@ -643,29 +580,19 @@ function generateFromSeed(seed) {
     };
     if (!overlapsSameColor(candidate, shapes)) {
       const nextShapes = [...shapes, candidate];
-      const nextCoverage = estimateCoverageRatio(
-        nextShapes,
-        width,
-        height,
-        probeCtx,
-      );
       const nextCenterOffsetRatio = getCenterOffsetRatio(
         nextShapes,
         width,
         height,
       );
-      const coverageGain = nextCoverage - coverageRatio;
-      const minGain =
-        coverageRatio < 0.9 ? MIN_COVERAGE_GAIN_EARLY : MIN_COVERAGE_GAIN_LATE;
       const withinCenterTarget =
         nextCenterOffsetRatio <= centerBalance.targetOffset;
       const improvesCenterBalance =
         nextCenterOffsetRatio <= centerOffsetRatio + centerBalance.slack;
       const centerBalanced = withinCenterTarget || improvesCenterBalance;
 
-      if (coverageGain >= minGain && centerBalanced) {
+      if (centerBalanced) {
         shapes.push(candidate);
-        coverageRatio = nextCoverage;
         centerOffsetRatio = nextCenterOffsetRatio;
       }
     }

@@ -57,6 +57,12 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
   - Canvas description text alternative
   - Toggle button `aria-expanded` state syncing
 
+## Current decisions
+
+- Keep strict-mode intent as the long-term validation direction (`reject`).
+- Keep current palette/background as canonical until brand update is provided.
+- Keep single-primitive generation for the current iteration phase.
+
 ## Out of scope (for now)
 
 - Multi-primitive generation in active renderer
@@ -66,7 +72,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ## Risks and unknowns
 
-- Coverage-driven acceptance can conflict with desired visual looseness.
+- Higher density ranges may increase visual clutter without stronger balancing constraints.
 - Current single-shape scope may limit variation range over time.
 - Constraint evolution may outpace ad-hoc generation logic without a dedicated validator layer.
 
@@ -103,4 +109,4 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ## Near-term next step
 
-- Decide whether to reduce, remove, or reframe coverage-gain gating now that full fill is no longer a hard target.
+- Add a thin constraints validator so acceptance rules are centralized and testable.
