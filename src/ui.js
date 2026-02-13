@@ -3,11 +3,8 @@ function bindSettingsToggle() {
   const sidebar = document.getElementById("sidebarPanel");
   if (!settingsBtn || !sidebar) return;
 
-  const openClass = "is-sidebar-open";
-  const closedClass = "is-sidebar-closed";
-
-  function syncExpandedState() {
-    const isVisible = window.getComputedStyle(sidebar).display !== "none";
+  function setSidebarVisible(isVisible) {
+    sidebar.hidden = !isVisible;
     settingsBtn.setAttribute("aria-expanded", String(isVisible));
   }
 
@@ -22,23 +19,12 @@ function bindSettingsToggle() {
     });
   }
 
-  settingsBtn.setAttribute("aria-controls", "sidebarPanel");
-
   settingsBtn.addEventListener("click", () => {
-    const isVisible = window.getComputedStyle(sidebar).display !== "none";
-    if (isVisible) {
-      document.body.classList.remove(openClass);
-      document.body.classList.add(closedClass);
-    } else {
-      document.body.classList.remove(closedClass);
-      document.body.classList.add(openClass);
-    }
-    syncExpandedState();
+    setSidebarVisible(sidebar.hidden);
     notifyLayoutChange();
   });
 
-  syncExpandedState();
-  window.addEventListener("resize", syncExpandedState);
+  setSidebarVisible(!sidebar.hidden);
 }
 
 function bindExportMenu() {

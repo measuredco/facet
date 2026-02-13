@@ -118,7 +118,7 @@ aside {
   border-inline-start: none;
   border-start-end-radius: var(--border-radius-card);
   box-shadow: var(--box-shadow);
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: var(--space-vertical-03);
   inline-size: 18rem;
@@ -129,18 +129,8 @@ aside {
   padding-inline: var(--space-horizontal-04);
   position: fixed;
 
-  .is-sidebar-open & {
-    display: flex;
-  }
-
-  .is-sidebar-closed & {
+  &[hidden] {
     display: none;
-  }
-
-  @container (min-inline-size: 72rem) {
-    body:not(.is-sidebar-closed) & {
-      display: flex;
-    }
   }
 }
 
@@ -157,13 +147,13 @@ main {
   }
 
   @container (min-inline-size: 72rem) {
-    body:not(.is-sidebar-closed) & {
+    .container:has(aside:not([hidden])) & {
       margin-inline-start: 18rem;
     }
   }
 
   @container (min-inline-size: 140rem) {
-    body:not(.is-sidebar-closed) & {
+    .container:has(aside:not([hidden])) & {
       margin-inline-start: 0;
     }
   }

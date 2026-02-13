@@ -38,7 +38,12 @@
       <p class="visually-hidden" id="downloadLiveRegion" role="status"></p>
       <header>
         <div class="header-title">
-          <button id="settingsBtn" type="button">
+          <button
+            aria-controls="sidebarPanel"
+            aria-expanded="false"
+            id="settingsBtn"
+            type="button"
+          >
             <svg
               aria-labelledby="settingsTitle"
               height="24"
@@ -59,6 +64,7 @@
         <aside
           aria-label="Composition controls"
           class="sidebar"
+          hidden
           id="sidebarPanel"
         >
           <div class="control-group">
