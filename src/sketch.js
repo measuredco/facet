@@ -5,10 +5,10 @@ let currentSeed = null;
 // Global configuration (foundational/default project settings)
 const BACKGROUND_COLOR = "#031f60";
 const PALETTE = ["#072d75", "#083c8a", "#0158ad", "#3598f8"];
+const CORNER_SHAPE_PATH_D =
+  "M360 360V224C360 100.5 259.5 0 136 0H0v160h136c35.3 0 64 28.7 64 64v136h160Z";
 const CORNER_SHAPE = {
-  path: new Path2D(
-    "M360 360V224C360 100.5 259.5 0 136 0H0v160h136c35.3 0 64 28.7 64 64v136h160Z",
-  ),
+  path: new Path2D(CORNER_SHAPE_PATH_D),
   viewBoxSize: 360,
 };
 const STROKE_WIDTH_RATIOS = [0.0037, 0.0148];
@@ -146,13 +146,68 @@ function exportCurrentComposition(filename) {
 
   exportCanvas.toBlob((blob) => {
     if (!blob) return;
-    const downloadUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = `${filename}.png`;
-    link.click();
-    URL.revokeObjectURL(downloadUrl);
+    downloadBlob(`${filename}.png`, blob);
   }, "image/png");
+}
+
+function downloadBlob(filenameWithExtension, blob) {
+  const downloadUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = downloadUrl;
+  link.download = filenameWithExtension;
+  link.click();
+  URL.revokeObjectURL(downloadUrl);
+}
+
+function buildSvgExportMarkup(renderWidth, renderHeight) {
+  const svgParts = [];
+  svgParts.push(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${renderWidth}" height="${renderHeight}" viewBox="0 0 ${renderWidth} ${renderHeight}">`,
+  );
+  svgParts.push(
+    `<rect width="${renderWidth}" height="${renderHeight}" fill="${BACKGROUND_COLOR}" />`,
+  );
+
+  shapes.forEach((shape, index) => {
+    const hasLowerOverlap = shapes
+      .slice(0, index)
+      .some(
+        (lowerShape) =>
+          lowerShape.styleMode !== "stroke" && shapesOverlap(shape, lowerShape),
+      );
+    const alpha = hasLowerOverlap ? runtimeConfig.overlapAlpha : 1;
+
+    const scale = shape.size / CORNER_SHAPE.viewBoxSize;
+    const viewBoxHalf = CORNER_SHAPE.viewBoxSize * 0.5;
+    const signX = shape.flipX ? -1 : 1;
+    const signY = shape.flipY ? -1 : 1;
+    const transform = `translate(${shape.x} ${shape.y}) scale(${scale * signX} ${scale * signY}) translate(${-viewBoxHalf} ${-viewBoxHalf})`;
+
+    if (shape.styleMode === "stroke") {
+      const ratio = shape.strokeWidthRatio ?? STROKE_WIDTH_RATIOS[0];
+      const strokeWidth = Math.max(MIN_STROKE_WIDTH, shape.size * ratio);
+      const localStrokeWidth = strokeWidth / scale;
+      svgParts.push(
+        `<path d="${CORNER_SHAPE_PATH_D}" fill="none" stroke="${rgbaFromHex(shape.color, alpha)}" stroke-width="${localStrokeWidth}" transform="${transform}" />`,
+      );
+      return;
+    }
+
+    svgParts.push(
+      `<path d="${CORNER_SHAPE_PATH_D}" fill="${rgbaFromHex(shape.color, alpha)}" transform="${transform}" />`,
+    );
+  });
+
+  svgParts.push("</svg>");
+  return svgParts.join("");
+}
+
+function exportCurrentCompositionSvg(filename) {
+  const svgMarkup = buildSvgExportMarkup(width, height);
+  const blob = new Blob([svgMarkup], {
+    type: "image/svg+xml;charset=utf-8",
+  });
+  downloadBlob(`${filename}.svg`, blob);
 }
 
 function buildExportFilename(seed) {
@@ -486,7 +541,8 @@ function setup() {
 
   // wire controls
   const genBtn = document.getElementById("generateBtn");
-  const downloadBtn = document.getElementById("downloadBtn");
+  const downloadPngBtn = document.getElementById("downloadPngBtn");
+  const downloadSvgBtn = document.getElementById("downloadSvgBtn");
   readRuntimeConfigFromUrl();
   bindRuntimeControls();
 
@@ -496,10 +552,19 @@ function setup() {
     generateFromSeed(seed);
   });
 
-  downloadBtn.addEventListener("click", () => {
-    const filename = buildExportFilename(currentSeed);
-    exportCurrentComposition(filename);
-  });
+  if (downloadPngBtn) {
+    downloadPngBtn.addEventListener("click", () => {
+      const filename = buildExportFilename(currentSeed);
+      exportCurrentComposition(filename);
+    });
+  }
+
+  if (downloadSvgBtn) {
+    downloadSvgBtn.addEventListener("click", () => {
+      const filename = buildExportFilename(currentSeed);
+      exportCurrentCompositionSvg(filename);
+    });
+  }
 
   // initial generate
   const initialSeed = readSeedFromUrl() ?? Math.floor(Math.random() * 1e9);

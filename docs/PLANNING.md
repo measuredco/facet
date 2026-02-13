@@ -20,14 +20,14 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Single-page app.
 - Single active primitive in generation (The Corner).
 - Runtime control panel for composition tuning.
-- PNG export.
+- PNG and SVG export.
 - Constraint handling direction: strict reject on rule violations.
 
 ## Current UX model
 
 - Header actions:
   - `Generate` (new seed)
-  - `Download` (PNG)
+  - `Download` (dropdown with PNG/SVG actions)
   - Settings toggle (sidebar visibility)
 - Main preview:
   - Responsive 16:9 canvas
@@ -63,8 +63,6 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Now
 
-- Output contract: Decide on SVG support and whether to include control params in export filenames.
-
 ### Next
 
 ### Later
@@ -73,7 +71,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Primitive roadmap: Reintroduce additional approved primitives intentionally (with explicit constraints updates).
 - Presets: Introduce constrained presets (`brand-muted`, `brand-bold`, `grid-centric`) after controls/primitive work.
 - Validation layer: Add a fuller validation module (explicit rule contracts, reject reasons, and lightweight tests) once core controls and primitives stabilize.
-- Enable export filename versioning.
+- Enable versioning and include in export filenames.
 
 ## Acceptance tests
 
@@ -81,5 +79,5 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Generate creates new seeded output.
 - URL params reproduce seeded output and controls.
 - Sidebar controls change composition and persist to URL.
-- Download exports current composition as PNG.
+- Download exports current composition as SVG and PNG.
 - Download exports fixed `8000x4500` PNG.

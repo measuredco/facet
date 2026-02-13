@@ -14,7 +14,7 @@ Define deterministic and probabilistic rules so generated images follow Measured
 
 - Single primitive in active use: The Corner SVG shape.
 - Seeded, deterministic generation with runtime UI controls.
-- PNG export only.
+- PNG and SVG export.
 
 ## Global parameters
 
@@ -128,6 +128,8 @@ Canonical order:
 
 ## Output behavior
 
-- Export format: PNG
-- Export resolution: fixed `8000x4500` (16:9)
-- Filename includes seed + control params (`facet-s{seed}-bl{bl}-dn{dn}-mr{mr}-op{op}-ot{ot}-sc{sc}.png`)
+- Export formats:
+  - PNG: fixed `8000x4500` (16:9)
+  - SVG: current canvas dimensions (`800x450` base, responsive in UI)
+- Filename includes seed + control params:
+  - `facet-s{seed}-bl{bl}-dn{dn}-mr{mr}-op{op}-ot{ot}-sc{sc}.{ext}`

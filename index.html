@@ -35,6 +35,7 @@
   </head>
   <body>
     <div class="container">
+      <p class="visually-hidden" id="downloadLiveRegion" role="status"></p>
       <header>
         <div class="header-title">
           <button id="settingsBtn" type="button">
@@ -96,7 +97,39 @@
           </div>
         </aside>
         <div class="header-actions">
-          <button id="downloadBtn" type="button">Download</button>
+          <div class="export-menu" id="exportMenu">
+            <button
+              aria-expanded="false"
+              aria-haspopup="menu"
+              id="downloadBtn"
+              type="button"
+            >
+              Download
+            </button>
+            <div
+              class="export-menu-panel"
+              hidden
+              id="exportMenuPanel"
+              role="menu"
+            >
+              <button
+                id="downloadPngBtn"
+                role="menuitem"
+                tabindex="-1"
+                type="button"
+              >
+                PNG
+              </button>
+              <button
+                id="downloadSvgBtn"
+                role="menuitem"
+                tabindex="-1"
+                type="button"
+              >
+                SVG
+              </button>
+            </div>
+          </div>
           <button id="generateBtn" type="button">Generate</button>
         </div>
       </header>
