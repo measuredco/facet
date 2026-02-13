@@ -528,6 +528,40 @@ function getCenterOffsetRatio(shapeList, canvasWidth, canvasHeight) {
   return maxDist > 0 ? dist / maxDist : 0;
 }
 
+function validateCandidateConstraints(
+  candidate,
+  currentShapes,
+  centerOffsetRatio,
+  centerBalance,
+  canvasWidth,
+  canvasHeight,
+) {
+  if (overlapsSameColor(candidate, currentShapes)) {
+    return {
+      accepted: false,
+      nextCenterOffsetRatio: centerOffsetRatio,
+    };
+  }
+
+  const nextShapes = [...currentShapes, candidate];
+  const nextCenterOffsetRatio = getCenterOffsetRatio(
+    nextShapes,
+    canvasWidth,
+    canvasHeight,
+  );
+  const withinCenterTarget = nextCenterOffsetRatio <= centerBalance.targetOffset;
+  const improvesCenterBalance =
+    nextCenterOffsetRatio <= centerOffsetRatio + centerBalance.slack;
+  const centerBalanced = withinCenterTarget || improvesCenterBalance;
+
+  return {
+    accepted: centerBalanced,
+    nextCenterOffsetRatio: centerBalanced
+      ? nextCenterOffsetRatio
+      : centerOffsetRatio,
+  };
+}
+
 function generateFromSeed(seed) {
   currentSeed = seed;
   randomSeed(seed);
@@ -578,23 +612,18 @@ function generateFromSeed(seed) {
       flipX,
       flipY,
     };
-    if (!overlapsSameColor(candidate, shapes)) {
-      const nextShapes = [...shapes, candidate];
-      const nextCenterOffsetRatio = getCenterOffsetRatio(
-        nextShapes,
-        width,
-        height,
-      );
-      const withinCenterTarget =
-        nextCenterOffsetRatio <= centerBalance.targetOffset;
-      const improvesCenterBalance =
-        nextCenterOffsetRatio <= centerOffsetRatio + centerBalance.slack;
-      const centerBalanced = withinCenterTarget || improvesCenterBalance;
+    const validation = validateCandidateConstraints(
+      candidate,
+      shapes,
+      centerOffsetRatio,
+      centerBalance,
+      width,
+      height,
+    );
 
-      if (centerBalanced) {
-        shapes.push(candidate);
-        centerOffsetRatio = nextCenterOffsetRatio;
-      }
+    if (validation.accepted) {
+      shapes.push(candidate);
+      centerOffsetRatio = validation.nextCenterOffsetRatio;
     }
   }
 
