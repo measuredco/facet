@@ -21,6 +21,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Single active primitive in generation (The Corner).
 - Runtime control panel for composition tuning.
 - PNG export.
+- Constraint handling direction: strict reject on rule violations.
 
 ## Current UX model
 
@@ -52,51 +53,26 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Canvas regeneration is deterministic per seed.
 - Runtime controls are fully wired and update URL state.
 - Randomise and Reset are implemented.
+- Candidate acceptance has been refactored into a centralized validator helper with no visual regression in manual snapshot checks.
 - Accessibility baseline improvements in place:
   - Labeled controls landmark
   - Canvas description text alternative
   - Toggle button `aria-expanded` state syncing
 
-## Current decisions
+## Opportunity roadmap
 
-- Keep strict-mode intent as the long-term validation direction (`reject`).
-- Keep current palette/background as canonical until brand update is provided.
-- Keep single-primitive generation for the current iteration phase.
+### Now
 
-## Out of scope (for now)
+- Output contract: Decide on SVG support and whether to include control params in export filenames.
 
-- Multi-primitive generation in active renderer
-- Preset selection UX
-- SVG export
-- Full constraints validator module
+### Next
 
-## Risks and unknowns
+### Later
 
-- Higher density ranges may increase visual clutter without stronger balancing constraints.
-- Current single-shape scope may limit variation range over time.
-- Constraint evolution may outpace ad-hoc generation logic without a dedicated validator layer.
-
-## Prioritized backlog
-
-1. Validation layer
-
-- Add a thin constraints validator so acceptance rules are centralized and testable.
-
-2. Output contract
-
-- Keep fixed high-resolution PNG export (`8000x4500`) and decide on SVG support.
-
-3. Primitive roadmap
-
-- Reintroduce additional approved primitives intentionally (with explicit constraints updates).
-
-4. Controls roadmap
-
-- Add additional runtime controls only where they map cleanly to constraint language.
-
-5. Presets
-
-- Introduce constrained presets (`brand-muted`, `brand-bold`, `grid-centric`) after validator/output work.
+- Controls roadmap: Add additional runtime controls only where they map cleanly to constraint language.
+- Primitive roadmap: Reintroduce additional approved primitives intentionally (with explicit constraints updates).
+- Presets: Introduce constrained presets (`brand-muted`, `brand-bold`, `grid-centric`) after controls/primitive work.
+- Validation layer: Add a fuller validation module (explicit rule contracts, reject reasons, and lightweight tests) once core controls and primitives stabilize.
 
 ## Acceptance tests
 
@@ -106,7 +82,3 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Sidebar controls change composition and persist to URL.
 - Download exports current composition as PNG.
 - Download exports fixed `8000x4500` PNG.
-
-## Near-term next step
-
-- Add a thin constraints validator so acceptance rules are centralized and testable.
