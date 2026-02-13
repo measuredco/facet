@@ -24,7 +24,8 @@ const UI_DENSITY_PERCENT_DEFAULT = 0;
 const UI_MIRROR_PERCENT_DEFAULT = 0;
 const UI_OPACITY_PERCENT_DEFAULT = 75;
 const UI_OUTLINE_PERCENT_DEFAULT = 0;
-const UI_SCALE_PERCENT_DEFAULT = 75;
+const UI_SIZE_PERCENT_DEFAULT = 75;
+const UI_VARIANCE_PERCENT_DEFAULT = 50;
 
 // Internal tuning constants (engine behavior / performance guards)
 const MAX_GENERATION_ATTEMPTS = 9000;
@@ -37,17 +38,19 @@ const runtimeConfig = {
   strokeOnlyProbability: UI_OUTLINE_PERCENT_DEFAULT / 100,
   flipProbability: UI_MIRROR_PERCENT_DEFAULT / 100,
   overlapAlpha: UI_OPACITY_PERCENT_DEFAULT / 100,
-  sizePercent: UI_SCALE_PERCENT_DEFAULT,
+  sizePercent: UI_SIZE_PERCENT_DEFAULT,
+  variancePercent: UI_VARIANCE_PERCENT_DEFAULT,
   balancePercent: UI_BALANCE_PERCENT_DEFAULT,
 };
 const URL_PARAMS = {
   seed: "s",
   balancePct: "bl",
   densityPct: "dn",
-  scalePct: "sc",
+  sizePct: "sz",
   outlinePct: "ot",
   mirrorPct: "mr",
   opacityPct: "op",
+  variancePct: "vr",
 };
 
 function shapesOverlap(a, b) {
@@ -217,7 +220,8 @@ function buildExportFilename(seed) {
   const mirrorPct = Math.round(runtimeConfig.flipProbability * 100);
   const opacityPct = Math.round(runtimeConfig.overlapAlpha * 100);
   const outlinePct = Math.round(runtimeConfig.strokeOnlyProbability * 100);
-  const scalePct = Math.round(runtimeConfig.sizePercent);
+  const sizePct = Math.round(runtimeConfig.sizePercent);
+  const variancePct = Math.round(runtimeConfig.variancePercent);
 
   return [
     `facet-s${safeSeed}`,
@@ -226,7 +230,8 @@ function buildExportFilename(seed) {
     `${URL_PARAMS.mirrorPct}${mirrorPct}`,
     `${URL_PARAMS.opacityPct}${opacityPct}`,
     `${URL_PARAMS.outlinePct}${outlinePct}`,
-    `${URL_PARAMS.scalePct}${scalePct}`,
+    `${URL_PARAMS.sizePct}${sizePct}`,
+    `${URL_PARAMS.variancePct}${variancePct}`,
   ].join("-");
 }
 
@@ -250,14 +255,19 @@ function getSizeControlFromPercent(sizePercent) {
   return lerp(1.0, 2.0, t);
 }
 
-function getSizeRatioRange(sizePercent) {
-  const spread = 0.5;
+function getVarianceFromPercent(variancePercent) {
+  const t = clamp(variancePercent, 0, 100) / 100;
+  return lerp(0, 1, t);
+}
+
+function getSizeRatioRange(sizePercent, variancePercent) {
+  const variance = getVarianceFromPercent(variancePercent);
   const minRatio = 0.1;
   const maxRatio = 2.0;
   const sizeControl = getSizeControlFromPercent(sizePercent);
   return {
-    min: clamp(sizeControl - spread, minRatio, maxRatio),
-    max: clamp(sizeControl + spread, minRatio, maxRatio),
+    min: clamp(sizeControl - variance, minRatio, maxRatio),
+    max: clamp(sizeControl + variance, minRatio, maxRatio),
   };
 }
 
@@ -281,7 +291,8 @@ function updateRuntimeControlDisplay() {
   const outlineValue = document.getElementById("outlineValue");
   const mirrorValue = document.getElementById("mirrorValue");
   const opacityValue = document.getElementById("opacityValue");
-  const scaleValue = document.getElementById("scaleValue");
+  const sizeValue = document.getElementById("sizeValue");
+  const varianceValue = document.getElementById("varianceValue");
 
   if (balanceValue) {
     balanceValue.textContent = `${Math.round(runtimeConfig.balancePercent)}%`;
@@ -302,8 +313,11 @@ function updateRuntimeControlDisplay() {
   if (opacityValue) {
     opacityValue.textContent = `${Math.round(runtimeConfig.overlapAlpha * 100)}%`;
   }
-  if (scaleValue) {
-    scaleValue.textContent = `${Math.round(runtimeConfig.sizePercent)}%`;
+  if (sizeValue) {
+    sizeValue.textContent = `${Math.round(runtimeConfig.sizePercent)}%`;
+  }
+  if (varianceValue) {
+    varianceValue.textContent = `${Math.round(runtimeConfig.variancePercent)}%`;
   }
 }
 
@@ -313,7 +327,8 @@ function syncRuntimeControlsToInputs() {
   const outlineInput = document.getElementById("outlineInput");
   const mirrorInput = document.getElementById("mirrorInput");
   const opacityInput = document.getElementById("opacityInput");
-  const scaleInput = document.getElementById("scaleInput");
+  const sizeInput = document.getElementById("sizeInput");
+  const varianceInput = document.getElementById("varianceInput");
 
   if (balanceInput) {
     balanceInput.value = String(Math.round(runtimeConfig.balancePercent));
@@ -332,8 +347,11 @@ function syncRuntimeControlsToInputs() {
   if (opacityInput) {
     opacityInput.value = String(Math.round(runtimeConfig.overlapAlpha * 100));
   }
-  if (scaleInput) {
-    scaleInput.value = String(runtimeConfig.sizePercent);
+  if (sizeInput) {
+    sizeInput.value = String(runtimeConfig.sizePercent);
+  }
+  if (varianceInput) {
+    varianceInput.value = String(runtimeConfig.variancePercent);
   }
 }
 
@@ -343,7 +361,8 @@ function bindRuntimeControls() {
   const outlineInput = document.getElementById("outlineInput");
   const mirrorInput = document.getElementById("mirrorInput");
   const opacityInput = document.getElementById("opacityInput");
-  const scaleInput = document.getElementById("scaleInput");
+  const sizeInput = document.getElementById("sizeInput");
+  const varianceInput = document.getElementById("varianceInput");
   const resetBtn = document.getElementById("resetBtn");
   const randomBtn = document.getElementById("randomBtn");
 
@@ -353,7 +372,8 @@ function bindRuntimeControls() {
     !outlineInput ||
     !mirrorInput ||
     !opacityInput ||
-    !scaleInput ||
+    !sizeInput ||
+    !varianceInput ||
     !resetBtn ||
     !randomBtn
   ) {
@@ -403,9 +423,17 @@ function bindRuntimeControls() {
     if (currentSeed !== null) generateFromSeed(currentSeed);
   });
 
-  scaleInput.addEventListener("input", () => {
-    const nextValue = Number(scaleInput.value);
+  sizeInput.addEventListener("input", () => {
+    const nextValue = Number(sizeInput.value);
     runtimeConfig.sizePercent = clamp(nextValue, 0, 100);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  varianceInput.addEventListener("input", () => {
+    const nextValue = Number(varianceInput.value);
+    runtimeConfig.variancePercent = clamp(nextValue, 0, 100);
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
     if (currentSeed !== null) generateFromSeed(currentSeed);
@@ -417,7 +445,8 @@ function bindRuntimeControls() {
     runtimeConfig.strokeOnlyProbability = UI_OUTLINE_PERCENT_DEFAULT / 100;
     runtimeConfig.flipProbability = UI_MIRROR_PERCENT_DEFAULT / 100;
     runtimeConfig.overlapAlpha = UI_OPACITY_PERCENT_DEFAULT / 100;
-    runtimeConfig.sizePercent = UI_SCALE_PERCENT_DEFAULT;
+    runtimeConfig.sizePercent = UI_SIZE_PERCENT_DEFAULT;
+    runtimeConfig.variancePercent = UI_VARIANCE_PERCENT_DEFAULT;
     syncRuntimeControlsToInputs();
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
@@ -431,6 +460,7 @@ function bindRuntimeControls() {
     runtimeConfig.overlapAlpha = Math.random();
     runtimeConfig.strokeOnlyProbability = Math.random();
     runtimeConfig.sizePercent = Math.round(Math.random() * 100);
+    runtimeConfig.variancePercent = Math.round(Math.random() * 100);
     syncRuntimeControlsToInputs();
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
@@ -486,11 +516,19 @@ function readRuntimeConfigFromUrl() {
     }
   }
 
-  const sizeRatioRaw = params.get(URL_PARAMS.scalePct);
-  if (sizeRatioRaw !== null) {
-    const sizePercent = Number(sizeRatioRaw);
+  const sizePctRaw = params.get(URL_PARAMS.sizePct);
+  if (sizePctRaw !== null) {
+    const sizePercent = Number(sizePctRaw);
     if (Number.isFinite(sizePercent) && !Number.isNaN(sizePercent)) {
       runtimeConfig.sizePercent = clamp(sizePercent, 0, 100);
+    }
+  }
+
+  const variancePctRaw = params.get(URL_PARAMS.variancePct);
+  if (variancePctRaw !== null) {
+    const variancePercent = Number(variancePctRaw);
+    if (Number.isFinite(variancePercent) && !Number.isNaN(variancePercent)) {
+      runtimeConfig.variancePercent = clamp(variancePercent, 0, 100);
     }
   }
 }
@@ -525,8 +563,12 @@ function writeUrlState(seed) {
     String(Math.round(runtimeConfig.strokeOnlyProbability * 100)),
   );
   orderedParams.set(
-    URL_PARAMS.scalePct,
+    URL_PARAMS.sizePct,
     String(Math.round(runtimeConfig.sizePercent)),
+  );
+  orderedParams.set(
+    URL_PARAMS.variancePct,
+    String(Math.round(runtimeConfig.variancePercent)),
   );
 
   url.search = orderedParams.toString();
@@ -655,6 +697,7 @@ function generateFromSeed(seed) {
   shapes = [];
   const { min: minSizeRatio, max: maxSizeRatio } = getSizeRatioRange(
     runtimeConfig.sizePercent,
+    runtimeConfig.variancePercent,
   );
   const centerBalance = getCenterBalanceConfig(runtimeConfig.balancePercent);
   const minSize = Math.min(width, height) * minSizeRatio;

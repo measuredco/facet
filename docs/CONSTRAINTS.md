@@ -85,7 +85,8 @@ UI controls currently exposed in sidebar:
 - `Mirror`
 - `Opacity`
 - `Outline`
-- `Scale`
+- `Size`
+- `Variance`
 
 Current defaults:
 
@@ -94,14 +95,16 @@ Current defaults:
 - `Mirror`: 0%
 - `Opacity`: 75%
 - `Outline`: 0%
-- `Scale`: 75%
+- `Size`: 75%
+- `Variance`: 50%
 
 Control semantics:
 
-- `Density` maps `0..100%` to shape max `1..UI_DENSITY_MAX` (currently 100).
-- `Scale` maps non-linearly to internal size control:
+- `Density` maps `0..100%` to shape max `1..UI_DENSITY_MAX` (currently 50).
+- `Size` maps non-linearly to internal size control:
   - `0..75%` maps to size control `0.1..1.0`
   - `75..100%` maps to size control `1.0..2.0`
+- `Variance` maps `0..100%` to internal size spread `0.0..1.0`.
 - `Balance` maps to center-bias + centroid acceptance behavior.
 
 ## URL parameter persistence
@@ -116,12 +119,13 @@ Canonical order:
 - `mr` (Mirror)
 - `op` (Opacity)
 - `ot` (Outline)
-- `sc` (Scale)
+- `sz` (Size)
+- `vr` (Variance)
 
 ## UI behavior
 
 - Settings button toggles sidebar open/closed state.
-- Sidebar defaults open at larger breakpoints unless explicitly closed.
+- Sidebar defaults closed and is toggled explicitly via Settings.
 - `Reset` restores all controls to defaults.
 - `Randomise` assigns random values to all controls and regenerates.
 - Canvas has a descriptive text alternative and the controls panel is a labeled complementary landmark.
@@ -132,4 +136,4 @@ Canonical order:
   - PNG: fixed `8000x4500` (16:9)
   - SVG: current canvas dimensions (`800x450` base, responsive in UI)
 - Filename includes seed + control params:
-  - `facet-s{seed}-bl{bl}-dn{dn}-mr{mr}-op{op}-ot{ot}-sc{sc}.{ext}`
+  - `facet-s{seed}-bl{bl}-dn{dn}-mr{mr}-op{op}-ot{ot}-sz{sz}-vr{vr}.{ext}`
