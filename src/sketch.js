@@ -280,8 +280,8 @@ function getCenterBalanceConfig(balancePercent) {
   const t = clamp(balancePercent, 0, 100) / 100;
   return {
     positionBias: lerp(0.1, 0.56, t),
-    targetOffset: lerp(0.45, 0.05, t),
-    slack: lerp(0.035, 0.005, t),
+    targetOffset: lerp(0.45, 0.08, t),
+    slack: lerp(0.035, 0.008, t),
   };
 }
 
