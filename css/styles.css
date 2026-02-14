@@ -315,7 +315,7 @@ canvas {
 .control-group {
   align-items: center;
   display: grid;
-  gap: var(--space-horizontal-03);
+  gap: var(--space-horizontal-04);
   grid-template-columns: auto 1fr auto;
   padding-inline: var(--space-horizontal-04);
 }
@@ -324,7 +324,7 @@ canvas {
   color: var(--color-interactive-neutral);
   font-size: var(--font-01-size);
   line-height: var(--font-01-line-height);
-  min-width: 3.625rem;
+  min-width: 3.25rem;
   white-space: nowrap;
 
   .control-group:has([disabled]) & {
@@ -351,7 +351,7 @@ canvas {
 .control-value {
   color: var(--color-text-prose);
   font-variant-numeric: tabular-nums;
-  min-inline-size: var(--space-horizontal-08);
+  min-inline-size: 1.75rem;
   text-align: end;
 
   .control-group:has([disabled]) & {

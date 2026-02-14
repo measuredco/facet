@@ -20,12 +20,13 @@ const DEFAULT_SEED = 991712126;
 
 // UI control configuration (defaults + bounds)
 const UI_CENTRE_PERCENT_DEFAULT = 50;
-const UI_COLOUR_PERCENT_DEFAULT = 50;
+const UI_BLEND_PERCENT_DEFAULT = 0;
 const UI_DENSITY_MAX = 50;
 const UI_AMOUNT_PERCENT_DEFAULT = 0;
 const UI_EDGE_PERCENT_DEFAULT = 50;
 const UI_FLIP_X_PERCENT_DEFAULT = 0;
 const UI_FLIP_Y_PERCENT_DEFAULT = 0;
+const UI_LIGHT_PERCENT_DEFAULT = 50;
 const UI_OPACITY_PERCENT_DEFAULT = 75;
 const UI_OUTLINE_PERCENT_DEFAULT = 0;
 const UI_WEIGHT_PERCENT_DEFAULT = 50;
@@ -42,8 +43,9 @@ const MIN_THICK_STROKE_WIDTH = 2;
 const runtimeConfig = {
   amountPercent: UI_AMOUNT_PERCENT_DEFAULT,
   centrePercent: UI_CENTRE_PERCENT_DEFAULT,
-  colourPercent: UI_COLOUR_PERCENT_DEFAULT,
+  blendPercent: UI_BLEND_PERCENT_DEFAULT,
   edgePercent: UI_EDGE_PERCENT_DEFAULT,
+  lightPercent: UI_LIGHT_PERCENT_DEFAULT,
   strokeOnlyProbability: UI_OUTLINE_PERCENT_DEFAULT / 100,
   weightProbability: UI_WEIGHT_PERCENT_DEFAULT / 100,
   flipXProbability: UI_FLIP_X_PERCENT_DEFAULT / 100,
@@ -61,7 +63,8 @@ const URL_PARAMS = {
   flipYPct: "fy",
   sizePct: "sz",
   spreadPct: "sp",
-  colourPct: "cl",
+  blendPct: "bl",
+  lightPct: "lg",
   opacityPct: "op",
   outlinePct: "ot",
   weightPct: "wg",
@@ -238,11 +241,12 @@ function exportCurrentCompositionSvg(filename) {
 function buildExportFilename(seed) {
   const safeSeed = Number.isFinite(seed) ? Math.floor(seed) : "random";
   const centrePct = Math.round(runtimeConfig.centrePercent);
-  const colourPct = Math.round(runtimeConfig.colourPercent);
   const amountPct = Math.round(runtimeConfig.amountPercent);
+  const blendPct = Math.round(runtimeConfig.blendPercent);
   const edgePct = Math.round(runtimeConfig.edgePercent);
   const flipXPct = Math.round(runtimeConfig.flipXProbability * 100);
   const flipYPct = Math.round(runtimeConfig.flipYProbability * 100);
+  const lightPct = Math.round(runtimeConfig.lightPercent);
   const opacityPct = Math.round(runtimeConfig.overlapAlpha * 100);
   const outlinePct = Math.round(runtimeConfig.strokeOnlyProbability * 100);
   const weightPct = Math.round(runtimeConfig.weightProbability * 100);
@@ -258,7 +262,8 @@ function buildExportFilename(seed) {
     `${URL_PARAMS.flipYPct}${flipYPct}`,
     `${URL_PARAMS.sizePct}${sizePct}`,
     `${URL_PARAMS.spreadPct}${spreadPct}`,
-    `${URL_PARAMS.colourPct}${colourPct}`,
+    `${URL_PARAMS.blendPct}${blendPct}`,
+    `${URL_PARAMS.lightPct}${lightPct}`,
     `${URL_PARAMS.opacityPct}${opacityPct}`,
     `${URL_PARAMS.outlinePct}${outlinePct}`,
     `${URL_PARAMS.weightPct}${weightPct}`,
@@ -320,8 +325,8 @@ function getEdgeOverflowFactors(edgePercent) {
   };
 }
 
-function getPaletteWeights(colourPercent) {
-  const t = clamp(colourPercent, 0, 100) / 100;
+function getPaletteWeights(lightPercent) {
+  const t = clamp(lightPercent, 0, 100) / 100;
   const count = PALETTE.length;
   const uniformWeight = 1 / count;
   const earlyWeights = PALETTE.map((_, index) => 1 / (index + 1));
@@ -360,9 +365,14 @@ function shouldDisableOpacityControl() {
   );
 }
 
+function shouldDisableBlendControl() {
+  return runtimeConfig.amountPercent <= 0;
+}
+
 function updateRuntimeControlDisplay() {
   const centreValue = document.getElementById("centreValue");
-  const colourValue = document.getElementById("colourValue");
+  const blendValue = document.getElementById("blendValue");
+  const lightValue = document.getElementById("lightValue");
   const amountValue = document.getElementById("amountValue");
   const edgeValue = document.getElementById("edgeValue");
   const flipXValue = document.getElementById("flipXValue");
@@ -374,51 +384,57 @@ function updateRuntimeControlDisplay() {
   const spreadValue = document.getElementById("spreadValue");
 
   if (centreValue) {
-    centreValue.textContent = `${Math.round(runtimeConfig.centrePercent)}%`;
+    centreValue.textContent = String(Math.round(runtimeConfig.centrePercent));
   }
-  if (colourValue) {
-    colourValue.textContent = `${Math.round(runtimeConfig.colourPercent)}%`;
+  if (blendValue) {
+    blendValue.textContent = String(Math.round(runtimeConfig.blendPercent));
+  }
+  if (lightValue) {
+    lightValue.textContent = String(Math.round(runtimeConfig.lightPercent));
   }
   if (amountValue) {
-    amountValue.textContent = `${Math.round(runtimeConfig.amountPercent)}%`;
+    amountValue.textContent = String(Math.round(runtimeConfig.amountPercent));
   }
   if (edgeValue) {
-    edgeValue.textContent = `${Math.round(runtimeConfig.edgePercent)}%`;
+    edgeValue.textContent = String(Math.round(runtimeConfig.edgePercent));
   }
   if (outlineValue) {
-    outlineValue.textContent = `${Math.round(
-      runtimeConfig.strokeOnlyProbability * 100,
-    )}%`;
+    outlineValue.textContent = String(
+      Math.round(runtimeConfig.strokeOnlyProbability * 100),
+    );
   }
   if (flipXValue) {
-    flipXValue.textContent = `${Math.round(
-      runtimeConfig.flipXProbability * 100,
-    )}%`;
+    flipXValue.textContent = String(
+      Math.round(runtimeConfig.flipXProbability * 100),
+    );
   }
   if (flipYValue) {
-    flipYValue.textContent = `${Math.round(
-      runtimeConfig.flipYProbability * 100,
-    )}%`;
+    flipYValue.textContent = String(
+      Math.round(runtimeConfig.flipYProbability * 100),
+    );
   }
   if (opacityValue) {
-    opacityValue.textContent = `${Math.round(runtimeConfig.overlapAlpha * 100)}%`;
+    opacityValue.textContent = String(
+      Math.round(runtimeConfig.overlapAlpha * 100),
+    );
   }
   if (sizeValue) {
-    sizeValue.textContent = `${Math.round(runtimeConfig.sizePercent)}%`;
+    sizeValue.textContent = String(Math.round(runtimeConfig.sizePercent));
   }
   if (weightValue) {
-    weightValue.textContent = `${Math.round(
-      runtimeConfig.weightProbability * 100,
-    )}%`;
+    weightValue.textContent = String(
+      Math.round(runtimeConfig.weightProbability * 100),
+    );
   }
   if (spreadValue) {
-    spreadValue.textContent = `${Math.round(runtimeConfig.spreadPercent)}%`;
+    spreadValue.textContent = String(Math.round(runtimeConfig.spreadPercent));
   }
 }
 
 function syncRuntimeControlsToInputs() {
   const centreInput = document.getElementById("centreInput");
-  const colourInput = document.getElementById("colourInput");
+  const blendInput = document.getElementById("blendInput");
+  const lightInput = document.getElementById("lightInput");
   const amountInput = document.getElementById("amountInput");
   const edgeInput = document.getElementById("edgeInput");
   const flipXInput = document.getElementById("flipXInput");
@@ -432,8 +448,11 @@ function syncRuntimeControlsToInputs() {
   if (centreInput) {
     centreInput.value = String(Math.round(runtimeConfig.centrePercent));
   }
-  if (colourInput) {
-    colourInput.value = String(Math.round(runtimeConfig.colourPercent));
+  if (blendInput) {
+    blendInput.value = String(Math.round(runtimeConfig.blendPercent));
+  }
+  if (lightInput) {
+    lightInput.value = String(Math.round(runtimeConfig.lightPercent));
   }
   if (amountInput) {
     amountInput.value = String(Math.round(runtimeConfig.amountPercent));
@@ -456,6 +475,9 @@ function syncRuntimeControlsToInputs() {
     opacityInput.value = String(Math.round(runtimeConfig.overlapAlpha * 100));
     opacityInput.disabled = shouldDisableOpacityControl();
   }
+  if (blendInput) {
+    blendInput.disabled = shouldDisableBlendControl();
+  }
   if (sizeInput) {
     sizeInput.value = String(runtimeConfig.sizePercent);
   }
@@ -472,7 +494,8 @@ function syncRuntimeControlsToInputs() {
 
 function bindRuntimeControls() {
   const centreInput = document.getElementById("centreInput");
-  const colourInput = document.getElementById("colourInput");
+  const blendInput = document.getElementById("blendInput");
+  const lightInput = document.getElementById("lightInput");
   const amountInput = document.getElementById("amountInput");
   const edgeInput = document.getElementById("edgeInput");
   const flipXInput = document.getElementById("flipXInput");
@@ -487,7 +510,8 @@ function bindRuntimeControls() {
 
   if (
     !centreInput ||
-    !colourInput ||
+    !blendInput ||
+    !lightInput ||
     !amountInput ||
     !edgeInput ||
     !flipXInput ||
@@ -514,9 +538,17 @@ function bindRuntimeControls() {
     if (currentSeed !== null) generateFromSeed(currentSeed);
   });
 
-  colourInput.addEventListener("input", () => {
-    const nextValue = Number(colourInput.value);
-    runtimeConfig.colourPercent = clamp(nextValue, 0, 100);
+  blendInput.addEventListener("input", () => {
+    const nextValue = Number(blendInput.value);
+    runtimeConfig.blendPercent = clamp(nextValue, 0, 100);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  lightInput.addEventListener("input", () => {
+    const nextValue = Number(lightInput.value);
+    runtimeConfig.lightPercent = clamp(nextValue, 0, 100);
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
     if (currentSeed !== null) generateFromSeed(currentSeed);
@@ -526,6 +558,7 @@ function bindRuntimeControls() {
     const nextValue = Number(amountInput.value);
     runtimeConfig.amountPercent = clamp(nextValue, 0, 100);
     opacityInput.disabled = shouldDisableOpacityControl();
+    blendInput.disabled = shouldDisableBlendControl();
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
     if (currentSeed !== null) generateFromSeed(currentSeed);
@@ -599,9 +632,10 @@ function bindRuntimeControls() {
 
   resetBtn.addEventListener("click", () => {
     runtimeConfig.centrePercent = UI_CENTRE_PERCENT_DEFAULT;
-    runtimeConfig.colourPercent = UI_COLOUR_PERCENT_DEFAULT;
+    runtimeConfig.blendPercent = UI_BLEND_PERCENT_DEFAULT;
     runtimeConfig.amountPercent = UI_AMOUNT_PERCENT_DEFAULT;
     runtimeConfig.edgePercent = UI_EDGE_PERCENT_DEFAULT;
+    runtimeConfig.lightPercent = UI_LIGHT_PERCENT_DEFAULT;
     runtimeConfig.strokeOnlyProbability = UI_OUTLINE_PERCENT_DEFAULT / 100;
     runtimeConfig.flipXProbability = UI_FLIP_X_PERCENT_DEFAULT / 100;
     runtimeConfig.flipYProbability = UI_FLIP_Y_PERCENT_DEFAULT / 100;
@@ -617,9 +651,10 @@ function bindRuntimeControls() {
 
   randomBtn.addEventListener("click", () => {
     runtimeConfig.centrePercent = Math.round(Math.random() * 100);
-    runtimeConfig.colourPercent = Math.round(Math.random() * 100);
+    runtimeConfig.blendPercent = Math.round(Math.random() * 100);
     runtimeConfig.amountPercent = Math.round(Math.random() * 100);
     runtimeConfig.edgePercent = Math.round(Math.random() * 100);
+    runtimeConfig.lightPercent = Math.round(Math.random() * 100);
     runtimeConfig.flipXProbability = Math.random();
     runtimeConfig.flipYProbability = Math.random();
     runtimeConfig.overlapAlpha = Math.random();
@@ -714,19 +749,27 @@ function readRuntimeConfigFromUrl() {
     }
   }
 
-  const colourPctRaw = params.get(URL_PARAMS.colourPct);
-  if (colourPctRaw !== null) {
-    const colourPct = Number(colourPctRaw);
-    if (Number.isFinite(colourPct) && !Number.isNaN(colourPct)) {
-      runtimeConfig.colourPercent = clamp(colourPct, 0, 100);
-    }
-  }
-
   const overlapPctRaw = params.get(URL_PARAMS.opacityPct);
   if (overlapPctRaw !== null) {
     const overlapPct = Number(overlapPctRaw);
     if (Number.isFinite(overlapPct) && !Number.isNaN(overlapPct)) {
       runtimeConfig.overlapAlpha = clamp(overlapPct / 100, 0, 1);
+    }
+  }
+
+  const blendPctRaw = params.get(URL_PARAMS.blendPct);
+  if (blendPctRaw !== null) {
+    const blendPct = Number(blendPctRaw);
+    if (Number.isFinite(blendPct) && !Number.isNaN(blendPct)) {
+      runtimeConfig.blendPercent = clamp(blendPct, 0, 100);
+    }
+  }
+
+  const lightPctRaw = params.get(URL_PARAMS.lightPct);
+  if (lightPctRaw !== null) {
+    const lightPct = Number(lightPctRaw);
+    if (Number.isFinite(lightPct) && !Number.isNaN(lightPct)) {
+      runtimeConfig.lightPercent = clamp(lightPct, 0, 100);
     }
   }
 }
@@ -769,8 +812,12 @@ function writeUrlState(seed) {
     String(Math.round(runtimeConfig.spreadPercent)),
   );
   orderedParams.set(
-    URL_PARAMS.colourPct,
-    String(Math.round(runtimeConfig.colourPercent)),
+    URL_PARAMS.blendPct,
+    String(Math.round(runtimeConfig.blendPercent)),
+  );
+  orderedParams.set(
+    URL_PARAMS.lightPct,
+    String(Math.round(runtimeConfig.lightPercent)),
   );
   orderedParams.set(
     URL_PARAMS.opacityPct,
@@ -876,7 +923,11 @@ function validateCandidateConstraints(candidate, currentShapes) {
     ENABLE_SAME_COLOR_OVERLAP_CHECK &&
     overlapsSameColor(candidate, currentShapes)
   ) {
-    return false;
+    const blend = clamp(runtimeConfig.blendPercent, 0, 100) / 100;
+    const rejectionStrictness = 1 - blend;
+    if (rejectionStrictness >= 1) return false;
+    if (rejectionStrictness <= 0) return true;
+    return random() >= rejectionStrictness;
   }
   return true;
 }
@@ -895,7 +946,7 @@ function generateFromSeed(seed) {
     runtimeConfig.centrePercent,
   );
   const edgeOverflow = getEdgeOverflowFactors(runtimeConfig.edgePercent);
-  const paletteWeights = getPaletteWeights(runtimeConfig.colourPercent);
+  const paletteWeights = getPaletteWeights(runtimeConfig.lightPercent);
   const minSize = Math.min(width, height) * minSizeRatio;
   const maxSize = Math.min(width, height) * maxSizeRatio;
 

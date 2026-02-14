@@ -69,7 +69,7 @@ Define deterministic and probabilistic rules so generated images follow Measured
 ## Acceptance behavior
 
 - Candidate acceptance is currently based on:
-  - Same-color overlap rejection
+  - Same-color overlap check (strictness controlled by `Blend`)
 - Practical result:
   - Amount behaves as a max-cap, not an exact target count.
   - Gaps can still appear; full 100% fill is not guaranteed.
@@ -85,7 +85,8 @@ UI controls currently exposed in sidebar:
 - `Flip Y`
 - `Size`
 - `Spread`
-- `Colour`
+- `Blend`
+- `Light`
 - `Opacity`
 - `Outline`
 - `Weight`
@@ -99,7 +100,8 @@ Current defaults:
 - `Flip Y`: 0%
 - `Size`: 75%
 - `Spread`: 50%
-- `Colour`: 50%
+- `Blend`: 0%
+- `Light`: 50%
 - `Opacity`: 75%
 - `Outline`: 0%
 - `Weight`: 50%
@@ -107,10 +109,13 @@ Current defaults:
 Control semantics:
 
 - `Amount` maps `0..100%` to shape max `1..UI_DENSITY_MAX` (currently 50).
-- `Colour` maps `0..100%` as:
-  - `0%`: stronger bias for earlier palette colors
+- `Blend` maps `0..100%` to same-colour overlap rejection strictness.
+  - `0%`: reject all same-colour overlaps (strict behavior)
+  - `100%`: allow same-colour overlaps
+- `Light` maps `0..100%` as:
+  - `0%`: stronger bias for earlier/darker palette colors
   - `50%`: even palette use
-  - `100%`: stronger bias for later palette colors
+  - `100%`: stronger bias for later/lighter palette colors
 - `Edge` maps `0..100%` to off-canvas sampling allowance during candidate placement.
 - `Size` maps non-linearly to internal size control:
   - `0..75%` maps to size control `0.1..1.0`
@@ -119,6 +124,7 @@ Control semantics:
 - `Weight` maps `0..100%` to thin/thick stroke selection probability.
 - `Weight` is disabled when `Outline` is `0%`.
 - `Opacity` is disabled when `Outline` is `100%` or `Amount` is `0%`.
+- `Blend` is disabled when `Amount` is `0%`.
 - `Centre` maps to center-biased placement pull during candidate sampling.
 
 ## URL parameter persistence
@@ -135,7 +141,8 @@ Canonical order:
 - `fy` (Flip Y)
 - `sz` (Size)
 - `sp` (Spread)
-- `cl` (Colour)
+- `bl` (Blend)
+- `lg` (Light)
 - `op` (Opacity)
 - `ot` (Outline)
 - `wg` (Weight)
@@ -154,4 +161,4 @@ Canonical order:
   - PNG: fixed `8000x4500` (16:9)
   - SVG: current canvas dimensions (`800x450` base, responsive in UI)
 - Filename includes seed + control params:
-  - `facet-s{seed}-am{am}-ct{ct}-ed{ed}-fx{fx}-fy{fy}-sz{sz}-sp{sp}-cl{cl}-op{op}-ot{ot}-wg{wg}.{ext}`
+  - `facet-s{seed}-am{am}-ct{ct}-ed{ed}-fx{fx}-fy{fy}-sz{sz}-sp{sp}-bl{bl}-lg{lg}-op{op}-ot{ot}-wg{wg}.{ext}`
