@@ -32,14 +32,14 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Main preview:
   - Responsive 16:9 canvas
 - Controls sidebar:
-  - `Centre`, `Density`, `Flip X`, `Flip Y`, `Opacity`, `Outline`, `Size`, `Variance`, `Weight`
+  - `Centre`, `Density`, `Edge`, `Flip X`, `Flip Y`, `Opacity`, `Outline`, `Size`, `Variance`, `Weight`
   - `Reset`, `Randomise`
 
 ## State and persistence
 
 - No backend persistence.
 - URL query params persist runtime state:
-  - `s`, `ct`, `dn`, `fx`, `fy`, `op`, `ot`, `sz`, `vr`, `wg`
+  - `s`, `ct`, `dn`, `ed`, `fx`, `fy`, `op`, `ot`, `sz`, `vr`, `wg`
 - Reload reproduces output for same seed + control state.
 
 ## Tech stack
@@ -64,11 +64,12 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ### Now
 
 - Controls roadmap: Add additional runtime controls only where they map cleanly to constraint language.
+- Edge bias (`ed`): control off-canvas sampling allowance for framing.
 
 ### Next
 
 - Candidate controls recap:
-  - `Edge bias` (`ed`): control off-canvas sampling allowance for framing.
+  - Review acceptance checks (`same-color overlap` + centroid target/slack) for predictability and UX during control scrubbing.
   - `Colour bias` (`cl`): bias palette selection distribution without reducing effective shape count.
 - Candidate controls already covered (keep/iterate, not net-new):
   - `Variance` (`vr`) covers prior `Spread` concept.

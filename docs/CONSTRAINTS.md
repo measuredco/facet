@@ -82,6 +82,7 @@ UI controls currently exposed in sidebar:
 
 - `Centre`
 - `Density`
+- `Edge`
 - `Flip X`
 - `Flip Y`
 - `Opacity`
@@ -94,6 +95,7 @@ Current defaults:
 
 - `Centre`: 50%
 - `Density`: 0% (maps to 1 max shape)
+- `Edge`: 50%
 - `Flip X`: 0%
 - `Flip Y`: 0%
 - `Opacity`: 75%
@@ -105,6 +107,7 @@ Current defaults:
 Control semantics:
 
 - `Density` maps `0..100%` to shape max `1..UI_DENSITY_MAX` (currently 50).
+- `Edge` maps `0..100%` to off-canvas sampling allowance during candidate placement.
 - `Size` maps non-linearly to internal size control:
   - `0..75%` maps to size control `0.1..1.0`
   - `75..100%` maps to size control `1.0..2.0`
@@ -124,6 +127,7 @@ Canonical order:
 - `s` (seed)
 - `ct` (Centre)
 - `dn` (Density)
+- `ed` (Edge)
 - `fx` (Flip X)
 - `fy` (Flip Y)
 - `op` (Opacity)
@@ -146,4 +150,4 @@ Canonical order:
   - PNG: fixed `8000x4500` (16:9)
   - SVG: current canvas dimensions (`800x450` base, responsive in UI)
 - Filename includes seed + control params:
-  - `facet-s{seed}-ct{ct}-dn{dn}-fx{fx}-fy{fy}-op{op}-ot{ot}-sz{sz}-vr{vr}-wg{wg}.{ext}`
+  - `facet-s{seed}-ct{ct}-dn{dn}-ed{ed}-fx{fx}-fy{fy}-op{op}-ot{ot}-sz{sz}-vr{vr}-wg{wg}.{ext}`
