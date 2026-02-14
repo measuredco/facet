@@ -109,6 +109,7 @@ Control semantics:
 - `Variance` maps `0..100%` to internal size spread `0.0..1.0`.
 - `Weight` maps `0..100%` to thin/thick stroke selection probability.
 - `Weight` is disabled when `Outline` is `0%`.
+- `Opacity` is disabled when `Outline` is `100%` or `Density` is `0%`.
 - `Balance` maps to center-bias + centroid acceptance behavior.
 
 ## URL parameter persistence

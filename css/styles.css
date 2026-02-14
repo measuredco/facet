@@ -318,7 +318,12 @@ canvas {
   color: var(--color-interactive-neutral);
   font-size: var(--font-01-size);
   line-height: var(--font-01-line-height);
+  min-width: 3.625rem;
   white-space: nowrap;
+
+  .control-group:has([disabled]) & {
+    color: var(--color-text-muted);
+  }
 }
 
 .control-group input[type="range"] {
@@ -326,18 +331,26 @@ canvas {
   cursor: pointer;
   inline-size: 100%;
   padding: 0;
-}
 
-.control-group input[type="range"]::-webkit-slider-thumb {
-  background: var(--color-interactive);
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &::-webkit-slider-thumb {
+    background: var(--color-interactive);
+  }
 }
 
 .control-value {
   color: var(--color-text-prose);
-  font-size: var(--font-01-size);
-  line-height: var(--font-01-line-height);
+  font-variant-numeric: tabular-nums;
   min-inline-size: var(--space-horizontal-08);
   text-align: end;
+
+  .control-group:has([disabled]) & {
+    color: var(--color-text-muted);
+  }
 }
 
 .control-actions {

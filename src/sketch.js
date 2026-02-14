@@ -298,6 +298,12 @@ function getCenterBalanceConfig(balancePercent) {
   };
 }
 
+function shouldDisableOpacityControl() {
+  return (
+    runtimeConfig.strokeOnlyProbability >= 1 || runtimeConfig.shapeCountPercent <= 0
+  );
+}
+
 function updateRuntimeControlDisplay() {
   const balanceValue = document.getElementById("balanceValue");
   const densityValue = document.getElementById("densityValue");
@@ -366,6 +372,7 @@ function syncRuntimeControlsToInputs() {
   }
   if (opacityInput) {
     opacityInput.value = String(Math.round(runtimeConfig.overlapAlpha * 100));
+    opacityInput.disabled = shouldDisableOpacityControl();
   }
   if (sizeInput) {
     sizeInput.value = String(runtimeConfig.sizePercent);
@@ -422,6 +429,7 @@ function bindRuntimeControls() {
   densityInput.addEventListener("input", () => {
     const nextValue = Number(densityInput.value);
     runtimeConfig.shapeCountPercent = clamp(nextValue, 0, 100);
+    opacityInput.disabled = shouldDisableOpacityControl();
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
     if (currentSeed !== null) generateFromSeed(currentSeed);
@@ -431,6 +439,7 @@ function bindRuntimeControls() {
     const nextValue = Number(outlineInput.value) / 100;
     runtimeConfig.strokeOnlyProbability = clamp(nextValue, 0, 1);
     weightInput.disabled = runtimeConfig.strokeOnlyProbability <= 0;
+    opacityInput.disabled = shouldDisableOpacityControl();
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
     if (currentSeed !== null) generateFromSeed(currentSeed);
