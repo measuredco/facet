@@ -80,7 +80,7 @@ Define deterministic and probabilistic rules so generated images follow Measured
 
 UI controls currently exposed in sidebar:
 
-- `Balance`
+- `Centre`
 - `Density`
 - `Flip X`
 - `Flip Y`
@@ -92,7 +92,7 @@ UI controls currently exposed in sidebar:
 
 Current defaults:
 
-- `Balance`: 50%
+- `Centre`: 50%
 - `Density`: 0% (maps to 1 max shape)
 - `Flip X`: 0%
 - `Flip Y`: 0%
@@ -112,7 +112,8 @@ Control semantics:
 - `Weight` maps `0..100%` to thin/thick stroke selection probability.
 - `Weight` is disabled when `Outline` is `0%`.
 - `Opacity` is disabled when `Outline` is `100%` or `Density` is `0%`.
-- `Balance` maps to center-bias + centroid acceptance behavior.
+- `Centre` maps to center-biased placement pull during candidate sampling.
+- Centroid acceptance target/slack is fixed as internal tuning constants.
 
 ## URL parameter persistence
 
@@ -121,7 +122,7 @@ Control and seed state persist in compact URL params.
 Canonical order:
 
 - `s` (seed)
-- `bl` (Balance)
+- `ct` (Centre)
 - `dn` (Density)
 - `fx` (Flip X)
 - `fy` (Flip Y)
@@ -145,4 +146,4 @@ Canonical order:
   - PNG: fixed `8000x4500` (16:9)
   - SVG: current canvas dimensions (`800x450` base, responsive in UI)
 - Filename includes seed + control params:
-  - `facet-s{seed}-bl{bl}-dn{dn}-fx{fx}-fy{fy}-op{op}-ot{ot}-sz{sz}-vr{vr}-wg{wg}.{ext}`
+  - `facet-s{seed}-ct{ct}-dn{dn}-fx{fx}-fy{fy}-op{op}-ot{ot}-sz{sz}-vr{vr}-wg{wg}.{ext}`

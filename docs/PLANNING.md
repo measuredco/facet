@@ -32,14 +32,14 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Main preview:
   - Responsive 16:9 canvas
 - Controls sidebar:
-  - `Balance`, `Density`, `Flip X`, `Flip Y`, `Opacity`, `Outline`, `Size`, `Variance`, `Weight`
+  - `Centre`, `Density`, `Flip X`, `Flip Y`, `Opacity`, `Outline`, `Size`, `Variance`, `Weight`
   - `Reset`, `Randomise`
 
 ## State and persistence
 
 - No backend persistence.
 - URL query params persist runtime state:
-  - `s`, `bl`, `dn`, `fx`, `fy`, `op`, `ot`, `sz`, `vr`, `wg`
+  - `s`, `ct`, `dn`, `fx`, `fy`, `op`, `ot`, `sz`, `vr`, `wg`
 - Reload reproduces output for same seed + control state.
 
 ## Tech stack
@@ -68,7 +68,6 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ### Next
 
 - Candidate controls recap:
-  - `Centre strength split` (`ct`): separate placement pull from balance acceptance/target logic.
   - `Edge bias` (`ed`): control off-canvas sampling allowance for framing.
   - `Colour bias` (`cl`): bias palette selection distribution without reducing effective shape count.
 - Candidate controls already covered (keep/iterate, not net-new):

@@ -18,7 +18,7 @@ const EXPORT_SIZE = {
 };
 
 // UI control configuration (defaults + bounds)
-const UI_BALANCE_PERCENT_DEFAULT = 50;
+const UI_CENTRE_PERCENT_DEFAULT = 50;
 const UI_DENSITY_MAX = 50;
 const UI_DENSITY_PERCENT_DEFAULT = 0;
 const UI_FLIP_X_PERCENT_DEFAULT = 0;
@@ -30,6 +30,8 @@ const UI_SIZE_PERCENT_DEFAULT = 75;
 const UI_VARIANCE_PERCENT_DEFAULT = 50;
 
 // Internal tuning constants (engine behavior / performance guards)
+const CENTER_ACCEPTANCE_TARGET_OFFSET = 0.265;
+const CENTER_ACCEPTANCE_SLACK = 0.0215;
 const MAX_GENERATION_ATTEMPTS = 9000;
 const MIN_STROKE_WIDTH = 1;
 const MIN_THICK_STROKE_WIDTH = 2;
@@ -37,6 +39,7 @@ const MIN_THICK_STROKE_WIDTH = 2;
 // Default values for runtime UI controls
 const runtimeConfig = {
   shapeCountPercent: UI_DENSITY_PERCENT_DEFAULT,
+  centrePercent: UI_CENTRE_PERCENT_DEFAULT,
   strokeOnlyProbability: UI_OUTLINE_PERCENT_DEFAULT / 100,
   weightProbability: UI_WEIGHT_PERCENT_DEFAULT / 100,
   flipXProbability: UI_FLIP_X_PERCENT_DEFAULT / 100,
@@ -44,11 +47,10 @@ const runtimeConfig = {
   overlapAlpha: UI_OPACITY_PERCENT_DEFAULT / 100,
   sizePercent: UI_SIZE_PERCENT_DEFAULT,
   variancePercent: UI_VARIANCE_PERCENT_DEFAULT,
-  balancePercent: UI_BALANCE_PERCENT_DEFAULT,
 };
 const URL_PARAMS = {
   seed: "s",
-  balancePct: "bl",
+  centrePct: "ct",
   densityPct: "dn",
   flipXPct: "fx",
   flipYPct: "fy",
@@ -229,7 +231,7 @@ function exportCurrentCompositionSvg(filename) {
 
 function buildExportFilename(seed) {
   const safeSeed = Number.isFinite(seed) ? Math.floor(seed) : "random";
-  const balancePct = Math.round(runtimeConfig.balancePercent);
+  const centrePct = Math.round(runtimeConfig.centrePercent);
   const densityPct = Math.round(runtimeConfig.shapeCountPercent);
   const flipXPct = Math.round(runtimeConfig.flipXProbability * 100);
   const flipYPct = Math.round(runtimeConfig.flipYProbability * 100);
@@ -241,7 +243,7 @@ function buildExportFilename(seed) {
 
   return [
     `facet-s${safeSeed}`,
-    `${URL_PARAMS.balancePct}${balancePct}`,
+    `${URL_PARAMS.centrePct}${centrePct}`,
     `${URL_PARAMS.densityPct}${densityPct}`,
     `${URL_PARAMS.flipXPct}${flipXPct}`,
     `${URL_PARAMS.flipYPct}${flipYPct}`,
@@ -294,23 +296,20 @@ function getShapeCountFromPercent(shapeCountPercent) {
   return Math.round(1 + p * (UI_DENSITY_MAX - 1));
 }
 
-function getCenterBalanceConfig(balancePercent) {
-  const t = clamp(balancePercent, 0, 100) / 100;
-  return {
-    positionBias: lerp(0.1, 0.56, t),
-    targetOffset: lerp(0.45, 0.08, t),
-    slack: lerp(0.035, 0.008, t),
-  };
+function getCenterPlacementBias(centrePercent) {
+  const t = clamp(centrePercent, 0, 100) / 100;
+  return lerp(0.1, 0.56, t);
 }
 
 function shouldDisableOpacityControl() {
   return (
-    runtimeConfig.strokeOnlyProbability >= 1 || runtimeConfig.shapeCountPercent <= 0
+    runtimeConfig.strokeOnlyProbability >= 1 ||
+    runtimeConfig.shapeCountPercent <= 0
   );
 }
 
 function updateRuntimeControlDisplay() {
-  const balanceValue = document.getElementById("balanceValue");
+  const centreValue = document.getElementById("centreValue");
   const densityValue = document.getElementById("densityValue");
   const flipXValue = document.getElementById("flipXValue");
   const flipYValue = document.getElementById("flipYValue");
@@ -320,8 +319,8 @@ function updateRuntimeControlDisplay() {
   const weightValue = document.getElementById("weightValue");
   const varianceValue = document.getElementById("varianceValue");
 
-  if (balanceValue) {
-    balanceValue.textContent = `${Math.round(runtimeConfig.balancePercent)}%`;
+  if (centreValue) {
+    centreValue.textContent = `${Math.round(runtimeConfig.centrePercent)}%`;
   }
   if (densityValue) {
     densityValue.textContent = `${Math.round(runtimeConfig.shapeCountPercent)}%`;
@@ -358,7 +357,7 @@ function updateRuntimeControlDisplay() {
 }
 
 function syncRuntimeControlsToInputs() {
-  const balanceInput = document.getElementById("balanceInput");
+  const centreInput = document.getElementById("centreInput");
   const densityInput = document.getElementById("densityInput");
   const flipXInput = document.getElementById("flipXInput");
   const flipYInput = document.getElementById("flipYInput");
@@ -368,8 +367,8 @@ function syncRuntimeControlsToInputs() {
   const weightInput = document.getElementById("weightInput");
   const varianceInput = document.getElementById("varianceInput");
 
-  if (balanceInput) {
-    balanceInput.value = String(Math.round(runtimeConfig.balancePercent));
+  if (centreInput) {
+    centreInput.value = String(Math.round(runtimeConfig.centrePercent));
   }
   if (densityInput) {
     densityInput.value = String(Math.round(runtimeConfig.shapeCountPercent));
@@ -404,7 +403,7 @@ function syncRuntimeControlsToInputs() {
 }
 
 function bindRuntimeControls() {
-  const balanceInput = document.getElementById("balanceInput");
+  const centreInput = document.getElementById("centreInput");
   const densityInput = document.getElementById("densityInput");
   const flipXInput = document.getElementById("flipXInput");
   const flipYInput = document.getElementById("flipYInput");
@@ -417,7 +416,7 @@ function bindRuntimeControls() {
   const randomBtn = document.getElementById("randomBtn");
 
   if (
-    !balanceInput ||
+    !centreInput ||
     !densityInput ||
     !flipXInput ||
     !flipYInput ||
@@ -435,9 +434,9 @@ function bindRuntimeControls() {
   syncRuntimeControlsToInputs();
   updateRuntimeControlDisplay();
 
-  balanceInput.addEventListener("input", () => {
-    const nextValue = Number(balanceInput.value);
-    runtimeConfig.balancePercent = clamp(nextValue, 0, 100);
+  centreInput.addEventListener("input", () => {
+    const nextValue = Number(centreInput.value);
+    runtimeConfig.centrePercent = clamp(nextValue, 0, 100);
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
     if (currentSeed !== null) generateFromSeed(currentSeed);
@@ -511,7 +510,7 @@ function bindRuntimeControls() {
   });
 
   resetBtn.addEventListener("click", () => {
-    runtimeConfig.balancePercent = UI_BALANCE_PERCENT_DEFAULT;
+    runtimeConfig.centrePercent = UI_CENTRE_PERCENT_DEFAULT;
     runtimeConfig.shapeCountPercent = UI_DENSITY_PERCENT_DEFAULT;
     runtimeConfig.strokeOnlyProbability = UI_OUTLINE_PERCENT_DEFAULT / 100;
     runtimeConfig.flipXProbability = UI_FLIP_X_PERCENT_DEFAULT / 100;
@@ -527,7 +526,7 @@ function bindRuntimeControls() {
   });
 
   randomBtn.addEventListener("click", () => {
-    runtimeConfig.balancePercent = Math.round(Math.random() * 100);
+    runtimeConfig.centrePercent = Math.round(Math.random() * 100);
     runtimeConfig.shapeCountPercent = Math.round(Math.random() * 100);
     runtimeConfig.flipXProbability = Math.random();
     runtimeConfig.flipYProbability = Math.random();
@@ -551,11 +550,11 @@ function readSeedFromUrl() {
 function readRuntimeConfigFromUrl() {
   const params = new URLSearchParams(window.location.search);
 
-  const balancePctRaw = params.get(URL_PARAMS.balancePct);
-  if (balancePctRaw !== null) {
-    const balancePct = Number(balancePctRaw);
-    if (Number.isFinite(balancePct) && !Number.isNaN(balancePct)) {
-      runtimeConfig.balancePercent = clamp(balancePct, 0, 100);
+  const centrePctRaw = params.get(URL_PARAMS.centrePct);
+  if (centrePctRaw !== null) {
+    const centrePct = Number(centrePctRaw);
+    if (Number.isFinite(centrePct) && !Number.isNaN(centrePct)) {
+      runtimeConfig.centrePercent = clamp(centrePct, 0, 100);
     }
   }
 
@@ -634,8 +633,8 @@ function writeUrlState(seed) {
 
   // Keep URL ordering aligned to UI control order.
   orderedParams.set(
-    URL_PARAMS.balancePct,
-    String(Math.round(runtimeConfig.balancePercent)),
+    URL_PARAMS.centrePct,
+    String(Math.round(runtimeConfig.centrePercent)),
   );
   orderedParams.set(
     URL_PARAMS.densityPct,
@@ -740,7 +739,9 @@ function shuffleInPlace(items) {
 }
 
 function assignStrokeWidthRatios(shapeList, thickProbability) {
-  const strokeShapes = shapeList.filter((shape) => shape.styleMode === "stroke");
+  const strokeShapes = shapeList.filter(
+    (shape) => shape.styleMode === "stroke",
+  );
   if (strokeShapes.length === 0) return;
 
   const p = clamp(thickProbability, 0, 1);
@@ -799,7 +800,8 @@ function validateCandidateConstraints(
     canvasWidth,
     canvasHeight,
   );
-  const withinCenterTarget = nextCenterOffsetRatio <= centerBalance.targetOffset;
+  const withinCenterTarget =
+    nextCenterOffsetRatio <= centerBalance.targetOffset;
   const improvesCenterBalance =
     nextCenterOffsetRatio <= centerOffsetRatio + centerBalance.slack;
   const centerBalanced = withinCenterTarget || improvesCenterBalance;
@@ -822,7 +824,13 @@ function generateFromSeed(seed) {
     runtimeConfig.sizePercent,
     runtimeConfig.variancePercent,
   );
-  const centerBalance = getCenterBalanceConfig(runtimeConfig.balancePercent);
+  const centerAcceptance = {
+    targetOffset: CENTER_ACCEPTANCE_TARGET_OFFSET,
+    slack: CENTER_ACCEPTANCE_SLACK,
+  };
+  const centerPlacementBias = getCenterPlacementBias(
+    runtimeConfig.centrePercent,
+  );
   const minSize = Math.min(width, height) * minSizeRatio;
   const maxSize = Math.min(width, height) * maxSizeRatio;
 
@@ -841,8 +849,8 @@ function generateFromSeed(seed) {
     const uniformY = random(-size * 0.6, height + size * 0.2);
     const centeredX = randomGaussian(width * 0.5, width * 0.2);
     const centeredY = randomGaussian(height * 0.5, height * 0.2);
-    const x = lerp(uniformX, centeredX, centerBalance.positionBias);
-    const y = lerp(uniformY, centeredY, centerBalance.positionBias);
+    const x = lerp(uniformX, centeredX, centerPlacementBias);
+    const y = lerp(uniformY, centeredY, centerPlacementBias);
     const flipX = random() < runtimeConfig.flipXProbability;
     const flipY = random() < runtimeConfig.flipYProbability;
 
@@ -861,7 +869,7 @@ function generateFromSeed(seed) {
       candidate,
       shapes,
       centerOffsetRatio,
-      centerBalance,
+      centerAcceptance,
       width,
       height,
     );
