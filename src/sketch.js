@@ -16,6 +16,7 @@ const EXPORT_SIZE = {
   width: 8000,
   height: 4500,
 };
+const DEFAULT_SEED = 991712126;
 
 // UI control configuration (defaults + bounds)
 const UI_CENTRE_PERCENT_DEFAULT = 50;
@@ -265,6 +266,7 @@ function buildExportFilename(seed) {
 }
 
 function parseSeed(value) {
+  if (value === null || value === "") return null;
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || Number.isNaN(parsed)) return null;
   return Math.floor(parsed);
@@ -822,7 +824,7 @@ function setup() {
   }
 
   // initial generate
-  const initialSeed = readSeedFromUrl() ?? Math.floor(Math.random() * 1e9);
+  const initialSeed = readSeedFromUrl() ?? DEFAULT_SEED;
   writeUrlState(initialSeed);
   generateFromSeed(initialSeed);
 }
