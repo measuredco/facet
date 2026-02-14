@@ -87,6 +87,7 @@ UI controls currently exposed in sidebar:
 - `Outline`
 - `Size`
 - `Variance`
+- `Weight`
 
 Current defaults:
 
@@ -97,6 +98,7 @@ Current defaults:
 - `Outline`: 0%
 - `Size`: 75%
 - `Variance`: 50%
+- `Weight`: 50%
 
 Control semantics:
 
@@ -105,6 +107,8 @@ Control semantics:
   - `0..75%` maps to size control `0.1..1.0`
   - `75..100%` maps to size control `1.0..2.0`
 - `Variance` maps `0..100%` to internal size spread `0.0..1.0`.
+- `Weight` maps `0..100%` to thin/thick stroke selection probability.
+- `Weight` is disabled when `Outline` is `0%`.
 - `Balance` maps to center-bias + centroid acceptance behavior.
 
 ## URL parameter persistence
@@ -121,6 +125,7 @@ Canonical order:
 - `ot` (Outline)
 - `sz` (Size)
 - `vr` (Variance)
+- `wg` (Weight)
 
 ## UI behavior
 
@@ -136,4 +141,4 @@ Canonical order:
   - PNG: fixed `8000x4500` (16:9)
   - SVG: current canvas dimensions (`800x450` base, responsive in UI)
 - Filename includes seed + control params:
-  - `facet-s{seed}-bl{bl}-dn{dn}-mr{mr}-op{op}-ot{ot}-sz{sz}-vr{vr}.{ext}`
+  - `facet-s{seed}-bl{bl}-dn{dn}-mr{mr}-op{op}-ot{ot}-sz{sz}-vr{vr}-wg{wg}.{ext}`

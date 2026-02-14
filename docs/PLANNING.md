@@ -32,14 +32,14 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Main preview:
   - Responsive 16:9 canvas
 - Controls sidebar:
-  - `Balance`, `Density`, `Mirror`, `Opacity`, `Outline`, `Size`, `Variance`
+  - `Balance`, `Density`, `Mirror`, `Opacity`, `Outline`, `Size`, `Variance`, `Weight`
   - `Reset`, `Randomise`
 
 ## State and persistence
 
 - No backend persistence.
 - URL query params persist runtime state:
-  - `s`, `bl`, `dn`, `mr`, `op`, `ot`, `sz`, `vr`
+  - `s`, `bl`, `dn`, `mr`, `op`, `ot`, `sz`, `vr`, `wg`
 - Reload reproduces output for same seed + control state.
 
 ## Tech stack

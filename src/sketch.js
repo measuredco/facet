@@ -24,18 +24,20 @@ const UI_DENSITY_PERCENT_DEFAULT = 0;
 const UI_MIRROR_PERCENT_DEFAULT = 0;
 const UI_OPACITY_PERCENT_DEFAULT = 75;
 const UI_OUTLINE_PERCENT_DEFAULT = 0;
+const UI_WEIGHT_PERCENT_DEFAULT = 50;
 const UI_SIZE_PERCENT_DEFAULT = 75;
 const UI_VARIANCE_PERCENT_DEFAULT = 50;
 
 // Internal tuning constants (engine behavior / performance guards)
 const MAX_GENERATION_ATTEMPTS = 9000;
 const MIN_STROKE_WIDTH = 1;
-const STROKE_WIDTH_VARIANT_PROBABILITY = 0.5;
+const MIN_THICK_STROKE_WIDTH = 2;
 
 // Default values for runtime UI controls
 const runtimeConfig = {
   shapeCountPercent: UI_DENSITY_PERCENT_DEFAULT,
   strokeOnlyProbability: UI_OUTLINE_PERCENT_DEFAULT / 100,
+  weightProbability: UI_WEIGHT_PERCENT_DEFAULT / 100,
   flipProbability: UI_MIRROR_PERCENT_DEFAULT / 100,
   overlapAlpha: UI_OPACITY_PERCENT_DEFAULT / 100,
   sizePercent: UI_SIZE_PERCENT_DEFAULT,
@@ -46,11 +48,12 @@ const URL_PARAMS = {
   seed: "s",
   balancePct: "bl",
   densityPct: "dn",
-  sizePct: "sz",
-  outlinePct: "ot",
   mirrorPct: "mr",
   opacityPct: "op",
+  outlinePct: "ot",
+  sizePct: "sz",
   variancePct: "vr",
+  weightPct: "wg",
 };
 
 function shapesOverlap(a, b) {
@@ -107,8 +110,12 @@ function drawCompositionToContext(
 
     if (s.styleMode === "stroke") {
       const ratio = s.strokeWidthRatio ?? STROKE_WIDTH_RATIOS[0];
+      const minStrokeWidth =
+        ratio === STROKE_WIDTH_RATIOS[1]
+          ? MIN_THICK_STROKE_WIDTH
+          : MIN_STROKE_WIDTH;
       const strokeWidth = Math.max(
-        MIN_STROKE_WIDTH * sizeScale,
+        minStrokeWidth * sizeScale,
         drawSize * ratio,
       );
       ctx.strokeStyle = rgbaFromHex(s.color, alpha);
@@ -188,7 +195,11 @@ function buildSvgExportMarkup(renderWidth, renderHeight) {
 
     if (shape.styleMode === "stroke") {
       const ratio = shape.strokeWidthRatio ?? STROKE_WIDTH_RATIOS[0];
-      const strokeWidth = Math.max(MIN_STROKE_WIDTH, shape.size * ratio);
+      const minStrokeWidth =
+        ratio === STROKE_WIDTH_RATIOS[1]
+          ? MIN_THICK_STROKE_WIDTH
+          : MIN_STROKE_WIDTH;
+      const strokeWidth = Math.max(minStrokeWidth, shape.size * ratio);
       const localStrokeWidth = strokeWidth / scale;
       svgParts.push(
         `<path d="${CORNER_SHAPE_PATH_D}" fill="none" stroke="${rgbaFromHex(shape.color, alpha)}" stroke-width="${localStrokeWidth}" transform="${transform}" />`,
@@ -220,6 +231,7 @@ function buildExportFilename(seed) {
   const mirrorPct = Math.round(runtimeConfig.flipProbability * 100);
   const opacityPct = Math.round(runtimeConfig.overlapAlpha * 100);
   const outlinePct = Math.round(runtimeConfig.strokeOnlyProbability * 100);
+  const weightPct = Math.round(runtimeConfig.weightProbability * 100);
   const sizePct = Math.round(runtimeConfig.sizePercent);
   const variancePct = Math.round(runtimeConfig.variancePercent);
 
@@ -232,6 +244,7 @@ function buildExportFilename(seed) {
     `${URL_PARAMS.outlinePct}${outlinePct}`,
     `${URL_PARAMS.sizePct}${sizePct}`,
     `${URL_PARAMS.variancePct}${variancePct}`,
+    `${URL_PARAMS.weightPct}${weightPct}`,
   ].join("-");
 }
 
@@ -292,6 +305,7 @@ function updateRuntimeControlDisplay() {
   const mirrorValue = document.getElementById("mirrorValue");
   const opacityValue = document.getElementById("opacityValue");
   const sizeValue = document.getElementById("sizeValue");
+  const weightValue = document.getElementById("weightValue");
   const varianceValue = document.getElementById("varianceValue");
 
   if (balanceValue) {
@@ -316,6 +330,11 @@ function updateRuntimeControlDisplay() {
   if (sizeValue) {
     sizeValue.textContent = `${Math.round(runtimeConfig.sizePercent)}%`;
   }
+  if (weightValue) {
+    weightValue.textContent = `${Math.round(
+      runtimeConfig.weightProbability * 100,
+    )}%`;
+  }
   if (varianceValue) {
     varianceValue.textContent = `${Math.round(runtimeConfig.variancePercent)}%`;
   }
@@ -328,6 +347,7 @@ function syncRuntimeControlsToInputs() {
   const mirrorInput = document.getElementById("mirrorInput");
   const opacityInput = document.getElementById("opacityInput");
   const sizeInput = document.getElementById("sizeInput");
+  const weightInput = document.getElementById("weightInput");
   const varianceInput = document.getElementById("varianceInput");
 
   if (balanceInput) {
@@ -350,6 +370,12 @@ function syncRuntimeControlsToInputs() {
   if (sizeInput) {
     sizeInput.value = String(runtimeConfig.sizePercent);
   }
+  if (weightInput) {
+    weightInput.value = String(
+      Math.round(runtimeConfig.weightProbability * 100),
+    );
+    weightInput.disabled = runtimeConfig.strokeOnlyProbability <= 0;
+  }
   if (varianceInput) {
     varianceInput.value = String(runtimeConfig.variancePercent);
   }
@@ -362,6 +388,7 @@ function bindRuntimeControls() {
   const mirrorInput = document.getElementById("mirrorInput");
   const opacityInput = document.getElementById("opacityInput");
   const sizeInput = document.getElementById("sizeInput");
+  const weightInput = document.getElementById("weightInput");
   const varianceInput = document.getElementById("varianceInput");
   const resetBtn = document.getElementById("resetBtn");
   const randomBtn = document.getElementById("randomBtn");
@@ -373,6 +400,7 @@ function bindRuntimeControls() {
     !mirrorInput ||
     !opacityInput ||
     !sizeInput ||
+    !weightInput ||
     !varianceInput ||
     !resetBtn ||
     !randomBtn
@@ -402,6 +430,7 @@ function bindRuntimeControls() {
   outlineInput.addEventListener("input", () => {
     const nextValue = Number(outlineInput.value) / 100;
     runtimeConfig.strokeOnlyProbability = clamp(nextValue, 0, 1);
+    weightInput.disabled = runtimeConfig.strokeOnlyProbability <= 0;
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
     if (currentSeed !== null) generateFromSeed(currentSeed);
@@ -431,6 +460,14 @@ function bindRuntimeControls() {
     if (currentSeed !== null) generateFromSeed(currentSeed);
   });
 
+  weightInput.addEventListener("input", () => {
+    const nextValue = Number(weightInput.value) / 100;
+    runtimeConfig.weightProbability = clamp(nextValue, 0, 1);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
   varianceInput.addEventListener("input", () => {
     const nextValue = Number(varianceInput.value);
     runtimeConfig.variancePercent = clamp(nextValue, 0, 100);
@@ -445,6 +482,7 @@ function bindRuntimeControls() {
     runtimeConfig.strokeOnlyProbability = UI_OUTLINE_PERCENT_DEFAULT / 100;
     runtimeConfig.flipProbability = UI_MIRROR_PERCENT_DEFAULT / 100;
     runtimeConfig.overlapAlpha = UI_OPACITY_PERCENT_DEFAULT / 100;
+    runtimeConfig.weightProbability = UI_WEIGHT_PERCENT_DEFAULT / 100;
     runtimeConfig.sizePercent = UI_SIZE_PERCENT_DEFAULT;
     runtimeConfig.variancePercent = UI_VARIANCE_PERCENT_DEFAULT;
     syncRuntimeControlsToInputs();
@@ -459,6 +497,7 @@ function bindRuntimeControls() {
     runtimeConfig.flipProbability = Math.random();
     runtimeConfig.overlapAlpha = Math.random();
     runtimeConfig.strokeOnlyProbability = Math.random();
+    runtimeConfig.weightProbability = Math.random();
     runtimeConfig.sizePercent = Math.round(Math.random() * 100);
     runtimeConfig.variancePercent = Math.round(Math.random() * 100);
     syncRuntimeControlsToInputs();
@@ -497,6 +536,14 @@ function readRuntimeConfigFromUrl() {
     const strokePct = Number(strokePctRaw);
     if (Number.isFinite(strokePct) && !Number.isNaN(strokePct)) {
       runtimeConfig.strokeOnlyProbability = clamp(strokePct / 100, 0, 1);
+    }
+  }
+
+  const weightPctRaw = params.get(URL_PARAMS.weightPct);
+  if (weightPctRaw !== null) {
+    const weightPct = Number(weightPctRaw);
+    if (Number.isFinite(weightPct) && !Number.isNaN(weightPct)) {
+      runtimeConfig.weightProbability = clamp(weightPct / 100, 0, 1);
     }
   }
 
@@ -570,6 +617,10 @@ function writeUrlState(seed) {
     URL_PARAMS.variancePct,
     String(Math.round(runtimeConfig.variancePercent)),
   );
+  orderedParams.set(
+    URL_PARAMS.weightPct,
+    String(Math.round(runtimeConfig.weightProbability * 100)),
+  );
 
   url.search = orderedParams.toString();
   window.history.replaceState(null, "", url);
@@ -629,6 +680,30 @@ function applyLayeringOrder(shapeList) {
   const filled = shapeList.filter((shape) => shape.styleMode !== "stroke");
   const stroked = shapeList.filter((shape) => shape.styleMode === "stroke");
   return [...filled, ...stroked];
+}
+
+function shuffleInPlace(items) {
+  for (let i = items.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(random(i + 1));
+    const tmp = items[i];
+    items[i] = items[j];
+    items[j] = tmp;
+  }
+}
+
+function assignStrokeWidthRatios(shapeList, thickProbability) {
+  const strokeShapes = shapeList.filter((shape) => shape.styleMode === "stroke");
+  if (strokeShapes.length === 0) return;
+
+  const p = clamp(thickProbability, 0, 1);
+  const thickCount = Math.round(strokeShapes.length * p);
+  const shuffled = strokeShapes.slice();
+  shuffleInPlace(shuffled);
+
+  shuffled.forEach((shape, index) => {
+    shape.strokeWidthRatio =
+      index < thickCount ? STROKE_WIDTH_RATIOS[1] : STROKE_WIDTH_RATIOS[0];
+  });
 }
 
 function getCenterOffsetRatio(shapeList, canvasWidth, canvasHeight) {
@@ -713,10 +788,6 @@ function generateFromSeed(seed) {
     const color = random(PALETTE);
     const styleMode =
       random() < runtimeConfig.strokeOnlyProbability ? "stroke" : "fill";
-    const strokeWidthRatio =
-      random() < STROKE_WIDTH_VARIANT_PROBABILITY
-        ? STROKE_WIDTH_RATIOS[0]
-        : STROKE_WIDTH_RATIOS[1];
     const size = lerp(minSize, maxSize, Math.pow(random(), 0.35));
     const uniformX = random(-size * 0.6, width + size * 0.2);
     const uniformY = random(-size * 0.6, height + size * 0.2);
@@ -736,7 +807,7 @@ function generateFromSeed(seed) {
       size,
       color,
       styleMode,
-      strokeWidthRatio,
+      strokeWidthRatio: null,
       flipX,
       flipY,
     };
@@ -755,6 +826,7 @@ function generateFromSeed(seed) {
     }
   }
 
+  assignStrokeWidthRatios(shapes, runtimeConfig.weightProbability);
   shapes = applyLayeringOrder(shapes);
   redraw();
 }
