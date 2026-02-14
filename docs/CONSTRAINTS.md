@@ -82,7 +82,8 @@ UI controls currently exposed in sidebar:
 
 - `Balance`
 - `Density`
-- `Mirror`
+- `Flip X`
+- `Flip Y`
 - `Opacity`
 - `Outline`
 - `Size`
@@ -93,7 +94,8 @@ Current defaults:
 
 - `Balance`: 50%
 - `Density`: 0% (maps to 1 max shape)
-- `Mirror`: 0%
+- `Flip X`: 0%
+- `Flip Y`: 0%
 - `Opacity`: 75%
 - `Outline`: 0%
 - `Size`: 75%
@@ -121,7 +123,8 @@ Canonical order:
 - `s` (seed)
 - `bl` (Balance)
 - `dn` (Density)
-- `mr` (Mirror)
+- `fx` (Flip X)
+- `fy` (Flip Y)
 - `op` (Opacity)
 - `ot` (Outline)
 - `sz` (Size)
@@ -142,4 +145,4 @@ Canonical order:
   - PNG: fixed `8000x4500` (16:9)
   - SVG: current canvas dimensions (`800x450` base, responsive in UI)
 - Filename includes seed + control params:
-  - `facet-s{seed}-bl{bl}-dn{dn}-mr{mr}-op{op}-ot{ot}-sz{sz}-vr{vr}-wg{wg}.{ext}`
+  - `facet-s{seed}-bl{bl}-dn{dn}-fx{fx}-fy{fy}-op{op}-ot{ot}-sz{sz}-vr{vr}-wg{wg}.{ext}`

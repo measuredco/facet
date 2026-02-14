@@ -21,7 +21,8 @@ const EXPORT_SIZE = {
 const UI_BALANCE_PERCENT_DEFAULT = 50;
 const UI_DENSITY_MAX = 50;
 const UI_DENSITY_PERCENT_DEFAULT = 0;
-const UI_MIRROR_PERCENT_DEFAULT = 0;
+const UI_FLIP_X_PERCENT_DEFAULT = 0;
+const UI_FLIP_Y_PERCENT_DEFAULT = 0;
 const UI_OPACITY_PERCENT_DEFAULT = 75;
 const UI_OUTLINE_PERCENT_DEFAULT = 0;
 const UI_WEIGHT_PERCENT_DEFAULT = 50;
@@ -38,7 +39,8 @@ const runtimeConfig = {
   shapeCountPercent: UI_DENSITY_PERCENT_DEFAULT,
   strokeOnlyProbability: UI_OUTLINE_PERCENT_DEFAULT / 100,
   weightProbability: UI_WEIGHT_PERCENT_DEFAULT / 100,
-  flipProbability: UI_MIRROR_PERCENT_DEFAULT / 100,
+  flipXProbability: UI_FLIP_X_PERCENT_DEFAULT / 100,
+  flipYProbability: UI_FLIP_Y_PERCENT_DEFAULT / 100,
   overlapAlpha: UI_OPACITY_PERCENT_DEFAULT / 100,
   sizePercent: UI_SIZE_PERCENT_DEFAULT,
   variancePercent: UI_VARIANCE_PERCENT_DEFAULT,
@@ -48,7 +50,8 @@ const URL_PARAMS = {
   seed: "s",
   balancePct: "bl",
   densityPct: "dn",
-  mirrorPct: "mr",
+  flipXPct: "fx",
+  flipYPct: "fy",
   opacityPct: "op",
   outlinePct: "ot",
   sizePct: "sz",
@@ -228,7 +231,8 @@ function buildExportFilename(seed) {
   const safeSeed = Number.isFinite(seed) ? Math.floor(seed) : "random";
   const balancePct = Math.round(runtimeConfig.balancePercent);
   const densityPct = Math.round(runtimeConfig.shapeCountPercent);
-  const mirrorPct = Math.round(runtimeConfig.flipProbability * 100);
+  const flipXPct = Math.round(runtimeConfig.flipXProbability * 100);
+  const flipYPct = Math.round(runtimeConfig.flipYProbability * 100);
   const opacityPct = Math.round(runtimeConfig.overlapAlpha * 100);
   const outlinePct = Math.round(runtimeConfig.strokeOnlyProbability * 100);
   const weightPct = Math.round(runtimeConfig.weightProbability * 100);
@@ -239,7 +243,8 @@ function buildExportFilename(seed) {
     `facet-s${safeSeed}`,
     `${URL_PARAMS.balancePct}${balancePct}`,
     `${URL_PARAMS.densityPct}${densityPct}`,
-    `${URL_PARAMS.mirrorPct}${mirrorPct}`,
+    `${URL_PARAMS.flipXPct}${flipXPct}`,
+    `${URL_PARAMS.flipYPct}${flipYPct}`,
     `${URL_PARAMS.opacityPct}${opacityPct}`,
     `${URL_PARAMS.outlinePct}${outlinePct}`,
     `${URL_PARAMS.sizePct}${sizePct}`,
@@ -307,8 +312,9 @@ function shouldDisableOpacityControl() {
 function updateRuntimeControlDisplay() {
   const balanceValue = document.getElementById("balanceValue");
   const densityValue = document.getElementById("densityValue");
+  const flipXValue = document.getElementById("flipXValue");
+  const flipYValue = document.getElementById("flipYValue");
   const outlineValue = document.getElementById("outlineValue");
-  const mirrorValue = document.getElementById("mirrorValue");
   const opacityValue = document.getElementById("opacityValue");
   const sizeValue = document.getElementById("sizeValue");
   const weightValue = document.getElementById("weightValue");
@@ -325,9 +331,14 @@ function updateRuntimeControlDisplay() {
       runtimeConfig.strokeOnlyProbability * 100,
     )}%`;
   }
-  if (mirrorValue) {
-    mirrorValue.textContent = `${Math.round(
-      runtimeConfig.flipProbability * 100,
+  if (flipXValue) {
+    flipXValue.textContent = `${Math.round(
+      runtimeConfig.flipXProbability * 100,
+    )}%`;
+  }
+  if (flipYValue) {
+    flipYValue.textContent = `${Math.round(
+      runtimeConfig.flipYProbability * 100,
     )}%`;
   }
   if (opacityValue) {
@@ -349,8 +360,9 @@ function updateRuntimeControlDisplay() {
 function syncRuntimeControlsToInputs() {
   const balanceInput = document.getElementById("balanceInput");
   const densityInput = document.getElementById("densityInput");
+  const flipXInput = document.getElementById("flipXInput");
+  const flipYInput = document.getElementById("flipYInput");
   const outlineInput = document.getElementById("outlineInput");
-  const mirrorInput = document.getElementById("mirrorInput");
   const opacityInput = document.getElementById("opacityInput");
   const sizeInput = document.getElementById("sizeInput");
   const weightInput = document.getElementById("weightInput");
@@ -367,8 +379,11 @@ function syncRuntimeControlsToInputs() {
       Math.round(runtimeConfig.strokeOnlyProbability * 100),
     );
   }
-  if (mirrorInput) {
-    mirrorInput.value = String(Math.round(runtimeConfig.flipProbability * 100));
+  if (flipXInput) {
+    flipXInput.value = String(Math.round(runtimeConfig.flipXProbability * 100));
+  }
+  if (flipYInput) {
+    flipYInput.value = String(Math.round(runtimeConfig.flipYProbability * 100));
   }
   if (opacityInput) {
     opacityInput.value = String(Math.round(runtimeConfig.overlapAlpha * 100));
@@ -391,8 +406,9 @@ function syncRuntimeControlsToInputs() {
 function bindRuntimeControls() {
   const balanceInput = document.getElementById("balanceInput");
   const densityInput = document.getElementById("densityInput");
+  const flipXInput = document.getElementById("flipXInput");
+  const flipYInput = document.getElementById("flipYInput");
   const outlineInput = document.getElementById("outlineInput");
-  const mirrorInput = document.getElementById("mirrorInput");
   const opacityInput = document.getElementById("opacityInput");
   const sizeInput = document.getElementById("sizeInput");
   const weightInput = document.getElementById("weightInput");
@@ -403,8 +419,9 @@ function bindRuntimeControls() {
   if (
     !balanceInput ||
     !densityInput ||
+    !flipXInput ||
+    !flipYInput ||
     !outlineInput ||
-    !mirrorInput ||
     !opacityInput ||
     !sizeInput ||
     !weightInput ||
@@ -445,9 +462,17 @@ function bindRuntimeControls() {
     if (currentSeed !== null) generateFromSeed(currentSeed);
   });
 
-  mirrorInput.addEventListener("input", () => {
-    const nextValue = Number(mirrorInput.value) / 100;
-    runtimeConfig.flipProbability = clamp(nextValue, 0, 1);
+  flipXInput.addEventListener("input", () => {
+    const nextValue = Number(flipXInput.value) / 100;
+    runtimeConfig.flipXProbability = clamp(nextValue, 0, 1);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  flipYInput.addEventListener("input", () => {
+    const nextValue = Number(flipYInput.value) / 100;
+    runtimeConfig.flipYProbability = clamp(nextValue, 0, 1);
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
     if (currentSeed !== null) generateFromSeed(currentSeed);
@@ -489,7 +514,8 @@ function bindRuntimeControls() {
     runtimeConfig.balancePercent = UI_BALANCE_PERCENT_DEFAULT;
     runtimeConfig.shapeCountPercent = UI_DENSITY_PERCENT_DEFAULT;
     runtimeConfig.strokeOnlyProbability = UI_OUTLINE_PERCENT_DEFAULT / 100;
-    runtimeConfig.flipProbability = UI_MIRROR_PERCENT_DEFAULT / 100;
+    runtimeConfig.flipXProbability = UI_FLIP_X_PERCENT_DEFAULT / 100;
+    runtimeConfig.flipYProbability = UI_FLIP_Y_PERCENT_DEFAULT / 100;
     runtimeConfig.overlapAlpha = UI_OPACITY_PERCENT_DEFAULT / 100;
     runtimeConfig.weightProbability = UI_WEIGHT_PERCENT_DEFAULT / 100;
     runtimeConfig.sizePercent = UI_SIZE_PERCENT_DEFAULT;
@@ -503,7 +529,8 @@ function bindRuntimeControls() {
   randomBtn.addEventListener("click", () => {
     runtimeConfig.balancePercent = Math.round(Math.random() * 100);
     runtimeConfig.shapeCountPercent = Math.round(Math.random() * 100);
-    runtimeConfig.flipProbability = Math.random();
+    runtimeConfig.flipXProbability = Math.random();
+    runtimeConfig.flipYProbability = Math.random();
     runtimeConfig.overlapAlpha = Math.random();
     runtimeConfig.strokeOnlyProbability = Math.random();
     runtimeConfig.weightProbability = Math.random();
@@ -556,11 +583,19 @@ function readRuntimeConfigFromUrl() {
     }
   }
 
-  const flipPctRaw = params.get(URL_PARAMS.mirrorPct);
-  if (flipPctRaw !== null) {
-    const flipPct = Number(flipPctRaw);
-    if (Number.isFinite(flipPct) && !Number.isNaN(flipPct)) {
-      runtimeConfig.flipProbability = clamp(flipPct / 100, 0, 1);
+  const flipXPctRaw = params.get(URL_PARAMS.flipXPct);
+  if (flipXPctRaw !== null) {
+    const flipXPct = Number(flipXPctRaw);
+    if (Number.isFinite(flipXPct) && !Number.isNaN(flipXPct)) {
+      runtimeConfig.flipXProbability = clamp(flipXPct / 100, 0, 1);
+    }
+  }
+
+  const flipYPctRaw = params.get(URL_PARAMS.flipYPct);
+  if (flipYPctRaw !== null) {
+    const flipYPct = Number(flipYPctRaw);
+    if (Number.isFinite(flipYPct) && !Number.isNaN(flipYPct)) {
+      runtimeConfig.flipYProbability = clamp(flipYPct / 100, 0, 1);
     }
   }
 
@@ -607,8 +642,12 @@ function writeUrlState(seed) {
     String(Math.round(runtimeConfig.shapeCountPercent)),
   );
   orderedParams.set(
-    URL_PARAMS.mirrorPct,
-    String(Math.round(runtimeConfig.flipProbability * 100)),
+    URL_PARAMS.flipXPct,
+    String(Math.round(runtimeConfig.flipXProbability * 100)),
+  );
+  orderedParams.set(
+    URL_PARAMS.flipYPct,
+    String(Math.round(runtimeConfig.flipYProbability * 100)),
   );
   orderedParams.set(
     URL_PARAMS.opacityPct,
@@ -804,10 +843,8 @@ function generateFromSeed(seed) {
     const centeredY = randomGaussian(height * 0.5, height * 0.2);
     const x = lerp(uniformX, centeredX, centerBalance.positionBias);
     const y = lerp(uniformY, centeredY, centerBalance.positionBias);
-    const shouldFlip = random() < runtimeConfig.flipProbability;
-    const flipMode = shouldFlip ? Math.floor(random(1, 4)) : 0;
-    const flipX = flipMode === 1 || flipMode === 3;
-    const flipY = flipMode === 2 || flipMode === 3;
+    const flipX = random() < runtimeConfig.flipXProbability;
+    const flipY = random() < runtimeConfig.flipYProbability;
 
     const candidate = {
       type: "svg",
