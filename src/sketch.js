@@ -19,6 +19,7 @@ const EXPORT_SIZE = {
 
 // UI control configuration (defaults + bounds)
 const UI_CENTRE_PERCENT_DEFAULT = 50;
+const UI_COLOUR_PERCENT_DEFAULT = 50;
 const UI_DENSITY_MAX = 50;
 const UI_DENSITY_PERCENT_DEFAULT = 0;
 const UI_EDGE_PERCENT_DEFAULT = 50;
@@ -41,6 +42,7 @@ const MIN_THICK_STROKE_WIDTH = 2;
 const runtimeConfig = {
   shapeCountPercent: UI_DENSITY_PERCENT_DEFAULT,
   centrePercent: UI_CENTRE_PERCENT_DEFAULT,
+  colourPercent: UI_COLOUR_PERCENT_DEFAULT,
   edgePercent: UI_EDGE_PERCENT_DEFAULT,
   strokeOnlyProbability: UI_OUTLINE_PERCENT_DEFAULT / 100,
   weightProbability: UI_WEIGHT_PERCENT_DEFAULT / 100,
@@ -53,6 +55,7 @@ const runtimeConfig = {
 const URL_PARAMS = {
   seed: "s",
   centrePct: "ct",
+  colourPct: "cl",
   densityPct: "dn",
   edgePct: "ed",
   flipXPct: "fx",
@@ -235,6 +238,7 @@ function exportCurrentCompositionSvg(filename) {
 function buildExportFilename(seed) {
   const safeSeed = Number.isFinite(seed) ? Math.floor(seed) : "random";
   const centrePct = Math.round(runtimeConfig.centrePercent);
+  const colourPct = Math.round(runtimeConfig.colourPercent);
   const densityPct = Math.round(runtimeConfig.shapeCountPercent);
   const edgePct = Math.round(runtimeConfig.edgePercent);
   const flipXPct = Math.round(runtimeConfig.flipXProbability * 100);
@@ -248,6 +252,7 @@ function buildExportFilename(seed) {
   return [
     `facet-s${safeSeed}`,
     `${URL_PARAMS.centrePct}${centrePct}`,
+    `${URL_PARAMS.colourPct}${colourPct}`,
     `${URL_PARAMS.densityPct}${densityPct}`,
     `${URL_PARAMS.edgePct}${edgePct}`,
     `${URL_PARAMS.flipXPct}${flipXPct}`,
@@ -314,6 +319,40 @@ function getEdgeOverflowFactors(edgePercent) {
   };
 }
 
+function getPaletteWeights(colourPercent) {
+  const t = clamp(colourPercent, 0, 100) / 100;
+  const count = PALETTE.length;
+  const uniformWeight = 1 / count;
+  const earlyWeights = PALETTE.map((_, index) => 1 / (index + 1));
+  const earlyTotal = earlyWeights.reduce((sum, value) => sum + value, 0);
+  const lateWeights = PALETTE.map((_, index) => index + 1);
+  const lateTotal = lateWeights.reduce((sum, value) => sum + value, 0);
+
+  if (t <= 0.5) {
+    const phase = t / 0.5;
+    return earlyWeights.map((value) => {
+      const earlyBiasedWeight = value / earlyTotal;
+      return lerp(earlyBiasedWeight, uniformWeight, phase);
+    });
+  }
+
+  const phase = (t - 0.5) / 0.5;
+  return lateWeights.map((value) => {
+    const lateBiasedWeight = value / lateTotal;
+    return lerp(uniformWeight, lateBiasedWeight, phase);
+  });
+}
+
+function pickPaletteColor(weights) {
+  const threshold = random();
+  let sum = 0;
+  for (let i = 0; i < weights.length; i += 1) {
+    sum += weights[i];
+    if (threshold <= sum) return PALETTE[i];
+  }
+  return PALETTE[PALETTE.length - 1];
+}
+
 function shouldDisableOpacityControl() {
   return (
     runtimeConfig.strokeOnlyProbability >= 1 ||
@@ -323,6 +362,7 @@ function shouldDisableOpacityControl() {
 
 function updateRuntimeControlDisplay() {
   const centreValue = document.getElementById("centreValue");
+  const colourValue = document.getElementById("colourValue");
   const densityValue = document.getElementById("densityValue");
   const edgeValue = document.getElementById("edgeValue");
   const flipXValue = document.getElementById("flipXValue");
@@ -335,6 +375,9 @@ function updateRuntimeControlDisplay() {
 
   if (centreValue) {
     centreValue.textContent = `${Math.round(runtimeConfig.centrePercent)}%`;
+  }
+  if (colourValue) {
+    colourValue.textContent = `${Math.round(runtimeConfig.colourPercent)}%`;
   }
   if (densityValue) {
     densityValue.textContent = `${Math.round(runtimeConfig.shapeCountPercent)}%`;
@@ -375,6 +418,7 @@ function updateRuntimeControlDisplay() {
 
 function syncRuntimeControlsToInputs() {
   const centreInput = document.getElementById("centreInput");
+  const colourInput = document.getElementById("colourInput");
   const densityInput = document.getElementById("densityInput");
   const edgeInput = document.getElementById("edgeInput");
   const flipXInput = document.getElementById("flipXInput");
@@ -387,6 +431,9 @@ function syncRuntimeControlsToInputs() {
 
   if (centreInput) {
     centreInput.value = String(Math.round(runtimeConfig.centrePercent));
+  }
+  if (colourInput) {
+    colourInput.value = String(Math.round(runtimeConfig.colourPercent));
   }
   if (densityInput) {
     densityInput.value = String(Math.round(runtimeConfig.shapeCountPercent));
@@ -425,6 +472,7 @@ function syncRuntimeControlsToInputs() {
 
 function bindRuntimeControls() {
   const centreInput = document.getElementById("centreInput");
+  const colourInput = document.getElementById("colourInput");
   const densityInput = document.getElementById("densityInput");
   const edgeInput = document.getElementById("edgeInput");
   const flipXInput = document.getElementById("flipXInput");
@@ -439,6 +487,7 @@ function bindRuntimeControls() {
 
   if (
     !centreInput ||
+    !colourInput ||
     !densityInput ||
     !edgeInput ||
     !flipXInput ||
@@ -460,6 +509,14 @@ function bindRuntimeControls() {
   centreInput.addEventListener("input", () => {
     const nextValue = Number(centreInput.value);
     runtimeConfig.centrePercent = clamp(nextValue, 0, 100);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  colourInput.addEventListener("input", () => {
+    const nextValue = Number(colourInput.value);
+    runtimeConfig.colourPercent = clamp(nextValue, 0, 100);
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
     if (currentSeed !== null) generateFromSeed(currentSeed);
@@ -542,6 +599,7 @@ function bindRuntimeControls() {
 
   resetBtn.addEventListener("click", () => {
     runtimeConfig.centrePercent = UI_CENTRE_PERCENT_DEFAULT;
+    runtimeConfig.colourPercent = UI_COLOUR_PERCENT_DEFAULT;
     runtimeConfig.shapeCountPercent = UI_DENSITY_PERCENT_DEFAULT;
     runtimeConfig.edgePercent = UI_EDGE_PERCENT_DEFAULT;
     runtimeConfig.strokeOnlyProbability = UI_OUTLINE_PERCENT_DEFAULT / 100;
@@ -559,6 +617,7 @@ function bindRuntimeControls() {
 
   randomBtn.addEventListener("click", () => {
     runtimeConfig.centrePercent = Math.round(Math.random() * 100);
+    runtimeConfig.colourPercent = Math.round(Math.random() * 100);
     runtimeConfig.shapeCountPercent = Math.round(Math.random() * 100);
     runtimeConfig.edgePercent = Math.round(Math.random() * 100);
     runtimeConfig.flipXProbability = Math.random();
@@ -588,6 +647,14 @@ function readRuntimeConfigFromUrl() {
     const centrePct = Number(centrePctRaw);
     if (Number.isFinite(centrePct) && !Number.isNaN(centrePct)) {
       runtimeConfig.centrePercent = clamp(centrePct, 0, 100);
+    }
+  }
+
+  const colourPctRaw = params.get(URL_PARAMS.colourPct);
+  if (colourPctRaw !== null) {
+    const colourPct = Number(colourPctRaw);
+    if (Number.isFinite(colourPct) && !Number.isNaN(colourPct)) {
+      runtimeConfig.colourPercent = clamp(colourPct, 0, 100);
     }
   }
 
@@ -676,6 +743,10 @@ function writeUrlState(seed) {
   orderedParams.set(
     URL_PARAMS.centrePct,
     String(Math.round(runtimeConfig.centrePercent)),
+  );
+  orderedParams.set(
+    URL_PARAMS.colourPct,
+    String(Math.round(runtimeConfig.colourPercent)),
   );
   orderedParams.set(
     URL_PARAMS.densityPct,
@@ -877,6 +948,7 @@ function generateFromSeed(seed) {
     runtimeConfig.centrePercent,
   );
   const edgeOverflow = getEdgeOverflowFactors(runtimeConfig.edgePercent);
+  const paletteWeights = getPaletteWeights(runtimeConfig.colourPercent);
   const minSize = Math.min(width, height) * minSizeRatio;
   const maxSize = Math.min(width, height) * maxSizeRatio;
 
@@ -887,7 +959,7 @@ function generateFromSeed(seed) {
     shapes.length < getShapeCountFromPercent(runtimeConfig.shapeCountPercent)
   ) {
     guard += 1;
-    const color = random(PALETTE);
+    const color = pickPaletteColor(paletteWeights);
     const styleMode =
       random() < runtimeConfig.strokeOnlyProbability ? "stroke" : "fill";
     const size = lerp(minSize, maxSize, Math.pow(random(), 0.35));

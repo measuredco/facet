@@ -81,6 +81,7 @@ Define deterministic and probabilistic rules so generated images follow Measured
 UI controls currently exposed in sidebar:
 
 - `Centre`
+- `Colour`
 - `Density`
 - `Edge`
 - `Flip X`
@@ -94,6 +95,7 @@ UI controls currently exposed in sidebar:
 Current defaults:
 
 - `Centre`: 50%
+- `Colour`: 50%
 - `Density`: 0% (maps to 1 max shape)
 - `Edge`: 50%
 - `Flip X`: 0%
@@ -107,6 +109,10 @@ Current defaults:
 Control semantics:
 
 - `Density` maps `0..100%` to shape max `1..UI_DENSITY_MAX` (currently 50).
+- `Colour` maps `0..100%` as:
+  - `0%`: stronger bias for earlier palette colors
+  - `50%`: even palette use
+  - `100%`: stronger bias for later palette colors
 - `Edge` maps `0..100%` to off-canvas sampling allowance during candidate placement.
 - `Size` maps non-linearly to internal size control:
   - `0..75%` maps to size control `0.1..1.0`
@@ -126,6 +132,7 @@ Canonical order:
 
 - `s` (seed)
 - `ct` (Centre)
+- `cl` (Colour)
 - `dn` (Density)
 - `ed` (Edge)
 - `fx` (Flip X)
@@ -150,4 +157,4 @@ Canonical order:
   - PNG: fixed `8000x4500` (16:9)
   - SVG: current canvas dimensions (`800x450` base, responsive in UI)
 - Filename includes seed + control params:
-  - `facet-s{seed}-ct{ct}-dn{dn}-ed{ed}-fx{fx}-fy{fy}-op{op}-ot{ot}-sz{sz}-vr{vr}-wg{wg}.{ext}`
+  - `facet-s{seed}-ct{ct}-cl{cl}-dn{dn}-ed{ed}-fx{fx}-fy{fy}-op{op}-ot{ot}-sz{sz}-vr{vr}-wg{wg}.{ext}`
