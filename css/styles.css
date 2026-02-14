@@ -303,14 +303,20 @@ canvas {
   inline-size: 100%;
 }
 
+.control-section {
+  border-radius: var(--border-radius-button);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-vertical-03);
+  outline: var(--border-width) solid var(--color-border-light);
+  padding-block: var(--space-vertical-03);
+}
+
 .control-group {
   align-items: center;
-  border-radius: var(--border-radius-button);
   display: grid;
   gap: var(--space-horizontal-03);
   grid-template-columns: auto 1fr auto;
-  outline: var(--border-width) solid var(--color-border-light);
-  padding-block: var(--space-vertical-02);
   padding-inline: var(--space-horizontal-04);
 }
 

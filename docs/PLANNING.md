@@ -32,14 +32,14 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Main preview:
   - Responsive 16:9 canvas
 - Controls sidebar:
-  - `Centre`, `Colour`, `Density`, `Edge`, `Flip X`, `Flip Y`, `Opacity`, `Outline`, `Size`, `Variance`, `Weight`
+  - `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Colour`, `Opacity`, `Outline`, `Weight`
   - `Reset`, `Randomise`
 
 ## State and persistence
 
 - No backend persistence.
 - URL query params persist runtime state:
-  - `s`, `ct`, `cl`, `dn`, `ed`, `fx`, `fy`, `op`, `ot`, `sz`, `vr`, `wg`
+  - `s`, `am`, `ct`, `ed`, `fx`, `fy`, `sz`, `sp`, `cl`, `op`, `ot`, `wg`
 - Reload reproduces output for same seed + control state.
 
 ## Tech stack
@@ -65,10 +65,9 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Next
 
-- Review control labels/grouping
-
 ### Later
 
+- Consider colour overlap control
 - Primitive roadmap: Reintroduce additional approved primitives intentionally (with explicit constraints updates).
 - Presets: Introduce constrained presets (`brand-muted`, `brand-bold`, `grid-centric`) after controls/primitive work.
 - Validation layer: Add a fuller validation module (explicit rule contracts, reject reasons, and lightweight tests) once core controls and primitives stabilize.

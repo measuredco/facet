@@ -71,42 +71,42 @@ Define deterministic and probabilistic rules so generated images follow Measured
 - Candidate acceptance is currently based on:
   - Same-color overlap rejection
 - Practical result:
-  - Density behaves as a max-cap, not an exact target count.
+  - Amount behaves as a max-cap, not an exact target count.
   - Gaps can still appear; full 100% fill is not guaranteed.
 
 ## Runtime controls
 
 UI controls currently exposed in sidebar:
 
+- `Amount`
 - `Centre`
-- `Colour`
-- `Density`
 - `Edge`
 - `Flip X`
 - `Flip Y`
+- `Size`
+- `Spread`
+- `Colour`
 - `Opacity`
 - `Outline`
-- `Size`
-- `Variance`
 - `Weight`
 
 Current defaults:
 
+- `Amount`: 0% (maps to 1 max shape)
 - `Centre`: 50%
-- `Colour`: 50%
-- `Density`: 0% (maps to 1 max shape)
 - `Edge`: 50%
 - `Flip X`: 0%
 - `Flip Y`: 0%
+- `Size`: 75%
+- `Spread`: 50%
+- `Colour`: 50%
 - `Opacity`: 75%
 - `Outline`: 0%
-- `Size`: 75%
-- `Variance`: 50%
 - `Weight`: 50%
 
 Control semantics:
 
-- `Density` maps `0..100%` to shape max `1..UI_DENSITY_MAX` (currently 50).
+- `Amount` maps `0..100%` to shape max `1..UI_DENSITY_MAX` (currently 50).
 - `Colour` maps `0..100%` as:
   - `0%`: stronger bias for earlier palette colors
   - `50%`: even palette use
@@ -115,10 +115,10 @@ Control semantics:
 - `Size` maps non-linearly to internal size control:
   - `0..75%` maps to size control `0.1..1.0`
   - `75..100%` maps to size control `1.0..2.0`
-- `Variance` maps `0..100%` to internal size spread `0.0..1.0`.
+- `Spread` maps `0..100%` to internal size spread `0.0..1.0`.
 - `Weight` maps `0..100%` to thin/thick stroke selection probability.
 - `Weight` is disabled when `Outline` is `0%`.
-- `Opacity` is disabled when `Outline` is `100%` or `Density` is `0%`.
+- `Opacity` is disabled when `Outline` is `100%` or `Amount` is `0%`.
 - `Centre` maps to center-biased placement pull during candidate sampling.
 
 ## URL parameter persistence
@@ -128,16 +128,16 @@ Control and seed state persist in compact URL params.
 Canonical order:
 
 - `s` (seed)
+- `am` (Amount)
 - `ct` (Centre)
-- `cl` (Colour)
-- `dn` (Density)
 - `ed` (Edge)
 - `fx` (Flip X)
 - `fy` (Flip Y)
+- `sz` (Size)
+- `sp` (Spread)
+- `cl` (Colour)
 - `op` (Opacity)
 - `ot` (Outline)
-- `sz` (Size)
-- `vr` (Variance)
 - `wg` (Weight)
 
 ## UI behavior
@@ -154,4 +154,4 @@ Canonical order:
   - PNG: fixed `8000x4500` (16:9)
   - SVG: current canvas dimensions (`800x450` base, responsive in UI)
 - Filename includes seed + control params:
-  - `facet-s{seed}-ct{ct}-cl{cl}-dn{dn}-ed{ed}-fx{fx}-fy{fy}-op{op}-ot{ot}-sz{sz}-vr{vr}-wg{wg}.{ext}`
+  - `facet-s{seed}-am{am}-ct{ct}-ed{ed}-fx{fx}-fy{fy}-sz{sz}-sp{sp}-cl{cl}-op{op}-ot{ot}-wg{wg}.{ext}`

@@ -22,7 +22,7 @@ const DEFAULT_SEED = 991712126;
 const UI_CENTRE_PERCENT_DEFAULT = 50;
 const UI_COLOUR_PERCENT_DEFAULT = 50;
 const UI_DENSITY_MAX = 50;
-const UI_DENSITY_PERCENT_DEFAULT = 0;
+const UI_AMOUNT_PERCENT_DEFAULT = 0;
 const UI_EDGE_PERCENT_DEFAULT = 50;
 const UI_FLIP_X_PERCENT_DEFAULT = 0;
 const UI_FLIP_Y_PERCENT_DEFAULT = 0;
@@ -30,7 +30,7 @@ const UI_OPACITY_PERCENT_DEFAULT = 75;
 const UI_OUTLINE_PERCENT_DEFAULT = 0;
 const UI_WEIGHT_PERCENT_DEFAULT = 50;
 const UI_SIZE_PERCENT_DEFAULT = 75;
-const UI_VARIANCE_PERCENT_DEFAULT = 50;
+const UI_SPREAD_PERCENT_DEFAULT = 50;
 
 // Internal tuning constants (engine behavior / performance guards)
 const ENABLE_SAME_COLOR_OVERLAP_CHECK = true;
@@ -40,7 +40,7 @@ const MIN_THICK_STROKE_WIDTH = 2;
 
 // Default values for runtime UI controls
 const runtimeConfig = {
-  shapeCountPercent: UI_DENSITY_PERCENT_DEFAULT,
+  amountPercent: UI_AMOUNT_PERCENT_DEFAULT,
   centrePercent: UI_CENTRE_PERCENT_DEFAULT,
   colourPercent: UI_COLOUR_PERCENT_DEFAULT,
   edgePercent: UI_EDGE_PERCENT_DEFAULT,
@@ -50,20 +50,20 @@ const runtimeConfig = {
   flipYProbability: UI_FLIP_Y_PERCENT_DEFAULT / 100,
   overlapAlpha: UI_OPACITY_PERCENT_DEFAULT / 100,
   sizePercent: UI_SIZE_PERCENT_DEFAULT,
-  variancePercent: UI_VARIANCE_PERCENT_DEFAULT,
+  spreadPercent: UI_SPREAD_PERCENT_DEFAULT,
 };
 const URL_PARAMS = {
   seed: "s",
+  amountPct: "am",
   centrePct: "ct",
-  colourPct: "cl",
-  densityPct: "dn",
   edgePct: "ed",
   flipXPct: "fx",
   flipYPct: "fy",
+  sizePct: "sz",
+  spreadPct: "sp",
+  colourPct: "cl",
   opacityPct: "op",
   outlinePct: "ot",
-  sizePct: "sz",
-  variancePct: "vr",
   weightPct: "wg",
 };
 
@@ -239,7 +239,7 @@ function buildExportFilename(seed) {
   const safeSeed = Number.isFinite(seed) ? Math.floor(seed) : "random";
   const centrePct = Math.round(runtimeConfig.centrePercent);
   const colourPct = Math.round(runtimeConfig.colourPercent);
-  const densityPct = Math.round(runtimeConfig.shapeCountPercent);
+  const amountPct = Math.round(runtimeConfig.amountPercent);
   const edgePct = Math.round(runtimeConfig.edgePercent);
   const flipXPct = Math.round(runtimeConfig.flipXProbability * 100);
   const flipYPct = Math.round(runtimeConfig.flipYProbability * 100);
@@ -247,20 +247,20 @@ function buildExportFilename(seed) {
   const outlinePct = Math.round(runtimeConfig.strokeOnlyProbability * 100);
   const weightPct = Math.round(runtimeConfig.weightProbability * 100);
   const sizePct = Math.round(runtimeConfig.sizePercent);
-  const variancePct = Math.round(runtimeConfig.variancePercent);
+  const spreadPct = Math.round(runtimeConfig.spreadPercent);
 
   return [
     `facet-s${safeSeed}`,
+    `${URL_PARAMS.amountPct}${amountPct}`,
     `${URL_PARAMS.centrePct}${centrePct}`,
-    `${URL_PARAMS.colourPct}${colourPct}`,
-    `${URL_PARAMS.densityPct}${densityPct}`,
     `${URL_PARAMS.edgePct}${edgePct}`,
     `${URL_PARAMS.flipXPct}${flipXPct}`,
     `${URL_PARAMS.flipYPct}${flipYPct}`,
+    `${URL_PARAMS.sizePct}${sizePct}`,
+    `${URL_PARAMS.spreadPct}${spreadPct}`,
+    `${URL_PARAMS.colourPct}${colourPct}`,
     `${URL_PARAMS.opacityPct}${opacityPct}`,
     `${URL_PARAMS.outlinePct}${outlinePct}`,
-    `${URL_PARAMS.sizePct}${sizePct}`,
-    `${URL_PARAMS.variancePct}${variancePct}`,
     `${URL_PARAMS.weightPct}${weightPct}`,
   ].join("-");
 }
@@ -286,24 +286,24 @@ function getSizeControlFromPercent(sizePercent) {
   return lerp(1.0, 2.0, t);
 }
 
-function getVarianceFromPercent(variancePercent) {
-  const t = clamp(variancePercent, 0, 100) / 100;
+function getSpreadFromPercent(spreadPercent) {
+  const t = clamp(spreadPercent, 0, 100) / 100;
   return lerp(0, 1, t);
 }
 
-function getSizeRatioRange(sizePercent, variancePercent) {
-  const variance = getVarianceFromPercent(variancePercent);
+function getSizeRatioRange(sizePercent, spreadPercent) {
+  const spread = getSpreadFromPercent(spreadPercent);
   const minRatio = 0.1;
   const maxRatio = 2.0;
   const sizeControl = getSizeControlFromPercent(sizePercent);
   return {
-    min: clamp(sizeControl - variance, minRatio, maxRatio),
-    max: clamp(sizeControl + variance, minRatio, maxRatio),
+    min: clamp(sizeControl - spread, minRatio, maxRatio),
+    max: clamp(sizeControl + spread, minRatio, maxRatio),
   };
 }
 
-function getShapeCountFromPercent(shapeCountPercent) {
-  const p = clamp(shapeCountPercent, 0, 100) / 100;
+function getShapeCountFromPercent(amountPercent) {
+  const p = clamp(amountPercent, 0, 100) / 100;
   return Math.round(1 + p * (UI_DENSITY_MAX - 1));
 }
 
@@ -356,15 +356,14 @@ function pickPaletteColor(weights) {
 
 function shouldDisableOpacityControl() {
   return (
-    runtimeConfig.strokeOnlyProbability >= 1 ||
-    runtimeConfig.shapeCountPercent <= 0
+    runtimeConfig.strokeOnlyProbability >= 1 || runtimeConfig.amountPercent <= 0
   );
 }
 
 function updateRuntimeControlDisplay() {
   const centreValue = document.getElementById("centreValue");
   const colourValue = document.getElementById("colourValue");
-  const densityValue = document.getElementById("densityValue");
+  const amountValue = document.getElementById("amountValue");
   const edgeValue = document.getElementById("edgeValue");
   const flipXValue = document.getElementById("flipXValue");
   const flipYValue = document.getElementById("flipYValue");
@@ -372,7 +371,7 @@ function updateRuntimeControlDisplay() {
   const opacityValue = document.getElementById("opacityValue");
   const sizeValue = document.getElementById("sizeValue");
   const weightValue = document.getElementById("weightValue");
-  const varianceValue = document.getElementById("varianceValue");
+  const spreadValue = document.getElementById("spreadValue");
 
   if (centreValue) {
     centreValue.textContent = `${Math.round(runtimeConfig.centrePercent)}%`;
@@ -380,8 +379,8 @@ function updateRuntimeControlDisplay() {
   if (colourValue) {
     colourValue.textContent = `${Math.round(runtimeConfig.colourPercent)}%`;
   }
-  if (densityValue) {
-    densityValue.textContent = `${Math.round(runtimeConfig.shapeCountPercent)}%`;
+  if (amountValue) {
+    amountValue.textContent = `${Math.round(runtimeConfig.amountPercent)}%`;
   }
   if (edgeValue) {
     edgeValue.textContent = `${Math.round(runtimeConfig.edgePercent)}%`;
@@ -412,15 +411,15 @@ function updateRuntimeControlDisplay() {
       runtimeConfig.weightProbability * 100,
     )}%`;
   }
-  if (varianceValue) {
-    varianceValue.textContent = `${Math.round(runtimeConfig.variancePercent)}%`;
+  if (spreadValue) {
+    spreadValue.textContent = `${Math.round(runtimeConfig.spreadPercent)}%`;
   }
 }
 
 function syncRuntimeControlsToInputs() {
   const centreInput = document.getElementById("centreInput");
   const colourInput = document.getElementById("colourInput");
-  const densityInput = document.getElementById("densityInput");
+  const amountInput = document.getElementById("amountInput");
   const edgeInput = document.getElementById("edgeInput");
   const flipXInput = document.getElementById("flipXInput");
   const flipYInput = document.getElementById("flipYInput");
@@ -428,7 +427,7 @@ function syncRuntimeControlsToInputs() {
   const opacityInput = document.getElementById("opacityInput");
   const sizeInput = document.getElementById("sizeInput");
   const weightInput = document.getElementById("weightInput");
-  const varianceInput = document.getElementById("varianceInput");
+  const spreadInput = document.getElementById("spreadInput");
 
   if (centreInput) {
     centreInput.value = String(Math.round(runtimeConfig.centrePercent));
@@ -436,8 +435,8 @@ function syncRuntimeControlsToInputs() {
   if (colourInput) {
     colourInput.value = String(Math.round(runtimeConfig.colourPercent));
   }
-  if (densityInput) {
-    densityInput.value = String(Math.round(runtimeConfig.shapeCountPercent));
+  if (amountInput) {
+    amountInput.value = String(Math.round(runtimeConfig.amountPercent));
   }
   if (edgeInput) {
     edgeInput.value = String(Math.round(runtimeConfig.edgePercent));
@@ -466,15 +465,15 @@ function syncRuntimeControlsToInputs() {
     );
     weightInput.disabled = runtimeConfig.strokeOnlyProbability <= 0;
   }
-  if (varianceInput) {
-    varianceInput.value = String(runtimeConfig.variancePercent);
+  if (spreadInput) {
+    spreadInput.value = String(runtimeConfig.spreadPercent);
   }
 }
 
 function bindRuntimeControls() {
   const centreInput = document.getElementById("centreInput");
   const colourInput = document.getElementById("colourInput");
-  const densityInput = document.getElementById("densityInput");
+  const amountInput = document.getElementById("amountInput");
   const edgeInput = document.getElementById("edgeInput");
   const flipXInput = document.getElementById("flipXInput");
   const flipYInput = document.getElementById("flipYInput");
@@ -482,14 +481,14 @@ function bindRuntimeControls() {
   const opacityInput = document.getElementById("opacityInput");
   const sizeInput = document.getElementById("sizeInput");
   const weightInput = document.getElementById("weightInput");
-  const varianceInput = document.getElementById("varianceInput");
+  const spreadInput = document.getElementById("spreadInput");
   const resetBtn = document.getElementById("resetBtn");
   const randomBtn = document.getElementById("randomBtn");
 
   if (
     !centreInput ||
     !colourInput ||
-    !densityInput ||
+    !amountInput ||
     !edgeInput ||
     !flipXInput ||
     !flipYInput ||
@@ -497,7 +496,7 @@ function bindRuntimeControls() {
     !opacityInput ||
     !sizeInput ||
     !weightInput ||
-    !varianceInput ||
+    !spreadInput ||
     !resetBtn ||
     !randomBtn
   ) {
@@ -523,9 +522,9 @@ function bindRuntimeControls() {
     if (currentSeed !== null) generateFromSeed(currentSeed);
   });
 
-  densityInput.addEventListener("input", () => {
-    const nextValue = Number(densityInput.value);
-    runtimeConfig.shapeCountPercent = clamp(nextValue, 0, 100);
+  amountInput.addEventListener("input", () => {
+    const nextValue = Number(amountInput.value);
+    runtimeConfig.amountPercent = clamp(nextValue, 0, 100);
     opacityInput.disabled = shouldDisableOpacityControl();
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
@@ -590,9 +589,9 @@ function bindRuntimeControls() {
     if (currentSeed !== null) generateFromSeed(currentSeed);
   });
 
-  varianceInput.addEventListener("input", () => {
-    const nextValue = Number(varianceInput.value);
-    runtimeConfig.variancePercent = clamp(nextValue, 0, 100);
+  spreadInput.addEventListener("input", () => {
+    const nextValue = Number(spreadInput.value);
+    runtimeConfig.spreadPercent = clamp(nextValue, 0, 100);
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
     if (currentSeed !== null) generateFromSeed(currentSeed);
@@ -601,7 +600,7 @@ function bindRuntimeControls() {
   resetBtn.addEventListener("click", () => {
     runtimeConfig.centrePercent = UI_CENTRE_PERCENT_DEFAULT;
     runtimeConfig.colourPercent = UI_COLOUR_PERCENT_DEFAULT;
-    runtimeConfig.shapeCountPercent = UI_DENSITY_PERCENT_DEFAULT;
+    runtimeConfig.amountPercent = UI_AMOUNT_PERCENT_DEFAULT;
     runtimeConfig.edgePercent = UI_EDGE_PERCENT_DEFAULT;
     runtimeConfig.strokeOnlyProbability = UI_OUTLINE_PERCENT_DEFAULT / 100;
     runtimeConfig.flipXProbability = UI_FLIP_X_PERCENT_DEFAULT / 100;
@@ -609,7 +608,7 @@ function bindRuntimeControls() {
     runtimeConfig.overlapAlpha = UI_OPACITY_PERCENT_DEFAULT / 100;
     runtimeConfig.weightProbability = UI_WEIGHT_PERCENT_DEFAULT / 100;
     runtimeConfig.sizePercent = UI_SIZE_PERCENT_DEFAULT;
-    runtimeConfig.variancePercent = UI_VARIANCE_PERCENT_DEFAULT;
+    runtimeConfig.spreadPercent = UI_SPREAD_PERCENT_DEFAULT;
     syncRuntimeControlsToInputs();
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
@@ -619,7 +618,7 @@ function bindRuntimeControls() {
   randomBtn.addEventListener("click", () => {
     runtimeConfig.centrePercent = Math.round(Math.random() * 100);
     runtimeConfig.colourPercent = Math.round(Math.random() * 100);
-    runtimeConfig.shapeCountPercent = Math.round(Math.random() * 100);
+    runtimeConfig.amountPercent = Math.round(Math.random() * 100);
     runtimeConfig.edgePercent = Math.round(Math.random() * 100);
     runtimeConfig.flipXProbability = Math.random();
     runtimeConfig.flipYProbability = Math.random();
@@ -627,7 +626,7 @@ function bindRuntimeControls() {
     runtimeConfig.strokeOnlyProbability = Math.random();
     runtimeConfig.weightProbability = Math.random();
     runtimeConfig.sizePercent = Math.round(Math.random() * 100);
-    runtimeConfig.variancePercent = Math.round(Math.random() * 100);
+    runtimeConfig.spreadPercent = Math.round(Math.random() * 100);
     syncRuntimeControlsToInputs();
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
@@ -651,19 +650,11 @@ function readRuntimeConfigFromUrl() {
     }
   }
 
-  const colourPctRaw = params.get(URL_PARAMS.colourPct);
-  if (colourPctRaw !== null) {
-    const colourPct = Number(colourPctRaw);
-    if (Number.isFinite(colourPct) && !Number.isNaN(colourPct)) {
-      runtimeConfig.colourPercent = clamp(colourPct, 0, 100);
-    }
-  }
-
-  const shapePctRaw = params.get(URL_PARAMS.densityPct);
-  if (shapePctRaw !== null) {
-    const shapePct = Number(shapePctRaw);
-    if (Number.isFinite(shapePct) && !Number.isNaN(shapePct)) {
-      runtimeConfig.shapeCountPercent = clamp(shapePct, 0, 100);
+  const amountPctRaw = params.get(URL_PARAMS.amountPct);
+  if (amountPctRaw !== null) {
+    const amountPct = Number(amountPctRaw);
+    if (Number.isFinite(amountPct) && !Number.isNaN(amountPct)) {
+      runtimeConfig.amountPercent = clamp(amountPct, 0, 100);
     }
   }
 
@@ -707,14 +698,6 @@ function readRuntimeConfigFromUrl() {
     }
   }
 
-  const overlapPctRaw = params.get(URL_PARAMS.opacityPct);
-  if (overlapPctRaw !== null) {
-    const overlapPct = Number(overlapPctRaw);
-    if (Number.isFinite(overlapPct) && !Number.isNaN(overlapPct)) {
-      runtimeConfig.overlapAlpha = clamp(overlapPct / 100, 0, 1);
-    }
-  }
-
   const sizePctRaw = params.get(URL_PARAMS.sizePct);
   if (sizePctRaw !== null) {
     const sizePercent = Number(sizePctRaw);
@@ -723,11 +706,27 @@ function readRuntimeConfigFromUrl() {
     }
   }
 
-  const variancePctRaw = params.get(URL_PARAMS.variancePct);
-  if (variancePctRaw !== null) {
-    const variancePercent = Number(variancePctRaw);
-    if (Number.isFinite(variancePercent) && !Number.isNaN(variancePercent)) {
-      runtimeConfig.variancePercent = clamp(variancePercent, 0, 100);
+  const spreadPctRaw = params.get(URL_PARAMS.spreadPct);
+  if (spreadPctRaw !== null) {
+    const spreadPercent = Number(spreadPctRaw);
+    if (Number.isFinite(spreadPercent) && !Number.isNaN(spreadPercent)) {
+      runtimeConfig.spreadPercent = clamp(spreadPercent, 0, 100);
+    }
+  }
+
+  const colourPctRaw = params.get(URL_PARAMS.colourPct);
+  if (colourPctRaw !== null) {
+    const colourPct = Number(colourPctRaw);
+    if (Number.isFinite(colourPct) && !Number.isNaN(colourPct)) {
+      runtimeConfig.colourPercent = clamp(colourPct, 0, 100);
+    }
+  }
+
+  const overlapPctRaw = params.get(URL_PARAMS.opacityPct);
+  if (overlapPctRaw !== null) {
+    const overlapPct = Number(overlapPctRaw);
+    if (Number.isFinite(overlapPct) && !Number.isNaN(overlapPct)) {
+      runtimeConfig.overlapAlpha = clamp(overlapPct / 100, 0, 1);
     }
   }
 }
@@ -742,16 +741,12 @@ function writeUrlState(seed) {
 
   // Keep URL ordering aligned to UI control order.
   orderedParams.set(
+    URL_PARAMS.amountPct,
+    String(Math.round(runtimeConfig.amountPercent)),
+  );
+  orderedParams.set(
     URL_PARAMS.centrePct,
     String(Math.round(runtimeConfig.centrePercent)),
-  );
-  orderedParams.set(
-    URL_PARAMS.colourPct,
-    String(Math.round(runtimeConfig.colourPercent)),
-  );
-  orderedParams.set(
-    URL_PARAMS.densityPct,
-    String(Math.round(runtimeConfig.shapeCountPercent)),
   );
   orderedParams.set(
     URL_PARAMS.edgePct,
@@ -766,20 +761,24 @@ function writeUrlState(seed) {
     String(Math.round(runtimeConfig.flipYProbability * 100)),
   );
   orderedParams.set(
+    URL_PARAMS.sizePct,
+    String(Math.round(runtimeConfig.sizePercent)),
+  );
+  orderedParams.set(
+    URL_PARAMS.spreadPct,
+    String(Math.round(runtimeConfig.spreadPercent)),
+  );
+  orderedParams.set(
+    URL_PARAMS.colourPct,
+    String(Math.round(runtimeConfig.colourPercent)),
+  );
+  orderedParams.set(
     URL_PARAMS.opacityPct,
     String(Math.round(runtimeConfig.overlapAlpha * 100)),
   );
   orderedParams.set(
     URL_PARAMS.outlinePct,
     String(Math.round(runtimeConfig.strokeOnlyProbability * 100)),
-  );
-  orderedParams.set(
-    URL_PARAMS.sizePct,
-    String(Math.round(runtimeConfig.sizePercent)),
-  );
-  orderedParams.set(
-    URL_PARAMS.variancePct,
-    String(Math.round(runtimeConfig.variancePercent)),
   );
   orderedParams.set(
     URL_PARAMS.weightPct,
@@ -890,7 +889,7 @@ function generateFromSeed(seed) {
   shapes = [];
   const { min: minSizeRatio, max: maxSizeRatio } = getSizeRatioRange(
     runtimeConfig.sizePercent,
-    runtimeConfig.variancePercent,
+    runtimeConfig.spreadPercent,
   );
   const centerPlacementBias = getCenterPlacementBias(
     runtimeConfig.centrePercent,
@@ -903,7 +902,7 @@ function generateFromSeed(seed) {
   let guard = 0;
   while (
     guard < MAX_GENERATION_ATTEMPTS &&
-    shapes.length < getShapeCountFromPercent(runtimeConfig.shapeCountPercent)
+    shapes.length < getShapeCountFromPercent(runtimeConfig.amountPercent)
   ) {
     guard += 1;
     const color = pickPaletteColor(paletteWeights);
