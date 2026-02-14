@@ -63,15 +63,13 @@ Define deterministic and probabilistic rules so generated images follow Measured
 - Overlap alpha rule:
   - A shape uses reduced alpha only when overlapping a lower filled shape.
   - Overlap with lower stroke-only shapes does not reduce alpha.
-- Center balance rule:
+- Center placement rule:
   - Candidate placement blends uniform and center-biased sampling.
-  - Candidate acceptance also checks centroid balance target/slack.
 
 ## Acceptance behavior
 
 - Candidate acceptance is currently based on:
   - Same-color overlap rejection
-  - Center-balance acceptance check
 - Practical result:
   - Density behaves as a max-cap, not an exact target count.
   - Gaps can still appear; full 100% fill is not guaranteed.
@@ -122,7 +120,6 @@ Control semantics:
 - `Weight` is disabled when `Outline` is `0%`.
 - `Opacity` is disabled when `Outline` is `100%` or `Density` is `0%`.
 - `Centre` maps to center-biased placement pull during candidate sampling.
-- Centroid acceptance target/slack is fixed as internal tuning constants.
 
 ## URL parameter persistence
 

@@ -32,8 +32,7 @@ const UI_SIZE_PERCENT_DEFAULT = 75;
 const UI_VARIANCE_PERCENT_DEFAULT = 50;
 
 // Internal tuning constants (engine behavior / performance guards)
-const CENTER_ACCEPTANCE_TARGET_OFFSET = 0.265;
-const CENTER_ACCEPTANCE_SLACK = 0.0215;
+const ENABLE_SAME_COLOR_OVERLAP_CHECK = true;
 const MAX_GENERATION_ATTEMPTS = 9000;
 const MIN_STROKE_WIDTH = 1;
 const MIN_THICK_STROKE_WIDTH = 2;
@@ -871,63 +870,14 @@ function assignStrokeWidthRatios(shapeList, thickProbability) {
   });
 }
 
-function getCenterOffsetRatio(shapeList, canvasWidth, canvasHeight) {
-  if (shapeList.length === 0) return 0;
-
-  let weightedX = 0;
-  let weightedY = 0;
-  let totalWeight = 0;
-  shapeList.forEach((shape) => {
-    const weight = Math.max(1, shape.size * shape.size);
-    weightedX += shape.x * weight;
-    weightedY += shape.y * weight;
-    totalWeight += weight;
-  });
-
-  if (totalWeight <= 0) return 0;
-
-  const centroidX = weightedX / totalWeight;
-  const centroidY = weightedY / totalWeight;
-  const dx = centroidX - canvasWidth * 0.5;
-  const dy = centroidY - canvasHeight * 0.5;
-  const dist = Math.hypot(dx, dy);
-  const maxDist = Math.hypot(canvasWidth * 0.5, canvasHeight * 0.5);
-  return maxDist > 0 ? dist / maxDist : 0;
-}
-
-function validateCandidateConstraints(
-  candidate,
-  currentShapes,
-  centerOffsetRatio,
-  centerBalance,
-  canvasWidth,
-  canvasHeight,
-) {
-  if (overlapsSameColor(candidate, currentShapes)) {
-    return {
-      accepted: false,
-      nextCenterOffsetRatio: centerOffsetRatio,
-    };
+function validateCandidateConstraints(candidate, currentShapes) {
+  if (
+    ENABLE_SAME_COLOR_OVERLAP_CHECK &&
+    overlapsSameColor(candidate, currentShapes)
+  ) {
+    return false;
   }
-
-  const nextShapes = [...currentShapes, candidate];
-  const nextCenterOffsetRatio = getCenterOffsetRatio(
-    nextShapes,
-    canvasWidth,
-    canvasHeight,
-  );
-  const withinCenterTarget =
-    nextCenterOffsetRatio <= centerBalance.targetOffset;
-  const improvesCenterBalance =
-    nextCenterOffsetRatio <= centerOffsetRatio + centerBalance.slack;
-  const centerBalanced = withinCenterTarget || improvesCenterBalance;
-
-  return {
-    accepted: centerBalanced,
-    nextCenterOffsetRatio: centerBalanced
-      ? nextCenterOffsetRatio
-      : centerOffsetRatio,
-  };
+  return true;
 }
 
 function generateFromSeed(seed) {
@@ -940,10 +890,6 @@ function generateFromSeed(seed) {
     runtimeConfig.sizePercent,
     runtimeConfig.variancePercent,
   );
-  const centerAcceptance = {
-    targetOffset: CENTER_ACCEPTANCE_TARGET_OFFSET,
-    slack: CENTER_ACCEPTANCE_SLACK,
-  };
   const centerPlacementBias = getCenterPlacementBias(
     runtimeConfig.centrePercent,
   );
@@ -952,7 +898,6 @@ function generateFromSeed(seed) {
   const minSize = Math.min(width, height) * minSizeRatio;
   const maxSize = Math.min(width, height) * maxSizeRatio;
 
-  let centerOffsetRatio = 0;
   let guard = 0;
   while (
     guard < MAX_GENERATION_ATTEMPTS &&
@@ -989,18 +934,8 @@ function generateFromSeed(seed) {
       flipX,
       flipY,
     };
-    const validation = validateCandidateConstraints(
-      candidate,
-      shapes,
-      centerOffsetRatio,
-      centerAcceptance,
-      width,
-      height,
-    );
-
-    if (validation.accepted) {
+    if (validateCandidateConstraints(candidate, shapes)) {
       shapes.push(candidate);
-      centerOffsetRatio = validation.nextCenterOffsetRatio;
     }
   }
 

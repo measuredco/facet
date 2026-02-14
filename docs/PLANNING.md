@@ -65,7 +65,6 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Next
 
-- Review acceptance checks (`same-color overlap` + centroid target/slack) for predictability and UX during control scrubbing.
 - Review control labels/grouping
 
 ### Later
