@@ -39,7 +39,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 - No backend persistence.
 - URL query params persist runtime state:
-  - `s`, `am`, `ct`, `ed`, `fx`, `fy`, `sz`, `sp`, `bl`, `lg`, `op`, `ot`, `wg`
+  - `s`, `a`, `c`, `e`, `fx`, `fy`, `sz`, `sp`, `b`, `l`, `op`, `ot`, `w`
 - Reload reproduces output for same seed + control state.
 
 ## Tech stack

@@ -56,18 +56,18 @@ const runtimeConfig = {
 };
 const URL_PARAMS = {
   seed: "s",
-  amountPct: "am",
-  centrePct: "ct",
-  edgePct: "ed",
+  amountPct: "a",
+  centrePct: "c",
+  edgePct: "e",
   flipXPct: "fx",
   flipYPct: "fy",
   sizePct: "sz",
   spreadPct: "sp",
-  blendPct: "bl",
-  lightPct: "lg",
+  blendPct: "b",
+  lightPct: "l",
   opacityPct: "op",
   outlinePct: "ot",
-  weightPct: "wg",
+  weightPct: "w",
 };
 
 function shapesOverlap(a, b) {
@@ -253,8 +253,7 @@ function buildExportFilename(seed) {
   const sizePct = Math.round(runtimeConfig.sizePercent);
   const spreadPct = Math.round(runtimeConfig.spreadPercent);
 
-  return [
-    `facet-s${safeSeed}`,
+  const paramString = [
     `${URL_PARAMS.amountPct}${amountPct}`,
     `${URL_PARAMS.centrePct}${centrePct}`,
     `${URL_PARAMS.edgePct}${edgePct}`,
@@ -267,7 +266,8 @@ function buildExportFilename(seed) {
     `${URL_PARAMS.opacityPct}${opacityPct}`,
     `${URL_PARAMS.outlinePct}${outlinePct}`,
     `${URL_PARAMS.weightPct}${weightPct}`,
-  ].join("-");
+  ].join("");
+  return `facet-${safeSeed}-${paramString}`;
 }
 
 function parseSeed(value) {

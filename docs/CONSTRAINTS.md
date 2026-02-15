@@ -134,18 +134,18 @@ Control and seed state persist in compact URL params.
 Canonical order:
 
 - `s` (seed)
-- `am` (Amount)
-- `ct` (Centre)
-- `ed` (Edge)
+- `a` (Amount)
+- `c` (Centre)
+- `e` (Edge)
 - `fx` (Flip X)
 - `fy` (Flip Y)
 - `sz` (Size)
 - `sp` (Spread)
-- `bl` (Blend)
-- `lg` (Light)
+- `b` (Blend)
+- `l` (Light)
 - `op` (Opacity)
 - `ot` (Outline)
-- `wg` (Weight)
+- `w` (Weight)
 
 ## UI behavior
 
@@ -161,4 +161,4 @@ Canonical order:
   - PNG: fixed `8000x4500` (16:9)
   - SVG: current canvas dimensions (`800x450` base, responsive in UI)
 - Filename includes seed + control params:
-  - `facet-s{seed}-am{am}-ct{ct}-ed{ed}-fx{fx}-fy{fy}-sz{sz}-sp{sp}-bl{bl}-lg{lg}-op{op}-ot{ot}-wg{wg}.{ext}`
+  - `facet-{seed}-a{a}c{c}e{e}fx{fx}fy{fy}sz{sz}sp{sp}b{b}l{l}op{op}ot{ot}w{w}.{ext}`
