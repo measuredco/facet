@@ -67,77 +67,134 @@
           hidden
           id="sidebarPanel"
         >
-          <div class="control-section">
-            <div class="control-group">
-              <label for="amountInput">Amount</label>
-              <input id="amountInput" max="100" min="0" step="1" type="range" />
-              <span id="amountValue" class="control-value"></span>
+          <!-- <div class="control-header"></div> -->
+          <div class="control-main">
+            <div class="control-section">
+              <div class="control-group">
+                <label for="amountInput">Amount</label>
+                <input
+                  id="amountInput"
+                  max="100"
+                  min="0"
+                  step="1"
+                  type="range"
+                />
+                <span id="amountValue" class="control-value"></span>
+              </div>
+              <div class="control-group">
+                <label for="centreInput">Centre</label>
+                <input
+                  id="centreInput"
+                  max="100"
+                  min="0"
+                  step="1"
+                  type="range"
+                />
+                <span id="centreValue" class="control-value"></span>
+              </div>
+              <div class="control-group">
+                <label for="edgeInput">Edge</label>
+                <input id="edgeInput" max="100" min="0" step="1" type="range" />
+                <span id="edgeValue" class="control-value"></span>
+              </div>
             </div>
-            <div class="control-group">
-              <label for="centreInput">Centre</label>
-              <input id="centreInput" max="100" min="0" step="1" type="range" />
-              <span id="centreValue" class="control-value"></span>
+            <div class="control-section">
+              <div class="control-group">
+                <label for="flipXInput">Flip X</label>
+                <input
+                  id="flipXInput"
+                  max="100"
+                  min="0"
+                  step="1"
+                  type="range"
+                />
+                <span id="flipXValue" class="control-value"></span>
+              </div>
+              <div class="control-group">
+                <label for="flipYInput">Flip Y</label>
+                <input
+                  id="flipYInput"
+                  max="100"
+                  min="0"
+                  step="1"
+                  type="range"
+                />
+                <span id="flipYValue" class="control-value"></span>
+              </div>
+              <div class="control-group">
+                <label for="sizeInput">Size</label>
+                <input id="sizeInput" max="100" min="0" step="1" type="range" />
+                <span id="sizeValue" class="control-value"></span>
+              </div>
+              <div class="control-group">
+                <label for="spreadInput">Spread</label>
+                <input
+                  id="spreadInput"
+                  max="100"
+                  min="0"
+                  step="1"
+                  type="range"
+                />
+                <span id="spreadValue" class="control-value"></span>
+              </div>
             </div>
-            <div class="control-group">
-              <label for="edgeInput">Edge</label>
-              <input id="edgeInput" max="100" min="0" step="1" type="range" />
-              <span id="edgeValue" class="control-value"></span>
-            </div>
-          </div>
-          <div class="control-section">
-            <div class="control-group">
-              <label for="flipXInput">Flip X</label>
-              <input id="flipXInput" max="100" min="0" step="1" type="range" />
-              <span id="flipXValue" class="control-value"></span>
-            </div>
-            <div class="control-group">
-              <label for="flipYInput">Flip Y</label>
-              <input id="flipYInput" max="100" min="0" step="1" type="range" />
-              <span id="flipYValue" class="control-value"></span>
-            </div>
-            <div class="control-group">
-              <label for="sizeInput">Size</label>
-              <input id="sizeInput" max="100" min="0" step="1" type="range" />
-              <span id="sizeValue" class="control-value"></span>
-            </div>
-            <div class="control-group">
-              <label for="spreadInput">Spread</label>
-              <input id="spreadInput" max="100" min="0" step="1" type="range" />
-              <span id="spreadValue" class="control-value"></span>
-            </div>
-          </div>
-          <div class="control-section">
-            <div class="control-group">
-              <label for="blendInput">Blend</label>
-              <input id="blendInput" max="100" min="0" step="1" type="range" />
-              <span id="blendValue" class="control-value"></span>
-            </div>
-            <div class="control-group">
-              <label for="lightInput">Light</label>
-              <input id="lightInput" max="100" min="0" step="1" type="range" />
-              <span id="lightValue" class="control-value"></span>
-            </div>
-            <div class="control-group">
-              <label for="opacityInput">Opacity</label>
-              <input id="opacityInput" max="100" min="0" step="1" type="range" />
-              <span id="opacityValue" class="control-value"></span>
-            </div>
-            <div class="control-group">
-              <label for="outlineInput">Outline</label>
-              <input id="outlineInput" max="100" min="0" step="1" type="range" />
-              <span id="outlineValue" class="control-value"></span>
-            </div>
-            <div class="control-group">
-              <label for="weightInput">Weight</label>
-              <input
-                disabled
-                id="weightInput"
-                max="100"
-                min="0"
-                step="1"
-                type="range"
-              />
-              <span id="weightValue" class="control-value"></span>
+            <div class="control-section">
+              <div class="control-group">
+                <label for="blendInput">Blend</label>
+                <input
+                  id="blendInput"
+                  max="100"
+                  min="0"
+                  step="1"
+                  type="range"
+                />
+                <span id="blendValue" class="control-value"></span>
+              </div>
+              <div class="control-group">
+                <label for="lightInput">Light</label>
+                <input
+                  id="lightInput"
+                  max="100"
+                  min="0"
+                  step="1"
+                  type="range"
+                />
+                <span id="lightValue" class="control-value"></span>
+              </div>
+              <div class="control-group">
+                <label for="opacityInput">Opacity</label>
+                <input
+                  id="opacityInput"
+                  max="100"
+                  min="0"
+                  step="1"
+                  type="range"
+                />
+                <span id="opacityValue" class="control-value"></span>
+              </div>
+              <div class="control-group">
+                <label for="outlineInput">Outline</label>
+                <input
+                  id="outlineInput"
+                  max="100"
+                  min="0"
+                  step="1"
+                  type="range"
+                />
+                <span id="outlineValue" class="control-value"></span>
+              </div>
+              <div class="control-group">
+                <label for="weightInput">Weight</label>
+                <input
+                  disabled
+                  id="weightInput"
+                  max="100"
+                  min="0"
+                  step="1"
+                  type="range"
+                />
+                <span id="weightValue" class="control-value"></span>
+              </div>
             </div>
           </div>
           <div class="control-actions">
@@ -190,7 +247,7 @@
         <div aria-describedby="canvasDescription" id="sketchContainer"></div>
       </main>
       <footer>
-        <div>Measured®</div>
+        <div class="trademark">Measured®</div>
         <a class="logo" href="https://measured.co" translate="no">
           <svg
             aria-labelledby="measured"

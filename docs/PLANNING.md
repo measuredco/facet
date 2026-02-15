@@ -63,11 +63,12 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Now
 
+- Primitive roadmap: Reintroduce additional approved primitives intentionally (with explicit constraints updates).
+
 ### Next
 
 ### Later
 
-- Primitive roadmap: Reintroduce additional approved primitives intentionally (with explicit constraints updates).
 - Presets: Introduce constrained presets (`brand-muted`, `brand-bold`, `grid-centric`) after controls/primitive work.
 - Validation layer: Add a fuller validation module (explicit rule contracts, reject reasons, and lightweight tests) once core controls and primitives stabilize.
 - Enable versioning and include in export filenames.

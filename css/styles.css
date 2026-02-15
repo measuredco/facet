@@ -90,7 +90,7 @@ button {
 }
 
 .container {
-  --header-block-size: 3.75rem;
+  --outer-block-size: 3.75rem;
   container-type: inline-size;
   display: flex;
   flex-direction: column;
@@ -100,6 +100,11 @@ button {
 
 header {
   align-items: center;
+  background-color: color-mix(
+    in srgb,
+    var(--color-background) 80%,
+    transparent
+  );
   display: flex;
   inset-block-start: 0;
   inset-inline: 0;
@@ -120,13 +125,13 @@ aside {
   box-shadow: var(--box-shadow);
   display: flex;
   flex-direction: column;
-  gap: var(--space-vertical-03);
   inline-size: 18rem;
-  inset-block-start: var(--header-block-size);
+  inset-block-start: var(--outer-block-size);
   inset-inline-start: 0;
   justify-self: center;
-  padding-block: var(--space-vertical-03);
-  padding-inline: var(--space-horizontal-04);
+  max-block-size: calc(
+    100dvh - var(--outer-block-size) - var(--space-vertical-04)
+  );
   position: fixed;
 
   &[hidden] {
@@ -160,13 +165,13 @@ main {
 }
 
 footer {
-  align-items: flex-end;
+  align-items: center;
   color: var(--color-text-prose);
   display: flex;
+  height: var(--outer-block-size);
   justify-content: space-between;
-  line-height: 0.8;
   margin-block-start: var(--space-vertical-02);
-  padding-block: var(--space-vertical-03) var(--space-vertical-04);
+  padding-block: var(--space-vertical-03);
   padding-inline: var(--space-horizontal-06);
 }
 
@@ -303,7 +308,29 @@ canvas {
   inline-size: 100%;
 }
 
+.control-header {
+  background-color: var(--color-background-emphasis);
+  border-block-end: var(--border-width) solid var(--color-border-light);
+  border-start-end-radius: var(--border-radius-card);
+  display: grid;
+  gap: var(--space-horizontal-04);
+  grid-template-columns: 1fr 1fr;
+  inline-size: 100%;
+  padding-block: var(--space-vertical-03);
+  padding-inline: var(--space-horizontal-04);
+}
+
+.control-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-vertical-03);
+  overflow-y: auto;
+  padding-block: var(--space-vertical-03);
+  padding-inline: var(--space-horizontal-04);
+}
+
 .control-section {
+  background-color: var(--color-background-emphasis);
   border-radius: var(--border-radius-button);
   display: flex;
   flex-direction: column;
@@ -360,10 +387,16 @@ canvas {
 }
 
 .control-actions {
+  background-color: var(--color-background-emphasis);
+  border-block-start: var(--border-width) solid var(--color-border-light);
+  border-end-end-radius: var(--border-radius-card);
   display: grid;
   gap: var(--space-horizontal-04);
   grid-template-columns: 1fr 1fr;
   inline-size: 100%;
+  margin-block-start: auto;
+  padding-block: var(--space-vertical-03);
+  padding-inline: var(--space-horizontal-04);
 }
 
 .control-actions button {
@@ -373,4 +406,8 @@ canvas {
 .logo {
   color: var(--color-text-prose);
   display: flex;
+}
+
+.trademark {
+  align-self: flex-end;
 }
