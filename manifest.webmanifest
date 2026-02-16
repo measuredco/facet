@@ -29,5 +29,7 @@
   ],
   "name": "Facet • Measured brand image generator",
   "short_name": "Facet",
+  "scope": "/",
+  "start_url": "/",
   "theme_color": "#0158ad"
 }

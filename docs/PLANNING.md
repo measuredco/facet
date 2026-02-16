@@ -66,13 +66,19 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Now
 
-- Review
-
 ### Next
 
-- Consider adding text support
-
 ### Later
+
+- Deploy to https://facet.measured.co
+- Consider adding text feature, to optional add a textual element to compositions _values below calculated for a 1200 × 630 OG image_
+  - no rich text, string only
+  - `--color-white` (probably?)
+  - (optional) backplate for legibility? could use background color from constraints, maybe with (configurable) opacity
+  - `--font-family` (InterVariable.subset.woff2)
+  - `--font-11-size`, `--font-11-line-height`, `font-weight: 300`
+  - 2–3 line limit, max 50 characters
+  - Prioritize deterministic rendering parity between preview and export.
 
 ## Acceptance tests
 
