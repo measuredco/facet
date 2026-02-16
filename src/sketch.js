@@ -1,6 +1,7 @@
 let cnv;
 let shapes = [];
 let currentSeed = null;
+let resizeFrameRequestId = null;
 
 // Global configuration (foundational/default project settings)
 const BACKGROUND_COLOR = "#031f60";
@@ -1026,7 +1027,7 @@ function setup() {
   const downloadSvgBtn = document.getElementById("downloadSvgBtn");
   readRuntimeConfigFromUrl();
   syncRatioOptionsToInputs();
-  windowResized();
+  applyResponsiveCanvasSize();
   bindRuntimeControls();
 
   if (ratioBtn && ratioMenuPanel) {
@@ -1040,7 +1041,7 @@ function setup() {
       runtimeConfig.ratioValue = nextRatio;
       syncRatioOptionsToInputs();
       writeUrlState(currentSeed);
-      windowResized();
+      applyResponsiveCanvasSize();
     });
   }
 
@@ -1219,6 +1220,16 @@ function generateFromSeed(seed) {
 }
 
 function windowResized() {
+  if (resizeFrameRequestId !== null) {
+    return;
+  }
+  resizeFrameRequestId = window.requestAnimationFrame(() => {
+    resizeFrameRequestId = null;
+    applyResponsiveCanvasSize();
+  });
+}
+
+function applyResponsiveCanvasSize() {
   const container = document.getElementById("sketchContainer");
   if (!container) return;
   const main = document.querySelector("main");
@@ -1262,5 +1273,5 @@ function windowResized() {
 
 // responsive on first layout
 window.addEventListener("load", () => {
-  windowResized();
+  applyResponsiveCanvasSize();
 });
