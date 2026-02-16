@@ -179,7 +179,8 @@ Canonical order:
 ## Output behavior
 
 - Export formats:
-  - PNG: fixed `8000x4500` (16:9)
-  - SVG: current canvas dimensions (`800x450` base, responsive in UI)
+  - `Hi-res`: PNG `7680x4320` (16:9)
+  - `Standard`: PNG `1920x1080` (16:9)
+  - `Vector`: SVG at current canvas dimensions (`800x450` base, responsive in UI)
 - Filename includes seed + control params:
   - `facet-{seed}{cm}-a{a}cn{cn}e{e}fx{fx}fy{fy}sz{sz}sp{sp}b{b}l{l}op{op}ot{ot}w{w}.{ext}`

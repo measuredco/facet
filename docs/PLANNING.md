@@ -66,8 +66,6 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Next
 
-### Later
-
 - Expand download and aspect ratio support (retain SVG as Vector).
 
 | Aspect           | Hi-Res (PNG) | Standard (PNG) |
@@ -76,6 +74,8 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 | OG (1.91:1)      | 7680 × 4020  | 2400 × 1260    |
 | Portrait (4:5)   | 4320 × 5400  | 1600 × 2000    |
 | Square (1:1)     | 4320 × 4320  | 1600 × 1600    |
+
+### Later
 
 - Validation layer: Add a fuller validation module (explicit rule contracts, reject reasons, and lightweight tests) once core controls and primitives stabilize.
 - Enable versioning and include in export filenames.
@@ -87,5 +87,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Seed creates new seeded output with current settings.
 - URL params reproduce seeded output and controls.
 - Sidebar controls change composition and persist to URL.
-- Download exports current composition as SVG and PNG.
-- Download exports fixed `8000x4500` PNG.
+- Download menu offers `Hi-res`, `Standard`, and `Vector`.
+- `Hi-res` exports PNG at `7680x4320`.
+- `Standard` exports PNG at `1920x1080`.
+- `Vector` exports SVG at current canvas dimensions.

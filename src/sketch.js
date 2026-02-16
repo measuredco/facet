@@ -49,9 +49,13 @@ const COMPONENTS_BY_VALUE = new Map(
 const DEFAULT_COMPONENT_VALUE = "tc";
 const MIX_COMPONENT_VALUE = "mx";
 const STROKE_WIDTH_RATIOS = [0.0037, 0.0148];
-const EXPORT_SIZE = {
-  width: 8000,
-  height: 4500,
+const PNG_EXPORT_HI_RES = {
+  width: 7680,
+  height: 4320,
+};
+const PNG_EXPORT_STANDARD = {
+  width: 1920,
+  height: 1080,
 };
 const DEFAULT_SEED = 991712126;
 
@@ -196,23 +200,23 @@ function drawCompositionToContext(
   ctx.restore();
 }
 
-function exportCurrentComposition(filename) {
+function exportCurrentComposition(filename, exportWidth, exportHeight) {
   const exportCanvas = document.createElement("canvas");
-  exportCanvas.width = EXPORT_SIZE.width;
-  exportCanvas.height = EXPORT_SIZE.height;
+  exportCanvas.width = exportWidth;
+  exportCanvas.height = exportHeight;
   const exportCtx = exportCanvas.getContext("2d");
   if (!exportCtx) return;
 
-  const scaleX = EXPORT_SIZE.width / width;
-  const scaleY = EXPORT_SIZE.height / height;
+  const scaleX = exportWidth / width;
+  const scaleY = exportHeight / height;
   const uniformScale = Math.min(scaleX, scaleY);
-  const offsetX = (EXPORT_SIZE.width - width * uniformScale) * 0.5;
-  const offsetY = (EXPORT_SIZE.height - height * uniformScale) * 0.5;
+  const offsetX = (exportWidth - width * uniformScale) * 0.5;
+  const offsetY = (exportHeight - height * uniformScale) * 0.5;
 
   drawCompositionToContext(
     exportCtx,
-    EXPORT_SIZE.width,
-    EXPORT_SIZE.height,
+    exportWidth,
+    exportHeight,
     uniformScale,
     uniformScale,
     offsetX,
@@ -952,7 +956,8 @@ function setup() {
 
   // wire controls
   const genBtn = document.getElementById("generateBtn");
-  const downloadPngBtn = document.getElementById("downloadPngBtn");
+  const downloadHiResBtn = document.getElementById("downloadHiResBtn");
+  const downloadStandardBtn = document.getElementById("downloadStandardBtn");
   const downloadSvgBtn = document.getElementById("downloadSvgBtn");
   readRuntimeConfigFromUrl();
   bindRuntimeControls();
@@ -961,10 +966,25 @@ function setup() {
     applyRandomizedSettings();
   });
 
-  if (downloadPngBtn) {
-    downloadPngBtn.addEventListener("click", () => {
+  if (downloadHiResBtn) {
+    downloadHiResBtn.addEventListener("click", () => {
       const filename = buildExportFilename(currentSeed);
-      exportCurrentComposition(filename);
+      exportCurrentComposition(
+        filename,
+        PNG_EXPORT_HI_RES.width,
+        PNG_EXPORT_HI_RES.height,
+      );
+    });
+  }
+
+  if (downloadStandardBtn) {
+    downloadStandardBtn.addEventListener("click", () => {
+      const filename = buildExportFilename(currentSeed);
+      exportCurrentComposition(
+        filename,
+        PNG_EXPORT_STANDARD.width,
+        PNG_EXPORT_STANDARD.height,
+      );
     });
   }
 
