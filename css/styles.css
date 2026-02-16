@@ -517,5 +517,15 @@ canvas {
 }
 
 .trademark {
+  color: var(--color-interactive-neutral);
   align-self: flex-end;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--color-interactive-neutral-hover);
+  }
+
+  &:active {
+    color: var(--color-interactive-neutral-active);
+  }
 }
