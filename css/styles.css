@@ -392,6 +392,10 @@ canvas {
   &:has([value="st"])::after {
     --mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIj48cGF0aCBkPSJtNjQgMGMtMzUuMyAwLTY0IDI4LjctNjQgNjR2MjcyYzAgMzUuMyAyOC43IDY0IDY0IDY0aDI3MmMzNS4zIDAgNjQtMjguNyA2NC02NHYtMjcyYzAtMzUuMy0yOC43LTY0LTY0LTY0eiIgZmlsbD0iY3VycmVudENvbG9yIi8+PC9zdmc+");
   }
+
+  &:has([value="mx"])::after {
+    --mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3MjAgNzIwIj48cGF0aCBkPSJNNDk2IDcyMEgyMjRDMTAwLjUgNzIwIDAgNjE5LjUgMCA0OTZWMjI0QzAgMTAwLjUgMTAwLjUgMCAyMjQgMGgyNzJjMTIzLjUgMCAyMjQgMTAwLjUgMjI0IDIyNHYyNzJjMCAxMjMuNS0xMDAuNSAyMjQtMjI0IDIyNFpNMjI0IDE2MGMtMzUuMyAwLTY0IDI4LjctNjQgNjR2MjcyYzAgMzUuMyAyOC43IDY0IDY0IDY0aDI3MmMzNS4zIDAgNjQtMjguNyA2NC02NFYyMjRjMC0zNS4zLTI4LjctNjQtNjQtNjRIMjI0WiIgZmlsbD0iY3VycmVudENvbG9yIiAvPjwvc3ZnPg==");
+  }
 }
 
 .control-main {

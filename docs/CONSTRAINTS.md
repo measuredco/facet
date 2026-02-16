@@ -12,7 +12,7 @@ Define deterministic and probabilistic rules so generated images follow Measured
 
 ## Current scope
 
-- Approved component set in active use (in UI order): `tc`, `ls`, `lt`, `ss`, `st`.
+- Approved component options in active use (in UI order): `tc`, `ls`, `lt`, `ss`, `st`, `mx`.
 - Seeded, deterministic generation with runtime UI controls.
 - PNG and SVG export.
 
@@ -37,8 +37,13 @@ Define deterministic and probabilistic rules so generated images follow Measured
 
 ## Shape rules
 
-- Primitive in use:
-  - The Corner (viewBox `0 0 360 360`)
+- Components in use:
+  - `tc`: The Corner (viewBox `0 0 360 360`)
+  - `ls`: Large Tile Slice (viewBox `0 0 360 360`)
+  - `lt`: Large Tile (viewBox `0 0 720 720`)
+  - `ss`: Small Tile Slice (viewBox `0 0 200 200`)
+  - `st`: Small Tile (viewBox `0 0 400 400`)
+  - `mx`: Mix mode (per-shape uniform random selection across `tc/ls/lt/ss/st`)
 - Shape style modes:
   - Fill only
   - Stroke only (no fill)
@@ -115,6 +120,7 @@ Component values (UI order):
 - `lt`: Large tile
 - `ss`: Small tile slice
 - `st`: Small tile
+- `mx`: Mix mode (uniform 20% selection across `tc/ls/lt/ss/st` per shape)
 
 Control semantics:
 
@@ -136,6 +142,7 @@ Control semantics:
 - `Opacity` is disabled when `Outline` is `100%` or `Amount` is `0%`.
 - `Blend` is disabled when `Amount` is `0%`.
 - `Flip X` and `Flip Y` are disabled when `Component` is `lt` or `st`, because those two shapes are symmetrical and flips produce no visual difference.
+  - In `mx` mix mode, flip controls remain enabled.
 - `Centre` maps to center-biased placement pull during candidate sampling.
 
 ## URL parameter persistence

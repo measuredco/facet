@@ -47,6 +47,7 @@ const COMPONENTS_BY_VALUE = new Map(
   ]),
 );
 const DEFAULT_COMPONENT_VALUE = "tc";
+const MIX_COMPONENT_VALUE = "mx";
 const STROKE_WIDTH_RATIOS = [0.0037, 0.0148];
 const EXPORT_SIZE = {
   width: 8000,
@@ -109,6 +110,9 @@ const URL_PARAMS = {
 };
 
 function getActiveComponent() {
+  if (runtimeConfig.componentValue === MIX_COMPONENT_VALUE) {
+    return COMPONENTS_BY_VALUE.get(DEFAULT_COMPONENT_VALUE);
+  }
   return (
     COMPONENTS_BY_VALUE.get(runtimeConfig.componentValue) ||
     COMPONENTS_BY_VALUE.get(DEFAULT_COMPONENT_VALUE)
@@ -141,14 +145,14 @@ function drawCompositionToContext(
   offsetX = 0,
   offsetY = 0,
 ) {
-  const activeComponent = getActiveComponent();
-  const viewBoxHalf = activeComponent.viewBoxSize * 0.5;
-
   ctx.save();
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(0, 0, renderWidth, renderHeight);
 
   shapes.forEach((s, index) => {
+    const activeComponent =
+      COMPONENTS_BY_VALUE.get(s.componentValue) || getActiveComponent();
+    const viewBoxHalf = activeComponent.viewBoxSize * 0.5;
     const hasLowerOverlap = shapes
       .slice(0, index)
       .some(
@@ -231,9 +235,6 @@ function downloadBlob(filenameWithExtension, blob) {
 }
 
 function buildSvgExportMarkup(renderWidth, renderHeight) {
-  const activeComponent = getActiveComponent();
-  const viewBoxHalf = activeComponent.viewBoxSize * 0.5;
-
   const svgParts = [];
   svgParts.push(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${renderWidth}" height="${renderHeight}" viewBox="0 0 ${renderWidth} ${renderHeight}">`,
@@ -243,6 +244,9 @@ function buildSvgExportMarkup(renderWidth, renderHeight) {
   );
 
   shapes.forEach((shape, index) => {
+    const activeComponent =
+      COMPONENTS_BY_VALUE.get(shape.componentValue) || getActiveComponent();
+    const viewBoxHalf = activeComponent.viewBoxSize * 0.5;
     const hasLowerOverlap = shapes
       .slice(0, index)
       .some(
@@ -421,6 +425,7 @@ function shouldDisableBlendControl() {
 
 function shouldDisableFlipControls() {
   // Large tile and small tile are symmetrical; flipping yields no visual change.
+  if (runtimeConfig.componentValue === MIX_COMPONENT_VALUE) return false;
   return runtimeConfig.componentValue === "lt" || runtimeConfig.componentValue === "st";
 }
 
@@ -506,7 +511,6 @@ function syncRuntimeControlsToInputs() {
   if (componentInput instanceof HTMLInputElement) {
     componentInput.checked = true;
   }
-
   if (centreInput) {
     centreInput.value = String(Math.round(runtimeConfig.centrePercent));
   }
@@ -730,8 +734,12 @@ function bindRuntimeControls() {
   });
 
   randomBtn.addEventListener("click", () => {
+    const componentValues = [
+      ...COMPONENTS.map((component) => component.value),
+      MIX_COMPONENT_VALUE,
+    ];
     runtimeConfig.componentValue =
-      COMPONENTS[Math.floor(Math.random() * COMPONENTS.length)].value;
+      componentValues[Math.floor(Math.random() * componentValues.length)];
     runtimeConfig.centrePercent = Math.round(Math.random() * 100);
     runtimeConfig.blendPercent = Math.round(Math.random() * 100);
     runtimeConfig.amountPercent = Math.round(Math.random() * 100);
@@ -760,7 +768,9 @@ function readRuntimeConfigFromUrl() {
   const params = new URLSearchParams(window.location.search);
 
   const componentRaw = params.get(URL_PARAMS.component);
-  if (componentRaw !== null && COMPONENTS_BY_VALUE.has(componentRaw)) {
+  if (componentRaw === MIX_COMPONENT_VALUE) {
+    runtimeConfig.componentValue = MIX_COMPONENT_VALUE;
+  } else if (componentRaw !== null && COMPONENTS_BY_VALUE.has(componentRaw)) {
     runtimeConfig.componentValue = componentRaw;
   }
 
@@ -1052,6 +1062,9 @@ function generateFromSeed(seed) {
   ) {
     guard += 1;
     const color = pickPaletteColor(paletteWeights);
+    const componentValue = runtimeConfig.componentValue === MIX_COMPONENT_VALUE
+      ? COMPONENTS[Math.floor(random(COMPONENTS.length))].value
+      : runtimeConfig.componentValue;
     const styleMode =
       random() < runtimeConfig.strokeOnlyProbability ? "stroke" : "fill";
     const size = lerp(minSize, maxSize, Math.pow(random(), 0.35));
@@ -1080,6 +1093,7 @@ function generateFromSeed(seed) {
       strokeWidthRatio: null,
       flipX,
       flipY,
+      componentValue,
     };
     if (validateCandidateConstraints(candidate, shapes)) {
       shapes.push(candidate);

@@ -32,7 +32,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Main preview:
   - Responsive 16:9 canvas
 - Controls sidebar:
-  - `Component`, `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`
+  - `Component` (includes `Mix` radio option), `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`
   - `Reset`, `Randomise`
 
 ## State and persistence
@@ -40,6 +40,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - No backend persistence.
 - URL query params persist runtime state:
   - `s`, `cm`, `a`, `cn`, `e`, `fx`, `fy`, `sz`, `sp`, `b`, `l`, `op`, `ot`, `w`
+  - `cm=mx` enables mixed-component generation.
 - Reload reproduces output for same seed + control state.
 
 ## Tech stack
@@ -65,10 +66,10 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Next
 
+- Consider swapping Generate and Randomise button functionality.
+
 ### Later
 
-- Rounded menu button focus state when open.
-- Consider mixed/probabilistic component option.
 - Expand download and aspect ratio support (retain SVG as Vector).
 
 | Aspect           | Hi-Res (PNG) | Standard (PNG) |
