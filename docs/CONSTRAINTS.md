@@ -22,7 +22,8 @@ Define deterministic and probabilistic rules so generated images follow Measured
 - Aspect ratio: 16:9
 - Color mode: RGB
 - Seed handling:
-  - `Generate` creates a new random seed.
+  - `Generate` randomizes settings and regenerates.
+  - `Seed` creates a new random seed while retaining current settings.
   - Active seed is persisted in URL query param `s`.
   - Loading a URL with a seed reproduces the same output for the same control values.
 
@@ -171,7 +172,8 @@ Canonical order:
 - Settings button toggles sidebar open/closed state.
 - Sidebar defaults closed and is toggled explicitly via Settings.
 - `Reset` restores all controls to defaults.
-- `Randomise` assigns random values to all controls and regenerates.
+- `Generate` assigns random values to controls and regenerates.
+- `Seed` generates a new seed and keeps current settings.
 - Canvas has a descriptive text alternative and the controls panel is a labeled complementary landmark.
 
 ## Output behavior

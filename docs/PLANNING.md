@@ -26,14 +26,14 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ## Current UX model
 
 - Header actions:
-  - `Generate` (new seed)
+  - `Generate` (randomise settings)
   - `Download` (dropdown with PNG/SVG actions)
   - Settings toggle (sidebar visibility)
 - Main preview:
   - Responsive 16:9 canvas
 - Controls sidebar:
   - `Component` (includes `Mix` radio option), `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`
-  - `Reset`, `Randomise`
+  - `Reset`, `Seed`
 
 ## State and persistence
 
@@ -53,7 +53,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Sidebar toggle behavior is wired and synchronized with layout.
 - Canvas regeneration is deterministic per seed.
 - Runtime controls are fully wired and update URL state.
-- Randomise and Reset are implemented.
+- Generate, Seed, and Reset are implemented.
 - Candidate acceptance has been refactored into a centralized validator helper with no visual regression in manual snapshot checks.
 - Accessibility baseline improvements in place:
   - Labeled controls landmark
@@ -65,8 +65,6 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ### Now
 
 ### Next
-
-- Consider swapping Generate and Randomise button functionality.
 
 ### Later
 
@@ -85,7 +83,8 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ## Acceptance tests
 
 - App runs locally via static server.
-- Generate creates new seeded output.
+- Generate randomizes settings and regenerates.
+- Seed creates new seeded output with current settings.
 - URL params reproduce seeded output and controls.
 - Sidebar controls change composition and persist to URL.
 - Download exports current composition as SVG and PNG.

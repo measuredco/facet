@@ -560,6 +560,37 @@ function syncRuntimeControlsToInputs() {
   }
 }
 
+function applyRandomizedSettings() {
+  const componentValues = [
+    ...COMPONENTS.map((component) => component.value),
+    MIX_COMPONENT_VALUE,
+  ];
+  runtimeConfig.componentValue =
+    componentValues[Math.floor(Math.random() * componentValues.length)];
+  runtimeConfig.centrePercent = Math.round(Math.random() * 100);
+  runtimeConfig.blendPercent = Math.round(Math.random() * 100);
+  runtimeConfig.amountPercent = Math.round(Math.random() * 100);
+  runtimeConfig.edgePercent = Math.round(Math.random() * 100);
+  runtimeConfig.lightPercent = Math.round(Math.random() * 100);
+  runtimeConfig.flipXProbability = Math.random();
+  runtimeConfig.flipYProbability = Math.random();
+  runtimeConfig.overlapAlpha = Math.random();
+  runtimeConfig.strokeOnlyProbability = Math.random();
+  runtimeConfig.weightProbability = Math.random();
+  runtimeConfig.sizePercent = Math.round(Math.random() * 100);
+  runtimeConfig.spreadPercent = Math.round(Math.random() * 100);
+  syncRuntimeControlsToInputs();
+  updateRuntimeControlDisplay();
+  writeUrlState(currentSeed);
+  if (currentSeed !== null) generateFromSeed(currentSeed);
+}
+
+function applySeedVariant() {
+  const seed = Math.floor(Math.random() * 1e9);
+  writeUrlState(seed);
+  generateFromSeed(seed);
+}
+
 function bindRuntimeControls() {
   const componentInputs = document.querySelectorAll(
     'input[name="componentInput"]',
@@ -577,7 +608,7 @@ function bindRuntimeControls() {
   const weightInput = document.getElementById("weightInput");
   const spreadInput = document.getElementById("spreadInput");
   const resetBtn = document.getElementById("resetBtn");
-  const randomBtn = document.getElementById("randomBtn");
+  const seedBtn = document.getElementById("seedBtn");
 
   if (
     componentInputs.length === 0 ||
@@ -594,7 +625,7 @@ function bindRuntimeControls() {
     !weightInput ||
     !spreadInput ||
     !resetBtn ||
-    !randomBtn
+    !seedBtn
   ) {
     return;
   }
@@ -733,29 +764,8 @@ function bindRuntimeControls() {
     if (currentSeed !== null) generateFromSeed(currentSeed);
   });
 
-  randomBtn.addEventListener("click", () => {
-    const componentValues = [
-      ...COMPONENTS.map((component) => component.value),
-      MIX_COMPONENT_VALUE,
-    ];
-    runtimeConfig.componentValue =
-      componentValues[Math.floor(Math.random() * componentValues.length)];
-    runtimeConfig.centrePercent = Math.round(Math.random() * 100);
-    runtimeConfig.blendPercent = Math.round(Math.random() * 100);
-    runtimeConfig.amountPercent = Math.round(Math.random() * 100);
-    runtimeConfig.edgePercent = Math.round(Math.random() * 100);
-    runtimeConfig.lightPercent = Math.round(Math.random() * 100);
-    runtimeConfig.flipXProbability = Math.random();
-    runtimeConfig.flipYProbability = Math.random();
-    runtimeConfig.overlapAlpha = Math.random();
-    runtimeConfig.strokeOnlyProbability = Math.random();
-    runtimeConfig.weightProbability = Math.random();
-    runtimeConfig.sizePercent = Math.round(Math.random() * 100);
-    runtimeConfig.spreadPercent = Math.round(Math.random() * 100);
-    syncRuntimeControlsToInputs();
-    updateRuntimeControlDisplay();
-    writeUrlState(currentSeed);
-    if (currentSeed !== null) generateFromSeed(currentSeed);
+  seedBtn.addEventListener("click", () => {
+    applySeedVariant();
   });
 }
 
@@ -948,9 +958,7 @@ function setup() {
   bindRuntimeControls();
 
   genBtn.addEventListener("click", () => {
-    const seed = Math.floor(Math.random() * 1e9);
-    writeUrlState(seed);
-    generateFromSeed(seed);
+    applyRandomizedSettings();
   });
 
   if (downloadPngBtn) {
