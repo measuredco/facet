@@ -135,6 +135,7 @@ Control semantics:
 - `Weight` is disabled when `Outline` is `0%`.
 - `Opacity` is disabled when `Outline` is `100%` or `Amount` is `0%`.
 - `Blend` is disabled when `Amount` is `0%`.
+- `Flip X` and `Flip Y` are disabled when `Component` is `lt` or `st`, because those two shapes are symmetrical and flips produce no visual difference.
 - `Centre` maps to center-biased placement pull during candidate sampling.
 
 ## URL parameter persistence

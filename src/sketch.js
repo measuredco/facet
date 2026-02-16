@@ -419,6 +419,11 @@ function shouldDisableBlendControl() {
   return runtimeConfig.amountPercent <= 0;
 }
 
+function shouldDisableFlipControls() {
+  // Large tile and small tile are symmetrical; flipping yields no visual change.
+  return runtimeConfig.componentValue === "lt" || runtimeConfig.componentValue === "st";
+}
+
 function updateRuntimeControlDisplay() {
   const centreValue = document.getElementById("centreValue");
   const blendValue = document.getElementById("blendValue");
@@ -524,9 +529,11 @@ function syncRuntimeControlsToInputs() {
   }
   if (flipXInput) {
     flipXInput.value = String(Math.round(runtimeConfig.flipXProbability * 100));
+    flipXInput.disabled = shouldDisableFlipControls();
   }
   if (flipYInput) {
     flipYInput.value = String(Math.round(runtimeConfig.flipYProbability * 100));
+    flipYInput.disabled = shouldDisableFlipControls();
   }
   if (opacityInput) {
     opacityInput.value = String(Math.round(runtimeConfig.overlapAlpha * 100));
@@ -1026,6 +1033,13 @@ function generateFromSeed(seed) {
   const centerPlacementBias = getCenterPlacementBias(
     runtimeConfig.centrePercent,
   );
+  const shouldDisableFlip = shouldDisableFlipControls();
+  const effectiveFlipXProbability = shouldDisableFlip
+    ? 0
+    : runtimeConfig.flipXProbability;
+  const effectiveFlipYProbability = shouldDisableFlip
+    ? 0
+    : runtimeConfig.flipYProbability;
   const edgeOverflow = getEdgeOverflowFactors(runtimeConfig.edgePercent);
   const paletteWeights = getPaletteWeights(runtimeConfig.lightPercent);
   const minSize = Math.min(width, height) * minSizeRatio;
@@ -1053,8 +1067,8 @@ function generateFromSeed(seed) {
     const centeredY = randomGaussian(height * 0.5, height * 0.2);
     const x = lerp(uniformX, centeredX, centerPlacementBias);
     const y = lerp(uniformY, centeredY, centerPlacementBias);
-    const flipX = random() < runtimeConfig.flipXProbability;
-    const flipY = random() < runtimeConfig.flipYProbability;
+    const flipX = random() < effectiveFlipXProbability;
+    const flipY = random() < effectiveFlipYProbability;
 
     const candidate = {
       type: "svg",
