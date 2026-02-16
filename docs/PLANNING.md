@@ -18,7 +18,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ## Current scope
 
 - Single-page app.
-- Single active primitive in generation (The Corner).
+- Multiple approved components selectable at runtime.
 - Runtime control panel for composition tuning.
 - PNG and SVG export.
 - Constraint handling direction: strict reject on rule violations.
@@ -32,14 +32,14 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Main preview:
   - Responsive 16:9 canvas
 - Controls sidebar:
-  - `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`
+  - `Component`, `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`
   - `Reset`, `Randomise`
 
 ## State and persistence
 
 - No backend persistence.
 - URL query params persist runtime state:
-  - `s`, `a`, `c`, `e`, `fx`, `fy`, `sz`, `sp`, `b`, `l`, `op`, `ot`, `w`
+  - `s`, `cm`, `a`, `cn`, `e`, `fx`, `fy`, `sz`, `sp`, `b`, `l`, `op`, `ot`, `w`
 - Reload reproduces output for same seed + control state.
 
 ## Tech stack
@@ -63,13 +63,13 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Now
 
-- Primitive roadmap: Reintroduce additional approved primitives intentionally (with explicit constraints updates).
-
 ### Next
 
 ### Later
 
-- Presets: Introduce constrained presets (`brand-muted`, `brand-bold`, `grid-centric`) after controls/primitive work.
+- Disable CSS hover styles on touch devices.
+- Rounded menu button focus state when open.
+- Consider mixed/probabilistic component option.
 - Validation layer: Add a fuller validation module (explicit rule contracts, reject reasons, and lightweight tests) once core controls and primitives stabilize.
 - Enable versioning and include in export filenames.
 

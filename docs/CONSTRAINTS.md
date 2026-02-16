@@ -12,7 +12,7 @@ Define deterministic and probabilistic rules so generated images follow Measured
 
 ## Current scope
 
-- Single primitive in active use: The Corner SVG shape.
+- Approved component set in active use (in UI order): `tc`, `ls`, `lt`, `ss`, `st`.
 - Seeded, deterministic generation with runtime UI controls.
 - PNG and SVG export.
 
@@ -78,6 +78,7 @@ Define deterministic and probabilistic rules so generated images follow Measured
 
 UI controls currently exposed in sidebar:
 
+- `Component`
 - `Amount`
 - `Centre`
 - `Edge`
@@ -93,6 +94,7 @@ UI controls currently exposed in sidebar:
 
 Current defaults:
 
+- `Component`: `The corner` (`tc`)
 - `Amount`: 0% (maps to 1 max shape)
 - `Centre`: 50%
 - `Edge`: 50%
@@ -105,6 +107,14 @@ Current defaults:
 - `Opacity`: 75%
 - `Outline`: 0%
 - `Weight`: 50%
+
+Component values (UI order):
+
+- `tc`: The corner
+- `ls`: Large tile slice
+- `lt`: Large tile
+- `ss`: Small tile slice
+- `st`: Small tile
 
 Control semantics:
 
@@ -134,8 +144,9 @@ Control and seed state persist in compact URL params.
 Canonical order:
 
 - `s` (seed)
+- `cm` (Component)
 - `a` (Amount)
-- `c` (Centre)
+- `cn` (Centre)
 - `e` (Edge)
 - `fx` (Flip X)
 - `fy` (Flip Y)
@@ -161,4 +172,4 @@ Canonical order:
   - PNG: fixed `8000x4500` (16:9)
   - SVG: current canvas dimensions (`800x450` base, responsive in UI)
 - Filename includes seed + control params:
-  - `facet-{seed}-a{a}c{c}e{e}fx{fx}fy{fy}sz{sz}sp{sp}b{b}l{l}op{op}ot{ot}w{w}.{ext}`
+  - `facet-{seed}{cm}-a{a}cn{cn}e{e}fx{fx}fy{fy}sz{sz}sp{sp}b{b}l{l}op{op}ot{ot}w{w}.{ext}`

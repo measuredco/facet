@@ -67,7 +67,31 @@
           hidden
           id="sidebarPanel"
         >
-          <!-- <div class="control-header"></div> -->
+          <div class="control-header">
+            <fieldset class="control-component">
+              <legend class="visually-hidden">Component</legend>
+              <label class="component-option">
+                <input checked name="componentInput" type="radio" value="tc" />
+                <span class="visually-hidden">The corner</span>
+              </label>
+              <label class="component-option">
+                <input name="componentInput" type="radio" value="ls" />
+                <span class="visually-hidden">Large tile slice</span>
+              </label>
+              <label class="component-option">
+                <input name="componentInput" type="radio" value="lt" />
+                <span class="visually-hidden">Large tile</span>
+              </label>
+              <label class="component-option">
+                <input name="componentInput" type="radio" value="ss" />
+                <span class="visually-hidden">Small tile slice</span>
+              </label>
+              <label class="component-option">
+                <input name="componentInput" type="radio" value="st" />
+                <span class="visually-hidden">Small tile</span>
+              </label>
+            </fieldset>
+          </div>
           <div class="control-main">
             <div class="control-section">
               <div class="control-group">
@@ -197,7 +221,7 @@
               </div>
             </div>
           </div>
-          <div class="control-actions">
+          <div class="control-footer">
             <button id="resetBtn" type="button">Reset</button>
             <button id="randomBtn" type="button">Randomise</button>
           </div>
@@ -247,7 +271,6 @@
         <div aria-describedby="canvasDescription" id="sketchContainer"></div>
       </main>
       <footer>
-        <div class="trademark">Measured®</div>
         <a class="logo" href="https://measured.co" translate="no">
           <svg
             aria-labelledby="measured"
@@ -263,6 +286,7 @@
             />
           </svg>
         </a>
+        <div class="trademark">Measured®</div>
       </footer>
     </div>
 

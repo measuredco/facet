@@ -5,12 +5,48 @@ let currentSeed = null;
 // Global configuration (foundational/default project settings)
 const BACKGROUND_COLOR = "#031f60";
 const PALETTE = ["#072d75", "#083c8a", "#0158ad", "#3598f8"];
-const CORNER_SHAPE_PATH_D =
-  "M360 360V224C360 100.5 259.5 0 136 0H0v160h136c35.3 0 64 28.7 64 64v136h160Z";
-const CORNER_SHAPE = {
-  path: new Path2D(CORNER_SHAPE_PATH_D),
-  viewBoxSize: 360,
-};
+const COMPONENTS = [
+  {
+    name: "The corner",
+    path: "M360 360V224C360 100.5 259.5 0 136 0H0v160h136c35.3 0 64 28.7 64 64v136h160Z",
+    value: "tc",
+    viewBoxSize: 360,
+  },
+  {
+    name: "Large tile slice",
+    path: "M360,224C360,100.5,259.5,0,136,0H0v360h360v-136h0Z",
+    value: "ls",
+    viewBoxSize: 360,
+  },
+  {
+    name: "Large tile",
+    path: "M496,720H224C100.5,720,0,619.5,0,496V224C0,100.5,100.5,0,224,0h272c123.5,0,224,100.5,224,224v272c0,123.5-100.5,224-224,224h0Z",
+    value: "lt",
+    viewBoxSize: 720,
+  },
+  {
+    name: "Small tile slice",
+    path: "M200,64C200,28.7,171.3,0,136,0H0v200h200V64h0Z",
+    value: "ss",
+    viewBoxSize: 200,
+  },
+  {
+    name: "Small tile",
+    path: "m64 0c-35.3 0-64 28.7-64 64v272c0 35.3 28.7 64 64 64h272c35.3 0 64-28.7 64-64v-272c0-35.3-28.7-64-64-64z",
+    value: "st",
+    viewBoxSize: 400,
+  },
+];
+const COMPONENTS_BY_VALUE = new Map(
+  COMPONENTS.map((component) => [
+    component.value,
+    {
+      ...component,
+      path2D: new Path2D(component.path),
+    },
+  ]),
+);
+const DEFAULT_COMPONENT_VALUE = "tc";
 const STROKE_WIDTH_RATIOS = [0.0037, 0.0148];
 const EXPORT_SIZE = {
   width: 8000,
@@ -41,6 +77,7 @@ const MIN_THICK_STROKE_WIDTH = 2;
 
 // Default values for runtime UI controls
 const runtimeConfig = {
+  componentValue: DEFAULT_COMPONENT_VALUE,
   amountPercent: UI_AMOUNT_PERCENT_DEFAULT,
   centrePercent: UI_CENTRE_PERCENT_DEFAULT,
   blendPercent: UI_BLEND_PERCENT_DEFAULT,
@@ -56,8 +93,9 @@ const runtimeConfig = {
 };
 const URL_PARAMS = {
   seed: "s",
+  component: "cm",
   amountPct: "a",
-  centrePct: "c",
+  centrePct: "cn",
   edgePct: "e",
   flipXPct: "fx",
   flipYPct: "fy",
@@ -69,6 +107,13 @@ const URL_PARAMS = {
   outlinePct: "ot",
   weightPct: "w",
 };
+
+function getActiveComponent() {
+  return (
+    COMPONENTS_BY_VALUE.get(runtimeConfig.componentValue) ||
+    COMPONENTS_BY_VALUE.get(DEFAULT_COMPONENT_VALUE)
+  );
+}
 
 function shapesOverlap(a, b) {
   // Approximate overlap using circular bounds based on nominal size.
@@ -96,6 +141,9 @@ function drawCompositionToContext(
   offsetX = 0,
   offsetY = 0,
 ) {
+  const activeComponent = getActiveComponent();
+  const viewBoxHalf = activeComponent.viewBoxSize * 0.5;
+
   ctx.save();
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(0, 0, renderWidth, renderHeight);
@@ -112,8 +160,7 @@ function drawCompositionToContext(
     const drawY = offsetY + s.y * positionScale;
     const drawSize = s.size * sizeScale;
 
-    const scale = drawSize / CORNER_SHAPE.viewBoxSize;
-    const viewBoxHalf = CORNER_SHAPE.viewBoxSize * 0.5;
+    const scale = drawSize / activeComponent.viewBoxSize;
     const signX = s.flipX ? -1 : 1;
     const signY = s.flipY ? -1 : 1;
 
@@ -134,10 +181,10 @@ function drawCompositionToContext(
       );
       ctx.strokeStyle = rgbaFromHex(s.color, alpha);
       ctx.lineWidth = strokeWidth / scale;
-      ctx.stroke(CORNER_SHAPE.path);
+      ctx.stroke(activeComponent.path2D);
     } else {
       ctx.fillStyle = rgbaFromHex(s.color, alpha);
-      ctx.fill(CORNER_SHAPE.path);
+      ctx.fill(activeComponent.path2D);
     }
     ctx.restore();
   });
@@ -184,6 +231,9 @@ function downloadBlob(filenameWithExtension, blob) {
 }
 
 function buildSvgExportMarkup(renderWidth, renderHeight) {
+  const activeComponent = getActiveComponent();
+  const viewBoxHalf = activeComponent.viewBoxSize * 0.5;
+
   const svgParts = [];
   svgParts.push(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${renderWidth}" height="${renderHeight}" viewBox="0 0 ${renderWidth} ${renderHeight}">`,
@@ -201,8 +251,7 @@ function buildSvgExportMarkup(renderWidth, renderHeight) {
       );
     const alpha = hasLowerOverlap ? runtimeConfig.overlapAlpha : 1;
 
-    const scale = shape.size / CORNER_SHAPE.viewBoxSize;
-    const viewBoxHalf = CORNER_SHAPE.viewBoxSize * 0.5;
+    const scale = shape.size / activeComponent.viewBoxSize;
     const signX = shape.flipX ? -1 : 1;
     const signY = shape.flipY ? -1 : 1;
     const transform = `translate(${shape.x} ${shape.y}) scale(${scale * signX} ${scale * signY}) translate(${-viewBoxHalf} ${-viewBoxHalf})`;
@@ -216,13 +265,13 @@ function buildSvgExportMarkup(renderWidth, renderHeight) {
       const strokeWidth = Math.max(minStrokeWidth, shape.size * ratio);
       const localStrokeWidth = strokeWidth / scale;
       svgParts.push(
-        `<path d="${CORNER_SHAPE_PATH_D}" fill="none" stroke="${rgbaFromHex(shape.color, alpha)}" stroke-width="${localStrokeWidth}" transform="${transform}" />`,
+        `<path d="${activeComponent.path}" fill="none" stroke="${rgbaFromHex(shape.color, alpha)}" stroke-width="${localStrokeWidth}" transform="${transform}" />`,
       );
       return;
     }
 
     svgParts.push(
-      `<path d="${CORNER_SHAPE_PATH_D}" fill="${rgbaFromHex(shape.color, alpha)}" transform="${transform}" />`,
+      `<path d="${activeComponent.path}" fill="${rgbaFromHex(shape.color, alpha)}" transform="${transform}" />`,
     );
   });
 
@@ -240,6 +289,7 @@ function exportCurrentCompositionSvg(filename) {
 
 function buildExportFilename(seed) {
   const safeSeed = Number.isFinite(seed) ? Math.floor(seed) : "random";
+  const component = runtimeConfig.componentValue;
   const centrePct = Math.round(runtimeConfig.centrePercent);
   const amountPct = Math.round(runtimeConfig.amountPercent);
   const blendPct = Math.round(runtimeConfig.blendPercent);
@@ -267,7 +317,7 @@ function buildExportFilename(seed) {
     `${URL_PARAMS.outlinePct}${outlinePct}`,
     `${URL_PARAMS.weightPct}${weightPct}`,
   ].join("");
-  return `facet-${safeSeed}-${paramString}`;
+  return `facet-${safeSeed}${component}-${paramString}`;
 }
 
 function parseSeed(value) {
@@ -444,6 +494,13 @@ function syncRuntimeControlsToInputs() {
   const sizeInput = document.getElementById("sizeInput");
   const weightInput = document.getElementById("weightInput");
   const spreadInput = document.getElementById("spreadInput");
+  const componentInput = document.querySelector(
+    `input[name="componentInput"][value="${runtimeConfig.componentValue}"]`,
+  );
+
+  if (componentInput instanceof HTMLInputElement) {
+    componentInput.checked = true;
+  }
 
   if (centreInput) {
     centreInput.value = String(Math.round(runtimeConfig.centrePercent));
@@ -493,6 +550,9 @@ function syncRuntimeControlsToInputs() {
 }
 
 function bindRuntimeControls() {
+  const componentInputs = document.querySelectorAll(
+    'input[name="componentInput"]',
+  );
   const centreInput = document.getElementById("centreInput");
   const blendInput = document.getElementById("blendInput");
   const lightInput = document.getElementById("lightInput");
@@ -509,6 +569,7 @@ function bindRuntimeControls() {
   const randomBtn = document.getElementById("randomBtn");
 
   if (
+    componentInputs.length === 0 ||
     !centreInput ||
     !blendInput ||
     !lightInput ||
@@ -529,6 +590,17 @@ function bindRuntimeControls() {
 
   syncRuntimeControlsToInputs();
   updateRuntimeControlDisplay();
+
+  componentInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      if (!(input instanceof HTMLInputElement) || !input.checked) return;
+      runtimeConfig.componentValue = input.value;
+      syncRuntimeControlsToInputs();
+      updateRuntimeControlDisplay();
+      writeUrlState(currentSeed);
+      if (currentSeed !== null) generateFromSeed(currentSeed);
+    });
+  });
 
   centreInput.addEventListener("input", () => {
     const nextValue = Number(centreInput.value);
@@ -631,6 +703,7 @@ function bindRuntimeControls() {
   });
 
   resetBtn.addEventListener("click", () => {
+    runtimeConfig.componentValue = DEFAULT_COMPONENT_VALUE;
     runtimeConfig.centrePercent = UI_CENTRE_PERCENT_DEFAULT;
     runtimeConfig.blendPercent = UI_BLEND_PERCENT_DEFAULT;
     runtimeConfig.amountPercent = UI_AMOUNT_PERCENT_DEFAULT;
@@ -650,6 +723,8 @@ function bindRuntimeControls() {
   });
 
   randomBtn.addEventListener("click", () => {
+    runtimeConfig.componentValue =
+      COMPONENTS[Math.floor(Math.random() * COMPONENTS.length)].value;
     runtimeConfig.centrePercent = Math.round(Math.random() * 100);
     runtimeConfig.blendPercent = Math.round(Math.random() * 100);
     runtimeConfig.amountPercent = Math.round(Math.random() * 100);
@@ -676,6 +751,11 @@ function readSeedFromUrl() {
 
 function readRuntimeConfigFromUrl() {
   const params = new URLSearchParams(window.location.search);
+
+  const componentRaw = params.get(URL_PARAMS.component);
+  if (componentRaw !== null && COMPONENTS_BY_VALUE.has(componentRaw)) {
+    runtimeConfig.componentValue = componentRaw;
+  }
 
   const centrePctRaw = params.get(URL_PARAMS.centrePct);
   if (centrePctRaw !== null) {
@@ -783,6 +863,7 @@ function writeUrlState(seed) {
   }
 
   // Keep URL ordering aligned to UI control order.
+  orderedParams.set(URL_PARAMS.component, runtimeConfig.componentValue);
   orderedParams.set(
     URL_PARAMS.amountPct,
     String(Math.round(runtimeConfig.amountPercent)),

@@ -166,7 +166,6 @@ main {
 
 footer {
   align-items: center;
-  color: var(--color-text-prose);
   display: flex;
   height: var(--outer-block-size);
   justify-content: space-between;
@@ -312,12 +311,77 @@ canvas {
   background-color: var(--color-background-emphasis);
   border-block-end: var(--border-width) solid var(--color-border-light);
   border-start-end-radius: var(--border-radius-card);
-  display: grid;
-  gap: var(--space-horizontal-04);
-  grid-template-columns: 1fr 1fr;
   inline-size: 100%;
   padding-block: var(--space-vertical-03);
   padding-inline: var(--space-horizontal-04);
+}
+
+.control-component {
+  border: 0;
+  display: flex;
+  gap: var(--space-horizontal-04);
+  margin: 0;
+  padding-block: 0;
+  padding-inline: var(--space-horizontal-03);
+}
+
+.component-option {
+  --mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNjAgMzYwIj48cGF0aCBkPSJNMzYwIDM2MFYyMjRDMzYwIDEwMC41IDI1OS41IDAgMTM2IDBIMHYxNjBoMTM2YzM1LjMgMCA2NCAyOC43IDY0IDY0djEzNmgxNjBaIiBmaWxsPSJjdXJyZW50Q29sb3IiIC8+PC9zdmc+");
+  align-items: center;
+  display: flex;
+  height: 1.875rem;
+  justify-content: center;
+  position: relative;
+  width: 1.875rem;
+
+  &:has(:focus-visible) {
+    border-radius: var(--border-radius-focus);
+    outline: var(--outline-width) solid var(--color-interactive-focus);
+    outline-offset: var(--outline-width);
+  }
+
+  &::before {
+    background-color: var(--color-background-emphasis);
+    content: "";
+    cursor: pointer;
+    inset: var(--space-vertical-01);
+    position: absolute;
+  }
+
+  &::after {
+    background-color: var(--color-non-text-muted);
+    content: "";
+    cursor: pointer;
+    forced-color-adjust: none;
+    inset: var(--space-vertical-01);
+    -webkit-mask: var(--mask-image) center / contain no-repeat;
+    mask: var(--mask-image) center / contain no-repeat;
+    position: absolute;
+  }
+
+  &:hover::after {
+    background-color: var(--color-interactive-neutral-hover);
+  }
+
+  &:has(input:checked)::after {
+    background-color: var(--color-interactive-neutral);
+  }
+
+  &:has([value="ls"])::after {
+    --mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNjAgMzYwIj48cGF0aCBkPSJNMzYwIDIyNEMzNjAgMTAwLjUgMjU5LjUgMCAxMzYgMEgwdjM2MGgzNjBWMjI0WiIgZmlsbD0iY3VycmVudENvbG9yIi8+PC9zdmc+");
+  }
+
+  &:has([value="lt"])::after {
+    --mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3MjAgNzIwIj48cGF0aCBkPSJNNDk2LDcyMEgyMjRDMTAwLjUsNzIwLDAsNjE5LjUsMCw0OTZWMjI0QzAsMTAwLjUsMTAwLjUsMCwyMjQsMGgyNzJjMTIzLjUsMCwyMjQsMTAwLjUsMjI0LDIyNHYyNzJjMCwxMjMuNS0xMDAuNSwyMjQtMjI0LDIyNGgwWiIgZmlsbD0iY3VycmVudENvbG9yIi8+PC9zdmc+");
+  }
+
+  &:has([value="ss"])::after {
+    --mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj48cGF0aCBkPSJNMjAwLDY0QzIwMCwyOC43LDE3MS4zLDAsMTM2LDBIMHYyMDBoMjAwVjY0aDBaIiBmaWxsPSJjdXJyZW50Q29sb3IiLz48L3N2Zz4=");
+  }
+
+  &:has([value="st"])::after {
+    --mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgNDAwIj48cGF0aCBkPSJtNjQgMGMtMzUuMyAwLTY0IDI4LjctNjQgNjR2MjcyYzAgMzUuMyAyOC43IDY0IDY0IDY0aDI3MmMzNS4zIDAgNjQtMjguNyA2NC02NHYtMjcyYzAtMzUuMy0yOC43LTY0LTY0LTY0eiIgZmlsbD0iY3VycmVudENvbG9yIi8+PC9zdmc+");
+  }
 }
 
 .control-main {
@@ -367,7 +431,10 @@ canvas {
 
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 0.4;
+    @media (prefers-color-scheme: dark) {
+      opacity: 0.1;
+    }
   }
 
   &::-webkit-slider-thumb {
@@ -386,7 +453,7 @@ canvas {
   }
 }
 
-.control-actions {
+.control-footer {
   background-color: var(--color-background-emphasis);
   border-block-start: var(--border-width) solid var(--color-border-light);
   border-end-end-radius: var(--border-radius-card);
@@ -399,12 +466,12 @@ canvas {
   padding-inline: var(--space-horizontal-04);
 }
 
-.control-actions button {
+.control-footer button {
   inline-size: 100%;
 }
 
 .logo {
-  color: var(--color-text-prose);
+  color: var(--color-logo-neutral);
   display: flex;
 }
 
