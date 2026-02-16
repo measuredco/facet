@@ -231,17 +231,75 @@
           </div>
         </aside>
         <div class="header-actions">
-          <div class="export-menu" id="exportMenu">
+          <div class="dropdown-menu" id="ratioMenu">
+            <button
+              aria-controls="ratioMenuPanel"
+              aria-expanded="false"
+              aria-haspopup="listbox"
+              class="dropdown-button"
+              id="ratioBtn"
+              type="button"
+            >
+              16:9
+            </button>
+            <div
+              class="dropdown-menu-panel"
+              hidden
+              aria-labelledby="ratioBtn"
+              id="ratioMenuPanel"
+              role="listbox"
+              tabindex="-1"
+            >
+              <div
+                aria-selected="true"
+                data-ratio="l"
+                id="ratio-opt-l"
+                role="option"
+                tabindex="0"
+              >
+                16:9
+              </div>
+              <div
+                aria-selected="false"
+                data-ratio="og"
+                id="ratio-opt-og"
+                role="option"
+                tabindex="-1"
+              >
+                OG
+              </div>
+              <div
+                aria-selected="false"
+                data-ratio="s"
+                id="ratio-opt-s"
+                role="option"
+                tabindex="-1"
+              >
+                1:1
+              </div>
+              <div
+                aria-selected="false"
+                data-ratio="p"
+                id="ratio-opt-p"
+                role="option"
+                tabindex="-1"
+              >
+                4:5
+              </div>
+            </div>
+          </div>
+          <div class="dropdown-menu" id="exportMenu">
             <button
               aria-expanded="false"
               aria-haspopup="menu"
-              id="downloadBtn"
+              class="dropdown-button"
+              id="exportBtn"
               type="button"
             >
-              Download
+              Export
             </button>
             <div
-              class="export-menu-panel"
+              class="dropdown-menu-panel"
               hidden
               id="exportMenuPanel"
               role="menu"
@@ -255,14 +313,6 @@
                 Hi-res
               </button>
               <button
-                id="downloadStandardBtn"
-                role="menuitem"
-                tabindex="-1"
-                type="button"
-              >
-                Standard
-              </button>
-              <button
                 id="downloadSvgBtn"
                 role="menuitem"
                 tabindex="-1"
@@ -270,14 +320,22 @@
               >
                 Vector
               </button>
+              <button
+                id="downloadWebBtn"
+                role="menuitem"
+                tabindex="-1"
+                type="button"
+              >
+                Web
+              </button>
             </div>
           </div>
-          <button id="generateBtn" type="button">Generate</button>
+          <button id="generateBtn" type="button">New</button>
         </div>
       </header>
       <main>
         <p id="canvasDescription" class="visually-hidden">
-          Procedurally generated composition preview. Use Generate or the
+          Procedurally generated composition preview. Use New or the
           controls panel to create a new variation.
         </p>
         <div aria-describedby="canvasDescription" id="sketchContainer"></div>

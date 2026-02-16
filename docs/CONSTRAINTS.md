@@ -18,14 +18,18 @@ Define deterministic and probabilistic rules so generated images follow Measured
 
 ## Global parameters
 
-- Canvas base size: 800x450
-- Aspect ratio: 16:9
+- Ratio options:
+  - `l` (`16:9`, landscape): preview base `800x450`
+  - `og` (`1.91:1`, Open Graph): preview base `800x419`
+  - `s` (`1:1`, square): preview base `800x800`
+  - `p` (`4:5`, portrait): preview base `800x1000`
 - Color mode: RGB
 - Seed handling:
-  - `Generate` randomizes settings and regenerates.
+  - `New` randomizes settings and regenerates.
   - `Seed` creates a new random seed while retaining current settings.
   - Active seed is persisted in URL query param `s`.
   - Loading a URL with a seed reproduces the same output for the same control values.
+- Default ratio: `l` (`16:9`)
 
 ## Palette rules
 
@@ -153,6 +157,7 @@ Control and seed state persist in compact URL params.
 Canonical order:
 
 - `s` (seed)
+- `r` (Ratio)
 - `cm` (Component)
 - `a` (Amount)
 - `cn` (Centre)
@@ -171,16 +176,22 @@ Canonical order:
 
 - Settings button toggles sidebar open/closed state.
 - Sidebar defaults closed and is toggled explicitly via Settings.
+- `Ratio` menu selects active ratio (`l`, `og`, `s`, `p`).
 - `Reset` restores all controls to defaults.
-- `Generate` assigns random values to controls and regenerates.
+- `New` assigns random values to controls and regenerates.
 - `Seed` generates a new seed and keeps current settings.
 - Canvas has a descriptive text alternative and the controls panel is a labeled complementary landmark.
 
 ## Output behavior
 
 - Export formats:
-  - `Hi-res`: PNG `7680x4320` (16:9)
-  - `Standard`: PNG `1920x1080` (16:9)
-  - `Vector`: SVG at current canvas dimensions (`800x450` base, responsive in UI)
+  - `Hi-res`: PNG size depends on active Ratio
+  - `Web`: PNG size depends on active Ratio
+  - `Vector`: SVG at current canvas dimensions (responsive preview size)
+- Ratio export mapping:
+  - `l` (`16:9`): Hi-res `7680x4320`, Web `1920x1080`
+  - `og` (`OG`, `1.91:1`): Hi-res `7680x4020`, Web `2400x1260`
+  - `s` (`1:1`): Hi-res `4320x4320`, Web `1600x1600`
+  - `p` (`4:5`): Hi-res `4320x5400`, Web `1600x2000`
 - Filename includes seed + control params:
   - `facet-{seed}{cm}-a{a}cn{cn}e{e}fx{fx}fy{fy}sz{sz}sp{sp}b{b}l{l}op{op}ot{ot}w{w}.{ext}`

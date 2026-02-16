@@ -49,14 +49,33 @@ const COMPONENTS_BY_VALUE = new Map(
 const DEFAULT_COMPONENT_VALUE = "tc";
 const MIX_COMPONENT_VALUE = "mx";
 const STROKE_WIDTH_RATIOS = [0.0037, 0.0148];
-const PNG_EXPORT_HI_RES = {
-  width: 7680,
-  height: 4320,
+const RATIO_SPECS = {
+  l: {
+    label: "16:9",
+    preview: { width: 800, height: 450 },
+    hiRes: { width: 7680, height: 4320 },
+    standard: { width: 1920, height: 1080 },
+  },
+  og: {
+    label: "OG",
+    preview: { width: 800, height: 419 },
+    hiRes: { width: 7680, height: 4020 },
+    standard: { width: 2400, height: 1260 },
+  },
+  s: {
+    label: "1:1",
+    preview: { width: 800, height: 800 },
+    hiRes: { width: 4320, height: 4320 },
+    standard: { width: 1600, height: 1600 },
+  },
+  p: {
+    label: "4:5",
+    preview: { width: 800, height: 1000 },
+    hiRes: { width: 4320, height: 5400 },
+    standard: { width: 1600, height: 2000 },
+  },
 };
-const PNG_EXPORT_STANDARD = {
-  width: 1920,
-  height: 1080,
-};
+const DEFAULT_RATIO_VALUE = "l";
 const DEFAULT_SEED = 991712126;
 
 // UI control configuration (defaults + bounds)
@@ -82,6 +101,7 @@ const MIN_THICK_STROKE_WIDTH = 2;
 
 // Default values for runtime UI controls
 const runtimeConfig = {
+  ratioValue: DEFAULT_RATIO_VALUE,
   componentValue: DEFAULT_COMPONENT_VALUE,
   amountPercent: UI_AMOUNT_PERCENT_DEFAULT,
   centrePercent: UI_CENTRE_PERCENT_DEFAULT,
@@ -98,6 +118,7 @@ const runtimeConfig = {
 };
 const URL_PARAMS = {
   seed: "s",
+  ratio: "r",
   component: "cm",
   amountPct: "a",
   centrePct: "cn",
@@ -112,6 +133,18 @@ const URL_PARAMS = {
   outlinePct: "ot",
   weightPct: "w",
 };
+
+function getActiveRatioSpec() {
+  return (
+    RATIO_SPECS[runtimeConfig.ratioValue] || RATIO_SPECS[DEFAULT_RATIO_VALUE]
+  );
+}
+
+function resolveRatioValue(value) {
+  if (typeof value !== "string" || value.length === 0) return null;
+  if (Object.hasOwn(RATIO_SPECS, value)) return value;
+  return null;
+}
 
 function getActiveComponent() {
   if (runtimeConfig.componentValue === MIX_COMPONENT_VALUE) {
@@ -430,7 +463,10 @@ function shouldDisableBlendControl() {
 function shouldDisableFlipControls() {
   // Large tile and small tile are symmetrical; flipping yields no visual change.
   if (runtimeConfig.componentValue === MIX_COMPONENT_VALUE) return false;
-  return runtimeConfig.componentValue === "lt" || runtimeConfig.componentValue === "st";
+  return (
+    runtimeConfig.componentValue === "lt" ||
+    runtimeConfig.componentValue === "st"
+  );
 }
 
 function updateRuntimeControlDisplay() {
@@ -492,6 +528,25 @@ function updateRuntimeControlDisplay() {
   }
   if (spreadValue) {
     spreadValue.textContent = String(Math.round(runtimeConfig.spreadPercent));
+  }
+}
+
+function syncRatioOptionsToInputs() {
+  const ratioOptions = document.querySelectorAll(
+    '#ratioMenuPanel [role="option"]',
+  );
+  if (ratioOptions.length === 0) return;
+  const ratioBtn = document.getElementById("ratioBtn");
+  const activeRatio = getActiveRatioSpec();
+
+  ratioOptions.forEach((option) => {
+    if (!(option instanceof HTMLElement)) return;
+    const isSelected = option.dataset.ratio === runtimeConfig.ratioValue;
+    option.setAttribute("aria-selected", String(isSelected));
+    option.tabIndex = isSelected ? 0 : -1;
+  });
+  if (ratioBtn) {
+    ratioBtn.textContent = activeRatio.label;
   }
 }
 
@@ -781,6 +836,12 @@ function readSeedFromUrl() {
 function readRuntimeConfigFromUrl() {
   const params = new URLSearchParams(window.location.search);
 
+  const ratioRaw = params.get(URL_PARAMS.ratio);
+  const resolvedRatio = resolveRatioValue(ratioRaw);
+  if (resolvedRatio !== null) {
+    runtimeConfig.ratioValue = resolvedRatio;
+  }
+
   const componentRaw = params.get(URL_PARAMS.component);
   if (componentRaw === MIX_COMPONENT_VALUE) {
     runtimeConfig.componentValue = MIX_COMPONENT_VALUE;
@@ -894,6 +955,7 @@ function writeUrlState(seed) {
   }
 
   // Keep URL ordering aligned to UI control order.
+  orderedParams.set(URL_PARAMS.ratio, runtimeConfig.ratioValue);
   orderedParams.set(URL_PARAMS.component, runtimeConfig.componentValue);
   orderedParams.set(
     URL_PARAMS.amountPct,
@@ -950,17 +1012,37 @@ function writeUrlState(seed) {
 
 function setup() {
   const container = document.getElementById("sketchContainer");
-  cnv = createCanvas(800, 450);
+  const initialRatio = getActiveRatioSpec();
+  cnv = createCanvas(initialRatio.preview.width, initialRatio.preview.height);
   cnv.parent(container);
   noLoop();
 
   // wire controls
+  const ratioMenuPanel = document.getElementById("ratioMenuPanel");
+  const ratioBtn = document.getElementById("ratioBtn");
   const genBtn = document.getElementById("generateBtn");
   const downloadHiResBtn = document.getElementById("downloadHiResBtn");
-  const downloadStandardBtn = document.getElementById("downloadStandardBtn");
+  const downloadWebBtn = document.getElementById("downloadWebBtn");
   const downloadSvgBtn = document.getElementById("downloadSvgBtn");
   readRuntimeConfigFromUrl();
+  syncRatioOptionsToInputs();
+  windowResized();
   bindRuntimeControls();
+
+  if (ratioBtn && ratioMenuPanel) {
+    ratioBtn.addEventListener("choose", (event) => {
+      const customEvent = event;
+      if (!(customEvent instanceof CustomEvent)) return;
+      const choice = customEvent.detail?.choice;
+      if (!(choice instanceof HTMLElement)) return;
+      const nextRatio = resolveRatioValue(choice.dataset.ratio);
+      if (!nextRatio) return;
+      runtimeConfig.ratioValue = nextRatio;
+      syncRatioOptionsToInputs();
+      writeUrlState(currentSeed);
+      windowResized();
+    });
+  }
 
   genBtn.addEventListener("click", () => {
     applyRandomizedSettings();
@@ -969,21 +1051,23 @@ function setup() {
   if (downloadHiResBtn) {
     downloadHiResBtn.addEventListener("click", () => {
       const filename = buildExportFilename(currentSeed);
+      const ratioSpec = getActiveRatioSpec();
       exportCurrentComposition(
         filename,
-        PNG_EXPORT_HI_RES.width,
-        PNG_EXPORT_HI_RES.height,
+        ratioSpec.hiRes.width,
+        ratioSpec.hiRes.height,
       );
     });
   }
 
-  if (downloadStandardBtn) {
-    downloadStandardBtn.addEventListener("click", () => {
+  if (downloadWebBtn) {
+    downloadWebBtn.addEventListener("click", () => {
       const filename = buildExportFilename(currentSeed);
+      const ratioSpec = getActiveRatioSpec();
       exportCurrentComposition(
         filename,
-        PNG_EXPORT_STANDARD.width,
-        PNG_EXPORT_STANDARD.height,
+        ratioSpec.standard.width,
+        ratioSpec.standard.height,
       );
     });
   }
@@ -1090,9 +1174,10 @@ function generateFromSeed(seed) {
   ) {
     guard += 1;
     const color = pickPaletteColor(paletteWeights);
-    const componentValue = runtimeConfig.componentValue === MIX_COMPONENT_VALUE
-      ? COMPONENTS[Math.floor(random(COMPONENTS.length))].value
-      : runtimeConfig.componentValue;
+    const componentValue =
+      runtimeConfig.componentValue === MIX_COMPONENT_VALUE
+        ? COMPONENTS[Math.floor(random(COMPONENTS.length))].value
+        : runtimeConfig.componentValue;
     const styleMode =
       random() < runtimeConfig.strokeOnlyProbability ? "stroke" : "fill";
     const size = lerp(minSize, maxSize, Math.pow(random(), 0.35));
@@ -1135,8 +1220,43 @@ function generateFromSeed(seed) {
 
 function windowResized() {
   const container = document.getElementById("sketchContainer");
-  const w = container.clientWidth || 800;
-  resizeCanvas(w, Math.round(w * (9 / 16)));
+  if (!container) return;
+  const main = document.querySelector("main");
+  const header = document.querySelector("header");
+  const footer = document.querySelector("footer");
+  const ratioSpec = getActiveRatioSpec();
+  const ratio = ratioSpec.preview.height / ratioSpec.preview.width;
+
+  // Use stylesheet max-inline-size as baseline, then cap by viewport height
+  // so tall ratios (e.g. square/portrait) don't exceed the visible viewport.
+  container.style.removeProperty("max-inline-size");
+
+  const computed = window.getComputedStyle(container);
+  const baselineMaxInline = Number.parseFloat(computed.maxInlineSize);
+  const baselineMaxInlinePx = Number.isFinite(baselineMaxInline)
+    ? baselineMaxInline
+    : Number.POSITIVE_INFINITY;
+
+  const mainStyles = main ? window.getComputedStyle(main) : null;
+  const mainPaddingBlock = mainStyles
+    ? Number.parseFloat(mainStyles.paddingTop) +
+      Number.parseFloat(mainStyles.paddingBottom)
+    : 0;
+  const headerHeight = header ? header.offsetHeight : 0;
+  const footerHeight = footer ? footer.offsetHeight : 0;
+  const maxCanvasHeight = Math.max(
+    1,
+    window.innerHeight - headerHeight - footerHeight - mainPaddingBlock,
+  );
+
+  const maxInlineFromHeight = maxCanvasHeight / ratio;
+  const finalMaxInlinePx = Math.min(baselineMaxInlinePx, maxInlineFromHeight);
+  if (Number.isFinite(finalMaxInlinePx)) {
+    container.style.maxInlineSize = `${Math.floor(finalMaxInlinePx)}px`;
+  }
+
+  const w = container.clientWidth || ratioSpec.preview.width;
+  resizeCanvas(w, Math.round(w * ratio));
   if (currentSeed !== null) generateFromSeed(currentSeed);
 }
 

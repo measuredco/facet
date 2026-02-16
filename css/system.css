@@ -382,7 +382,6 @@
   --color-interactive: var(--color-brand);
   --color-interactive-hover: var(--color-azure-03);
   --color-interactive-focus: var(--color-rose-06);
-  --color-interactive-focus-background: var(--color-rose-11);
   --color-interactive-active: var(--color-azure-02);
   --color-interactive-visited: var(--color-violet-05);
 
@@ -446,7 +445,6 @@
     --color-interactive: var(--color-brand);
     --color-interactive-hover: var(--color-azure-06);
     --color-interactive-focus: var(--color-rose-05);
-    --color-interactive-focus-background: var(--color-rose-01);
     --color-interactive-active: var(--color-azure-05);
     --color-interactive-visited: var(--color-violet-06);
 

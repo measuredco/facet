@@ -26,11 +26,12 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ## Current UX model
 
 - Header actions:
-  - `Generate` (randomise settings)
-  - `Download` (dropdown with PNG/SVG actions)
+  - `New` (randomise settings)
+  - `Ratio` (dropdown with ratio options)
+  - `Export` (dropdown with PNG/SVG actions)
   - Settings toggle (sidebar visibility)
 - Main preview:
-  - Responsive 16:9 canvas
+  - Responsive canvas (active ratio)
 - Controls sidebar:
   - `Component` (includes `Mix` radio option), `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`
   - `Reset`, `Seed`
@@ -39,7 +40,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 - No backend persistence.
 - URL query params persist runtime state:
-  - `s`, `cm`, `a`, `cn`, `e`, `fx`, `fy`, `sz`, `sp`, `b`, `l`, `op`, `ot`, `w`
+  - `s`, `r`, `cm`, `a`, `cn`, `e`, `fx`, `fy`, `sz`, `sp`, `b`, `l`, `op`, `ot`, `w`
   - `cm=mx` enables mixed-component generation.
 - Reload reproduces output for same seed + control state.
 
@@ -53,7 +54,8 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Sidebar toggle behavior is wired and synchronized with layout.
 - Canvas regeneration is deterministic per seed.
 - Runtime controls are fully wired and update URL state.
-- Generate, Seed, and Reset are implemented.
+- Ratio menu is wired and drives preview/export dimensions.
+- New, Seed, and Reset are implemented.
 - Candidate acceptance has been refactored into a centralized validator helper with no visual regression in manual snapshot checks.
 - Accessibility baseline improvements in place:
   - Labeled controls landmark
@@ -64,30 +66,24 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Now
 
+- Review
+
 ### Next
 
-- Expand download and aspect ratio support (retain SVG as Vector).
-
-| Aspect           | Hi-Res (PNG) | Standard (PNG) |
-| ---------------- | ------------ | -------------- |
-| Landscape (16:9) | 7680 × 4320  | 1920 × 1080    |
-| OG (1.91:1)      | 7680 × 4020  | 2400 × 1260    |
-| Portrait (4:5)   | 4320 × 5400  | 1600 × 2000    |
-| Square (1:1)     | 4320 × 4320  | 1600 × 1600    |
+- Consider adding text support
 
 ### Later
-
-- Validation layer: Add a fuller validation module (explicit rule contracts, reject reasons, and lightweight tests) once core controls and primitives stabilize.
-- Enable versioning and include in export filenames.
 
 ## Acceptance tests
 
 - App runs locally via static server.
-- Generate randomizes settings and regenerates.
+- New randomizes settings and regenerates.
 - Seed creates new seeded output with current settings.
 - URL params reproduce seeded output and controls.
 - Sidebar controls change composition and persist to URL.
-- Download menu offers `Hi-res`, `Standard`, and `Vector`.
-- `Hi-res` exports PNG at `7680x4320`.
-- `Standard` exports PNG at `1920x1080`.
+- Ratio menu offers `16:9`, `OG`, `1:1`, and `4:5`.
+- Changing Ratio updates preview ratio while keeping responsive max preview behavior.
+- Export menu offers `Hi-res`, `Web`, and `Vector`.
+- `Hi-res` exports PNG size for active Ratio.
+- `Web` exports PNG size for active Ratio.
 - `Vector` exports SVG at current canvas dimensions.
