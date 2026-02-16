@@ -81,8 +81,10 @@ button {
   &:focus-visible {
     border-radius: var(--border-radius-button);
   }
-  &:hover {
-    color: var(--color-interactive-neutral-hover);
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-interactive-neutral-hover);
+    }
   }
   &:active {
     color: var(--color-interactive-neutral-active);
@@ -197,8 +199,10 @@ footer {
   &:focus-visible {
     border-radius: var(--border-radius-focus);
   }
-  &:hover {
-    color: var(--color-interactive-neutral-hover);
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-interactive-neutral-hover);
+    }
   }
   &:active {
     color: var(--color-interactive-neutral-active);
@@ -267,8 +271,10 @@ h1 {
     background-color: var(--color-interactive-focus-background);
     outline: none;
   }
-  &:hover {
-    color: var(--color-interactive-neutral-hover);
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-interactive-neutral-hover);
+    }
   }
   &:active {
     color: var(--color-interactive-neutral-active);
@@ -279,8 +285,10 @@ h1 {
   background-color: var(--color-interactive);
   border-color: var(--color-interactive);
   color: var(--color-interactive-contrast);
-  &:hover {
-    background-color: var(--color-interactive-hover);
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--color-interactive-hover);
+    }
   }
   &:active {
     background-color: var(--color-interactive-active);
@@ -359,8 +367,10 @@ canvas {
     position: absolute;
   }
 
-  &:hover::after {
-    background-color: var(--color-interactive-neutral-hover);
+  @media (hover: hover) {
+    &:hover::after {
+      background-color: var(--color-interactive-neutral-hover);
+    }
   }
 
   &:has(input:checked)::after {

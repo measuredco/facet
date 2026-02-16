@@ -67,9 +67,17 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Later
 
-- Disable CSS hover styles on touch devices.
 - Rounded menu button focus state when open.
 - Consider mixed/probabilistic component option.
+- Expand download and aspect ratio support (retain SVG as Vector).
+
+| Aspect           | Hi-Res (PNG) | Standard (PNG) |
+| ---------------- | ------------ | -------------- |
+| Landscape (16:9) | 7680 × 4320  | 1920 × 1080    |
+| OG (1.91:1)      | 7680 × 4020  | 2400 × 1260    |
+| Portrait (4:5)   | 4320 × 5400  | 1600 × 2000    |
+| Square (1:1)     | 4320 × 4320  | 1600 × 1600    |
+
 - Validation layer: Add a fuller validation module (explicit rule contracts, reject reasons, and lightweight tests) once core controls and primitives stabilize.
 - Enable versioning and include in export filenames.
 
