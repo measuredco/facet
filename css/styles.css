@@ -285,7 +285,8 @@ h1 {
   white-space: nowrap;
 
   &:focus-visible {
-    outline-offset: 0;
+    border-radius: var(--border-radius-button);
+    outline-offset: calc(-2 * var(--outline-width));
   }
 
   &[aria-selected="true"] {
