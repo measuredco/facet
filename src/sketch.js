@@ -1275,3 +1275,7 @@ function applyResponsiveCanvasSize() {
 window.addEventListener("load", () => {
   applyResponsiveCanvasSize();
 });
+
+window.draw = draw;
+window.setup = setup;
+window.windowResized = windowResized;
