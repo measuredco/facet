@@ -61,7 +61,7 @@ const RATIO_SPECS = {
     label: "OG",
     preview: { width: 800, height: 419 },
     hiRes: { width: 7680, height: 4020 },
-    standard: { width: 2400, height: 1260 },
+    standard: { width: 1200, height: 630 },
   },
   s: {
     label: "1:1",
