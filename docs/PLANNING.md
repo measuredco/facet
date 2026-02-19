@@ -47,7 +47,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ## Tech stack
 
 - HTML + CSS + vanilla JS
-- p5.js (CDN)
+- p5.js (npm) + Vite
 
 ## Current implementation status
 
