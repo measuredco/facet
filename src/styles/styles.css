@@ -102,11 +102,6 @@ button {
 
 header {
   align-items: center;
-  background-color: color-mix(
-    in srgb,
-    var(--color-background) 80%,
-    transparent
-  );
   display: flex;
   inset-block-start: 0;
   inset-inline: 0;
@@ -149,7 +144,7 @@ main {
   padding-block: var(--space-vertical-03);
   padding-inline: var(--space-horizontal-05);
 
-  @container (min-inline-size: 37.5rem) {
+  @container (min-inline-size: 48rem) {
     padding-inline: var(--space-horizontal-07);
   }
 
@@ -192,13 +187,13 @@ footer {
 
 #settingsBtn {
   align-items: center;
+  aspect-ratio: 1 / 1;
   background-color: transparent;
   block-size: 1.875rem;
   border: 0;
   color: var(--color-interactive-neutral);
   cursor: pointer;
   display: flex;
-  inline-size: 1.875rem;
   justify-content: center;
   line-height: 1;
   padding: 0;
@@ -241,7 +236,7 @@ h1 {
 
 .dropdown-button {
   font-variant-numeric: tabular-nums;
-  min-inline-size: 3.625rem;
+  min-inline-size: calc(72rem / 16);
 
   &[aria-expanded="true"] {
     border-block-end-color: var(--color-border-light);
@@ -363,11 +358,11 @@ canvas {
 .component-option {
   --mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNjAgMzYwIj48cGF0aCBkPSJNMzYwIDM2MFYyMjRDMzYwIDEwMC41IDI1OS41IDAgMTM2IDBIMHYxNjBoMTM2YzM1LjMgMCA2NCAyOC43IDY0IDY0djEzNmgxNjBaIiBmaWxsPSJjdXJyZW50Q29sb3IiIC8+PC9zdmc+");
   align-items: center;
+  aspect-ratio: 1 / 1;
+  block-size: 1.875rem;
   display: flex;
-  height: 1.875rem;
   justify-content: center;
   position: relative;
-  width: 1.875rem;
 
   &:has(:focus-visible) {
     border-radius: var(--border-radius-focus);
@@ -448,7 +443,7 @@ canvas {
   align-items: center;
   display: grid;
   gap: var(--space-horizontal-04);
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 6ch 1fr 3ch;
   padding-inline: var(--space-horizontal-04);
 }
 
@@ -456,7 +451,6 @@ canvas {
   color: var(--color-interactive-neutral);
   font-size: var(--font-01-size);
   line-height: var(--font-01-line-height);
-  min-width: 3.25rem;
   white-space: nowrap;
 
   .control-group:has([disabled]) & {
@@ -486,7 +480,6 @@ canvas {
 .control-value {
   color: var(--color-text-prose);
   font-variant-numeric: tabular-nums;
-  min-inline-size: 1.75rem;
   text-align: end;
 
   .control-group:has([disabled]) & {
@@ -517,8 +510,8 @@ canvas {
 }
 
 .trademark {
-  color: var(--color-interactive-neutral);
   align-self: flex-end;
+  color: var(--color-interactive-neutral);
   text-decoration: none;
 
   &:hover {
