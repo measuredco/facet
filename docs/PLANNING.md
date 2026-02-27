@@ -70,7 +70,10 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Later
 
-- Deploy to https://facet.measured.co
+- Move seed button to header
+- Create mobile nav
+- Link to repo
+- Color param
 - Consider adding text feature, to optional add a textual element to compositions _values below calculated for a 1200 × 630 OG image_
   - no rich text, string only
   - `--color-white` (probably?)

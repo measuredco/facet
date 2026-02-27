@@ -2,6 +2,7 @@ function bindSettingsToggle() {
   const settingsBtn = document.getElementById("settingsBtn");
   const sidebar = document.getElementById("sidebarPanel");
   if (!settingsBtn || !sidebar) return;
+  const desktopViewportQuery = window.matchMedia("(min-width: 72rem)");
 
   function setSidebarVisible(isVisible) {
     sidebar.hidden = !isVisible;
@@ -19,9 +20,58 @@ function bindSettingsToggle() {
     });
   }
 
+  function isOverlayViewport() {
+    return !desktopViewportQuery.matches;
+  }
+
+  function isSidebarOpen() {
+    return !sidebar.hidden;
+  }
+
+  function isAnyDropdownOpen() {
+    return (
+      document.querySelector('.dropdown-button[aria-expanded="true"]') !== null
+    );
+  }
+
+  function closeSidebar({ restoreFocus = false } = {}) {
+    if (!isSidebarOpen()) return;
+    setSidebarVisible(false);
+    notifyLayoutChange();
+    if (restoreFocus) {
+      settingsBtn.focus();
+    }
+  }
+
   settingsBtn.addEventListener("click", () => {
     setSidebarVisible(sidebar.hidden);
     notifyLayoutChange();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!isOverlayViewport()) return;
+    if (!isSidebarOpen()) return;
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    if (sidebar.contains(target)) return;
+    if (settingsBtn.contains(target)) return;
+    closeSidebar();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (!isSidebarOpen()) return;
+    if (isAnyDropdownOpen()) return;
+
+    const activeElement = document.activeElement;
+    const hasFocusInSidebar =
+      activeElement instanceof Node && sidebar.contains(activeElement);
+    const shouldCloseForEscape =
+      isOverlayViewport() || (!isOverlayViewport() && hasFocusInSidebar);
+    if (!shouldCloseForEscape) return;
+
+    event.preventDefault();
+    closeSidebar({ restoreFocus: true });
   });
 
   setSidebarVisible(!sidebar.hidden);

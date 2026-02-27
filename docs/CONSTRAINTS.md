@@ -176,6 +176,9 @@ Canonical order:
 
 - Settings button toggles sidebar open/closed state.
 - Sidebar defaults closed and is toggled explicitly via Settings.
+- In narrow viewport (sidebar overlays canvas), clicking outside sidebar closes it.
+- In narrow viewport, `Escape` closes sidebar unless a dropdown/listbox menu is currently open.
+- In desktop viewport, `Escape` closes sidebar only when focus is inside sidebar and no dropdown/listbox menu is open.
 - `Ratio` menu selects active ratio (`l`, `og`, `s`, `p`).
 - `Reset` restores all controls to defaults.
 - `New` assigns random values to controls and regenerates.
@@ -190,7 +193,7 @@ Canonical order:
   - `Vector`: SVG at current canvas dimensions (responsive preview size)
 - Ratio export mapping:
   - `l` (`16:9`): Hi-res `7680x4320`, Web `1920x1080`
-- `og` (`OG`, `1.91:1`): Hi-res `7680x4020`, Web `1200x630`
+  - `og` (`OG`, `1.91:1`): Hi-res `7680x4020`, Web `1200x630`
   - `s` (`1:1`): Hi-res `4320x4320`, Web `1600x1600`
   - `p` (`4:5`): Hi-res `4320x5400`, Web `1600x2000`
 - Filename includes seed + control params:
