@@ -509,13 +509,22 @@ canvas {
   display: flex;
 }
 
-.trademark {
+.footer-links {
   align-self: flex-end;
+  color: var(--color-text-prose);
+  line-height: 1.285714;
+  text-align: end;
+}
+
+.footer-link {
   color: var(--color-interactive-neutral);
   text-decoration: none;
+  white-space: nowrap;
 
-  &:hover {
-    color: var(--color-interactive-neutral-hover);
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-interactive-neutral-hover);
+    }
   }
 
   &:active {
