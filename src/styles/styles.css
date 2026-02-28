@@ -182,6 +182,7 @@ header {
   padding-block: var(--space-vertical-03);
   padding-inline: var(--space-horizontal-04);
   position: sticky;
+  z-index: 1;
 
   @container (min-inline-size: 24rem) {
     padding-inline: var(--space-horizontal-05);
