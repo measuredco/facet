@@ -286,7 +286,8 @@ footer {
   display: flex;
   justify-content: center;
   line-height: 1;
-  padding: 0;
+  padding-block: var(--space-vertical-01);
+  padding-inline: 0;
 
   &:focus-visible {
     border-radius: var(--border-radius-focus);
@@ -299,6 +300,10 @@ footer {
   }
   &:active {
     color: var(--color-interactive-neutral-active);
+  }
+
+  svg {
+    height: 100%;
   }
 }
 
