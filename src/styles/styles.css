@@ -207,7 +207,7 @@ aside {
   inset-inline-start: 0;
   justify-self: center;
   max-block-size: calc(
-    100dvh - var(--outer-block-size) - var(--space-vertical-04)
+    100dvh - var(--outer-block-size) - var(--space-vertical-03)
   );
   position: fixed;
 

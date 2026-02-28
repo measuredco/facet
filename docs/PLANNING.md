@@ -34,14 +34,14 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Main preview:
   - Responsive canvas (active ratio)
 - Controls sidebar:
-  - `Component` (includes `Mix` radio option), `Colour`, `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`
+  - `Component` (includes `Mix` radio option), `Colour`, `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`, `Dots`, `Screen`
   - `Reset`
 
 ## State and persistence
 
 - No backend persistence.
 - URL query params persist runtime state:
-  - `s`, `r`, `cm`, `cl`, `a`, `cn`, `e`, `fx`, `fy`, `sz`, `sp`, `b`, `l`, `op`, `ot`, `w`
+  - `s`, `r`, `cm`, `cl`, `a`, `cn`, `e`, `fx`, `fy`, `sz`, `sp`, `b`, `l`, `op`, `ot`, `w`, `ds`, `sc`
   - `cm=mx` enables mixed-component generation.
 - Reload reproduces output for same seed + control state.
 

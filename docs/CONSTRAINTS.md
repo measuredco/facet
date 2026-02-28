@@ -116,6 +116,8 @@ UI controls currently exposed in sidebar:
 - `Opacity`
 - `Outline`
 - `Weight`
+- `Dots`
+- `Screen`
 
 Current defaults:
 
@@ -133,6 +135,8 @@ Current defaults:
 - `Opacity`: 75%
 - `Outline`: 0%
 - `Weight`: 50%
+- `Dots`: 0%
+- `Screen`: 0%
 
 Component values (UI order):
 
@@ -161,6 +165,9 @@ Control semantics:
 - `Spread` maps `0..100%` to internal size spread `0.0..1.0`.
 - `Weight` maps `0..100%` to thin/thick stroke selection probability.
 - `Weight` is disabled when `Outline` is `0%`.
+- `Dots` maps `0..100%` to halftone dot scale.
+- `Dots` is disabled when `Screen` is `0%`.
+- `Screen` maps `0..100%` to halftone intensity.
 - `Opacity` is disabled when `Outline` is `100%` or `Amount` is `0%`.
 - `Blend` is disabled when `Amount` is `0%`.
 - `Flip X` and `Flip Y` are disabled when `Component` is `lt` or `st`, because those two shapes are symmetrical and flips produce no visual difference.
@@ -189,6 +196,8 @@ Canonical order:
 - `op` (Opacity)
 - `ot` (Outline)
 - `w` (Weight)
+- `ds` (Dots)
+- `sc` (Screen)
 
 ## UI behavior
 
@@ -209,10 +218,13 @@ Canonical order:
   - `Hi-res`: PNG size depends on active Ratio
   - `Web`: PNG size depends on active Ratio
   - `Vector`: SVG at current canvas dimensions (responsive preview size)
+- Post-process effects:
+  - `Dots` + `Screen` are raster post-process controls and apply to preview and PNG exports.
+  - `Vector` SVG export does not include raster post-process effects.
 - Ratio export mapping:
   - `l` (`16:9`): Hi-res `7680x4320`, Web `1920x1080`
   - `og` (`OG`, `1.91:1`): Hi-res `7680x4020`, Web `1200x630`
   - `s` (`1:1`): Hi-res `4320x4320`, Web `1600x1600`
   - `p` (`4:5`): Hi-res `4320x5400`, Web `1600x2000`
 - Filename includes seed + control params:
-  - `facet-{seed}{cm}-cl{cl}a{a}cn{cn}e{e}fx{fx}fy{fy}sz{sz}sp{sp}b{b}l{l}op{op}ot{ot}w{w}.{ext}`
+  - `facet-{seed}{cm}-cl{cl}a{a}cn{cn}e{e}fx{fx}fy{fy}sz{sz}sp{sp}b{b}l{l}op{op}ot{ot}w{w}ds{ds}sc{sc}.{ext}`

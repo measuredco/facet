@@ -118,6 +118,8 @@ const UI_OUTLINE_PERCENT_DEFAULT = 0;
 const UI_WEIGHT_PERCENT_DEFAULT = 50;
 const UI_SIZE_PERCENT_DEFAULT = 75;
 const UI_SPREAD_PERCENT_DEFAULT = 50;
+const UI_HALFTONE_PERCENT_DEFAULT = 0;
+const UI_DOT_SIZE_PERCENT_DEFAULT = 0;
 
 // Internal tuning constants (engine behavior / performance guards)
 const ENABLE_SAME_COLOR_OVERLAP_CHECK = true;
@@ -142,6 +144,8 @@ const runtimeConfig = {
   overlapAlpha: UI_OPACITY_PERCENT_DEFAULT / 100,
   sizePercent: UI_SIZE_PERCENT_DEFAULT,
   spreadPercent: UI_SPREAD_PERCENT_DEFAULT,
+  dotSizePercent: UI_DOT_SIZE_PERCENT_DEFAULT,
+  halftonePercent: UI_HALFTONE_PERCENT_DEFAULT,
 };
 const URL_PARAMS = {
   seed: "s",
@@ -160,6 +164,8 @@ const URL_PARAMS = {
   opacityPct: "op",
   outlinePct: "ot",
   weightPct: "w",
+  dotSizePct: "ds",
+  halftonePct: "sc",
 };
 
 function getActiveRatioSpec() {
@@ -265,6 +271,55 @@ function drawCompositionToContext(
     }
     ctx.restore();
   });
+  applyHalftoneOverlay(ctx);
+
+  ctx.restore();
+}
+
+function applyHalftoneOverlay(ctx) {
+  if (runtimeConfig.halftonePercent <= 0) return;
+
+  const strength = clamp(runtimeConfig.halftonePercent, 0, 100) / 100;
+  const dotSize = clamp(runtimeConfig.dotSizePercent, 0, 100) / 100;
+  const targetWidth = ctx.canvas.width;
+  const targetHeight = ctx.canvas.height;
+  const minDimension = Math.min(targetWidth, targetHeight);
+  const coarseCell = clamp(Math.round(minDimension / 180), 4, 24);
+  const dotScale = lerp(0.6, 2.2, dotSize);
+  const cellSize = Math.max(
+    3,
+    Math.round(coarseCell * lerp(1.6, 0.8, strength) * dotScale),
+  );
+  const sampleOffset = Math.floor(cellSize * 0.5);
+  const dotAlpha = lerp(0.16, 0.45, strength);
+
+  const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+  const data = imageData.data;
+
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalCompositeOperation = "multiply";
+  ctx.globalAlpha = dotAlpha;
+  ctx.fillStyle = "#000";
+
+  for (let y = 0; y < targetHeight; y += cellSize) {
+    for (let x = 0; x < targetWidth; x += cellSize) {
+      const sx = Math.min(x + sampleOffset, targetWidth - 1);
+      const sy = Math.min(y + sampleOffset, targetHeight - 1);
+      const pixelOffset = (sy * targetWidth + sx) * 4;
+      const r = data[pixelOffset];
+      const g = data[pixelOffset + 1];
+      const b = data[pixelOffset + 2];
+      const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      const darkness = 1 - luminance / 255;
+      const radius = darkness * (cellSize * 0.5) * strength;
+      if (radius <= 0.25) continue;
+
+      ctx.beginPath();
+      ctx.arc(sx, sy, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
 
   ctx.restore();
 }
@@ -381,6 +436,8 @@ function buildExportFilename(seed) {
   const weightPct = Math.round(runtimeConfig.weightProbability * 100);
   const sizePct = Math.round(runtimeConfig.sizePercent);
   const spreadPct = Math.round(runtimeConfig.spreadPercent);
+  const dotSizePct = Math.round(runtimeConfig.dotSizePercent);
+  const halftonePct = Math.round(runtimeConfig.halftonePercent);
 
   const paramString = [
     `${URL_PARAMS.color}${color}`,
@@ -396,6 +453,8 @@ function buildExportFilename(seed) {
     `${URL_PARAMS.opacityPct}${opacityPct}`,
     `${URL_PARAMS.outlinePct}${outlinePct}`,
     `${URL_PARAMS.weightPct}${weightPct}`,
+    `${URL_PARAMS.dotSizePct}${dotSizePct}`,
+    `${URL_PARAMS.halftonePct}${halftonePct}`,
   ].join("");
   return `facet-${safeSeed}${component}-${paramString}`;
 }
@@ -499,6 +558,10 @@ function shouldDisableBlendControl() {
   return runtimeConfig.amountPercent <= 0;
 }
 
+function shouldDisableDotSizeControl() {
+  return runtimeConfig.halftonePercent <= 0;
+}
+
 function shouldDisableFlipControls() {
   // Large tile and small tile are symmetrical; flipping yields no visual change.
   if (runtimeConfig.componentValue === MIX_COMPONENT_VALUE) return false;
@@ -521,6 +584,8 @@ function updateRuntimeControlDisplay() {
   const sizeValue = document.getElementById("sizeValue");
   const weightValue = document.getElementById("weightValue");
   const spreadValue = document.getElementById("spreadValue");
+  const dotSizeValue = document.getElementById("dotSizeValue");
+  const halftoneValue = document.getElementById("halftoneValue");
 
   if (centreValue) {
     centreValue.textContent = String(Math.round(runtimeConfig.centrePercent));
@@ -568,6 +633,12 @@ function updateRuntimeControlDisplay() {
   if (spreadValue) {
     spreadValue.textContent = String(Math.round(runtimeConfig.spreadPercent));
   }
+  if (dotSizeValue) {
+    dotSizeValue.textContent = String(Math.round(runtimeConfig.dotSizePercent));
+  }
+  if (halftoneValue) {
+    halftoneValue.textContent = String(Math.round(runtimeConfig.halftonePercent));
+  }
 }
 
 function syncRatioOptionsToInputs() {
@@ -602,6 +673,8 @@ function syncRuntimeControlsToInputs() {
   const sizeInput = document.getElementById("sizeInput");
   const weightInput = document.getElementById("weightInput");
   const spreadInput = document.getElementById("spreadInput");
+  const dotSizeInput = document.getElementById("dotSizeInput");
+  const halftoneInput = document.getElementById("halftoneInput");
   const componentInput = document.querySelector(
     `input[name="componentInput"][value="${runtimeConfig.componentValue}"]`,
   );
@@ -662,6 +735,13 @@ function syncRuntimeControlsToInputs() {
   if (spreadInput) {
     spreadInput.value = String(runtimeConfig.spreadPercent);
   }
+  if (dotSizeInput) {
+    dotSizeInput.value = String(runtimeConfig.dotSizePercent);
+    dotSizeInput.disabled = shouldDisableDotSizeControl();
+  }
+  if (halftoneInput) {
+    halftoneInput.value = String(runtimeConfig.halftonePercent);
+  }
 }
 
 function applyRandomizedSettings() {
@@ -683,6 +763,8 @@ function applyRandomizedSettings() {
   runtimeConfig.weightProbability = Math.random();
   runtimeConfig.sizePercent = Math.round(Math.random() * 100);
   runtimeConfig.spreadPercent = Math.round(Math.random() * 100);
+  runtimeConfig.halftonePercent = Math.round(Math.random() * 100);
+  runtimeConfig.dotSizePercent = Math.round(Math.random() * 100);
   syncRuntimeControlsToInputs();
   updateRuntimeControlDisplay();
   writeUrlState(currentSeed);
@@ -712,6 +794,8 @@ function bindRuntimeControls() {
   const sizeInput = document.getElementById("sizeInput");
   const weightInput = document.getElementById("weightInput");
   const spreadInput = document.getElementById("spreadInput");
+  const dotSizeInput = document.getElementById("dotSizeInput");
+  const halftoneInput = document.getElementById("halftoneInput");
   const resetBtn = document.getElementById("resetBtn");
   const seedBtn = document.getElementById("seedBtn");
 
@@ -730,6 +814,8 @@ function bindRuntimeControls() {
     !sizeInput ||
     !weightInput ||
     !spreadInput ||
+    !dotSizeInput ||
+    !halftoneInput ||
     !resetBtn ||
     !seedBtn
   ) {
@@ -862,6 +948,23 @@ function bindRuntimeControls() {
     if (currentSeed !== null) generateFromSeed(currentSeed);
   });
 
+  dotSizeInput.addEventListener("input", () => {
+    const nextValue = Number(dotSizeInput.value);
+    runtimeConfig.dotSizePercent = clamp(nextValue, 0, 100);
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
+  halftoneInput.addEventListener("input", () => {
+    const nextValue = Number(halftoneInput.value);
+    runtimeConfig.halftonePercent = clamp(nextValue, 0, 100);
+    dotSizeInput.disabled = shouldDisableDotSizeControl();
+    updateRuntimeControlDisplay();
+    writeUrlState(currentSeed);
+    if (currentSeed !== null) generateFromSeed(currentSeed);
+  });
+
   resetBtn.addEventListener("click", () => {
     runtimeConfig.componentValue = DEFAULT_COMPONENT_VALUE;
     runtimeConfig.colorValue = DEFAULT_COLOR_VALUE;
@@ -877,6 +980,8 @@ function bindRuntimeControls() {
     runtimeConfig.weightProbability = UI_WEIGHT_PERCENT_DEFAULT / 100;
     runtimeConfig.sizePercent = UI_SIZE_PERCENT_DEFAULT;
     runtimeConfig.spreadPercent = UI_SPREAD_PERCENT_DEFAULT;
+    runtimeConfig.halftonePercent = UI_HALFTONE_PERCENT_DEFAULT;
+    runtimeConfig.dotSizePercent = UI_DOT_SIZE_PERCENT_DEFAULT;
     syncRuntimeControlsToInputs();
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);
@@ -1009,6 +1114,23 @@ function readRuntimeConfigFromUrl() {
       runtimeConfig.lightPercent = clamp(lightPct, 0, 100);
     }
   }
+
+  const dotSizePctRaw = params.get(URL_PARAMS.dotSizePct);
+  if (dotSizePctRaw !== null) {
+    const dotSizePct = Number(dotSizePctRaw);
+    if (Number.isFinite(dotSizePct) && !Number.isNaN(dotSizePct)) {
+      runtimeConfig.dotSizePercent = clamp(dotSizePct, 0, 100);
+    }
+  }
+
+  const halftonePctRaw = params.get(URL_PARAMS.halftonePct);
+  if (halftonePctRaw !== null) {
+    const halftonePct = Number(halftonePctRaw);
+    if (Number.isFinite(halftonePct) && !Number.isNaN(halftonePct)) {
+      runtimeConfig.halftonePercent = clamp(halftonePct, 0, 100);
+    }
+  }
+
 }
 
 function writeUrlState(seed) {
@@ -1070,6 +1192,14 @@ function writeUrlState(seed) {
   orderedParams.set(
     URL_PARAMS.weightPct,
     String(Math.round(runtimeConfig.weightProbability * 100)),
+  );
+  orderedParams.set(
+    URL_PARAMS.dotSizePct,
+    String(Math.round(runtimeConfig.dotSizePercent)),
+  );
+  orderedParams.set(
+    URL_PARAMS.halftonePct,
+    String(Math.round(runtimeConfig.halftonePercent)),
   );
 
   url.search = orderedParams.toString();
