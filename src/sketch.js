@@ -150,8 +150,8 @@ const runtimeConfig = {
 const URL_PARAMS = {
   seed: "s",
   ratio: "r",
-  component: "cm",
   color: "cl",
+  component: "cm",
   amountPct: "a",
   centrePct: "cn",
   edgePct: "e",
@@ -164,7 +164,7 @@ const URL_PARAMS = {
   opacityPct: "op",
   outlinePct: "ot",
   weightPct: "w",
-  dotSizePct: "ds",
+  dotSizePct: "d",
   halftonePct: "sc",
 };
 
@@ -422,6 +422,7 @@ function exportCurrentCompositionSvg(filename) {
 
 function buildExportFilename(seed) {
   const safeSeed = Number.isFinite(seed) ? Math.floor(seed) : "random";
+  const ratio = runtimeConfig.ratioValue;
   const component = runtimeConfig.componentValue;
   const color = runtimeConfig.colorValue;
   const centrePct = Math.round(runtimeConfig.centrePercent);
@@ -440,7 +441,6 @@ function buildExportFilename(seed) {
   const halftonePct = Math.round(runtimeConfig.halftonePercent);
 
   const paramString = [
-    `${URL_PARAMS.color}${color}`,
     `${URL_PARAMS.amountPct}${amountPct}`,
     `${URL_PARAMS.centrePct}${centrePct}`,
     `${URL_PARAMS.edgePct}${edgePct}`,
@@ -456,7 +456,7 @@ function buildExportFilename(seed) {
     `${URL_PARAMS.dotSizePct}${dotSizePct}`,
     `${URL_PARAMS.halftonePct}${halftonePct}`,
   ].join("");
-  return `facet-${safeSeed}${component}-${paramString}`;
+  return `facet-${safeSeed}-${ratio}-${color}-${component}-${paramString}`;
 }
 
 function parseSeed(value) {
@@ -637,7 +637,9 @@ function updateRuntimeControlDisplay() {
     dotSizeValue.textContent = String(Math.round(runtimeConfig.dotSizePercent));
   }
   if (halftoneValue) {
-    halftoneValue.textContent = String(Math.round(runtimeConfig.halftonePercent));
+    halftoneValue.textContent = String(
+      Math.round(runtimeConfig.halftonePercent),
+    );
   }
 }
 
@@ -1130,7 +1132,6 @@ function readRuntimeConfigFromUrl() {
       runtimeConfig.halftonePercent = clamp(halftonePct, 0, 100);
     }
   }
-
 }
 
 function writeUrlState(seed) {
@@ -1143,8 +1144,8 @@ function writeUrlState(seed) {
 
   // Keep URL ordering aligned to UI control order.
   orderedParams.set(URL_PARAMS.ratio, runtimeConfig.ratioValue);
-  orderedParams.set(URL_PARAMS.component, runtimeConfig.componentValue);
   orderedParams.set(URL_PARAMS.color, runtimeConfig.colorValue);
+  orderedParams.set(URL_PARAMS.component, runtimeConfig.componentValue);
   orderedParams.set(
     URL_PARAMS.amountPct,
     String(Math.round(runtimeConfig.amountPercent)),

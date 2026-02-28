@@ -182,8 +182,8 @@ Canonical order:
 
 - `s` (seed)
 - `r` (Ratio)
-- `cm` (Component)
 - `cl` (Colour)
+- `cm` (Component)
 - `a` (Amount)
 - `cn` (Centre)
 - `e` (Edge)
@@ -196,7 +196,7 @@ Canonical order:
 - `op` (Opacity)
 - `ot` (Outline)
 - `w` (Weight)
-- `ds` (Dots)
+- `d` (Dots)
 - `sc` (Screen)
 
 ## UI behavior
@@ -227,4 +227,4 @@ Canonical order:
   - `s` (`1:1`): Hi-res `4320x4320`, Web `1600x1600`
   - `p` (`4:5`): Hi-res `4320x5400`, Web `1600x2000`
 - Filename includes seed + control params:
-  - `facet-{seed}{cm}-cl{cl}a{a}cn{cn}e{e}fx{fx}fy{fy}sz{sz}sp{sp}b{b}l{l}op{op}ot{ot}w{w}ds{ds}sc{sc}.{ext}`
+  - `facet-{seed}-{r}-{cl}-{cm}-a{a}cn{cn}e{e}fx{fx}fy{fy}sz{sz}sp{sp}b{b}l{l}op{op}ot{ot}w{w}d{d}sc{sc}.{ext}`
