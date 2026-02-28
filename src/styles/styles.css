@@ -57,7 +57,7 @@ body {
 .visually-hidden {
   block-size: 0.0625rem;
   border: 0;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   inline-size: 0.0625rem;
   margin: -0.0625rem;
   overflow: hidden;
@@ -67,16 +67,19 @@ body {
 }
 
 button {
+  align-items: center;
   background: var(--color-button-background);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--border-radius-button);
   color: var(--color-interactive-neutral);
   cursor: pointer;
+  display: flex;
   font-family: var(--font-family);
   font-size: var(--font-01-size);
+  justify-content: center;
   line-height: var(--font-01-line-height);
   padding-block: calc(var(--space-vertical-01) - var(--border-width));
-  padding-inline: var(--space-horizontal-04);
+  padding-inline: calc(var(--space-horizontal-04) - var(--border-width));
 
   &:focus-visible {
     border-radius: var(--border-radius-button);
@@ -88,6 +91,76 @@ button {
   }
   &:active {
     color: var(--color-interactive-neutral-active);
+  }
+}
+
+button.button-primary {
+  color: var(--color-interactive);
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-interactive-hover);
+    }
+  }
+
+  &:active {
+    color: var(--color-interactive-active);
+  }
+
+  @container (min-inline-size: 48rem) {
+    background-color: var(--color-interactive);
+    border-color: var(--color-interactive);
+    color: var(--color-interactive-contrast);
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--color-interactive-hover);
+        color: var(--color-interactive-contrast);
+      }
+    }
+
+    &:active {
+      background-color: var(--color-interactive-active);
+      color: var(--color-interactive-contrast);
+    }
+  }
+}
+
+button.button-responsive {
+  aspect-ratio: 1 / 1;
+  block-size: 1.875rem;
+  line-height: 1;
+  padding: 0;
+
+  & .button-text {
+    block-size: 0.0625rem;
+    clip-path: inset(50%);
+    inline-size: 0.0625rem;
+    margin: -0.0625rem;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+  }
+
+  @container (min-inline-size: 48rem) {
+    aspect-ratio: inherit;
+    block-size: auto;
+    line-height: var(--font-01-line-height);
+    padding-block: calc(var(--space-vertical-01) - var(--border-width));
+    padding-inline: calc(var(--space-horizontal-04) - var(--border-width));
+
+    & .button-text {
+      block-size: auto;
+      clip-path: none;
+      inline-size: auto;
+      margin: 0;
+      overflow: hidden;
+      position: static;
+    }
+
+    & svg {
+      display: none;
+    }
   }
 }
 
@@ -109,6 +182,14 @@ header {
   padding-block: var(--space-vertical-03);
   padding-inline: var(--space-horizontal-04);
   position: sticky;
+
+  @container (min-inline-size: 24rem) {
+    padding-inline: var(--space-horizontal-05);
+  }
+
+  @container (min-inline-size: 48rem) {
+    padding-inline: var(--space-horizontal-06);
+  }
 }
 
 aside {
@@ -175,14 +256,22 @@ footer {
   height: var(--outer-block-size);
   justify-content: space-between;
   padding-block: var(--space-vertical-03);
-  padding-inline: var(--space-horizontal-06);
+  padding-inline: var(--space-horizontal-04);
+
+  @container (min-inline-size: 24rem) {
+    padding-inline: var(--space-horizontal-05);
+  }
+
+  @container (min-inline-size: 48rem) {
+    padding-inline: var(--space-horizontal-06);
+  }
 }
 
 .header-title {
   align-items: center;
   display: flex;
   gap: var(--space-horizontal-03);
-  margin-inline-start: var(--space-horizontal-03);
+  margin-inline-start: calc(0rem - var(--space-horizontal-02));
 }
 
 #settingsBtn {
@@ -201,6 +290,7 @@ footer {
   &:focus-visible {
     border-radius: var(--border-radius-focus);
   }
+
   @media (hover: hover) {
     &:hover {
       color: var(--color-interactive-neutral-hover);
@@ -222,7 +312,6 @@ h1 {
   display: flex;
   gap: var(--space-horizontal-04);
   justify-content: flex-end;
-  margin-inline-end: var(--space-horizontal-04);
 }
 
 .dropdown-menu {
@@ -235,9 +324,6 @@ h1 {
 }
 
 .dropdown-button {
-  font-variant-numeric: tabular-nums;
-  min-inline-size: calc(72rem / 16);
-
   &[aria-expanded="true"] {
     border-block-end-color: var(--color-border-light);
     border-end-end-radius: 0;
@@ -247,6 +333,11 @@ h1 {
   }
 }
 
+#ratioBtn {
+  font-variant-numeric: tabular-nums;
+  min-inline-size: calc(56rem / 16);
+}
+
 .dropdown-menu-panel {
   background-color: var(--color-background-emphasis);
   border: var(--border-width) solid var(--color-border);
@@ -254,9 +345,9 @@ h1 {
   border-end-end-radius: var(--border-radius-button);
   border-end-start-radius: var(--border-radius-button);
   display: grid;
+  inline-size: 100%;
   inset-block-start: 100%;
   inset-inline-end: 0;
-  min-inline-size: 100%;
   padding-block-end: calc(var(--space-vertical-02) - var(--border-width));
   padding-block-start: var(--space-vertical-02);
   position: absolute;
@@ -264,6 +355,12 @@ h1 {
   &[hidden] {
     display: none;
   }
+}
+
+#exportBtn + .dropdown-menu-panel {
+  border-block-start: var(--border-width) solid var(--color-border);
+  inline-size: auto;
+  margin-block-start: -0.0625rem;
 }
 
 .dropdown-menu-panel button,
@@ -274,8 +371,9 @@ h1 {
   cursor: pointer;
   font-variant-numeric: tabular-nums;
   inline-size: 100%;
+  justify-content: flex-end;
   padding-block: var(--space-vertical-01);
-  padding-inline: var(--space-horizontal-04);
+  padding-inline: calc(var(--space-horizontal-04) - var(--border-width));
   text-align: right;
   white-space: nowrap;
 
@@ -300,20 +398,6 @@ h1 {
 
   &:not([aria-selected="true"]):active {
     color: var(--color-interactive-neutral-active);
-  }
-}
-
-#generateBtn {
-  background-color: var(--color-interactive);
-  border-color: var(--color-interactive);
-  color: var(--color-interactive-contrast);
-  @media (hover: hover) {
-    &:hover {
-      background-color: var(--color-interactive-hover);
-    }
-  }
-  &:active {
-    background-color: var(--color-interactive-active);
   }
 }
 
@@ -443,7 +527,7 @@ canvas {
   align-items: center;
   display: grid;
   gap: var(--space-horizontal-04);
-  grid-template-columns: 6ch 1fr 3ch;
+  grid-template-columns: minmax(6ch, auto) 1fr 3ch;
   padding-inline: var(--space-horizontal-04);
 }
 
@@ -491,9 +575,9 @@ canvas {
   background-color: var(--color-background-emphasis);
   border-block-start: var(--border-width) solid var(--color-border-light);
   border-end-end-radius: var(--border-radius-card);
-  display: grid;
+  /* display: grid;
   gap: var(--space-horizontal-04);
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr; */
   inline-size: 100%;
   margin-block-start: auto;
   padding-block: var(--space-vertical-03);

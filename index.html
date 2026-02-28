@@ -224,10 +224,63 @@
           </div>
           <div class="control-footer">
             <button id="resetBtn" type="button">Reset</button>
-            <button id="seedBtn" type="button">Seed</button>
           </div>
         </aside>
         <div class="header-actions">
+          <div class="dropdown-menu" id="exportMenu">
+            <button
+              aria-expanded="false"
+              aria-haspopup="menu"
+              class="dropdown-button button-responsive"
+              id="exportBtn"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="currentColor"
+                viewBox="0 0 256 256"
+              >
+                <path
+                  d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"
+                ></path>
+              </svg>
+              <span class="button-text">Export</span>
+            </button>
+            <div
+              class="dropdown-menu-panel"
+              hidden
+              id="exportMenuPanel"
+              role="menu"
+            >
+              <button
+                id="downloadHiResBtn"
+                role="menuitem"
+                tabindex="-1"
+                type="button"
+              >
+                Hi-res
+              </button>
+              <button
+                id="downloadSvgBtn"
+                role="menuitem"
+                tabindex="-1"
+                type="button"
+              >
+                Vector
+              </button>
+              <button
+                id="downloadWebBtn"
+                role="menuitem"
+                tabindex="-1"
+                type="button"
+              >
+                Web
+              </button>
+            </div>
+          </div>
           <div class="dropdown-menu" id="ratioMenu">
             <button
               aria-controls="ratioMenuPanel"
@@ -262,6 +315,7 @@
                 id="ratio-opt-og"
                 role="option"
                 tabindex="-1"
+                translate="no"
               >
                 OG
               </div>
@@ -285,49 +339,44 @@
               </div>
             </div>
           </div>
-          <div class="dropdown-menu" id="exportMenu">
-            <button
-              aria-expanded="false"
-              aria-haspopup="menu"
-              class="dropdown-button"
-              id="exportBtn"
-              type="button"
+          <button
+            class="button-primary button-responsive"
+            id="seedBtn"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              fill="currentColor"
+              height="24"
+              viewBox="0 0 256 256"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              Export
-            </button>
-            <div
-              class="dropdown-menu-panel"
-              hidden
-              id="exportMenuPanel"
-              role="menu"
+              <path
+                d="M232,104a56.06,56.06,0,0,0-56-56H136a24,24,0,0,1,24-24,8,8,0,0,0,0-16,40,40,0,0,0-40,40H80a56.06,56.06,0,0,0-56,56,16,16,0,0,0,8,13.83V128c0,35.53,33.12,62.12,59.74,83.49C103.66,221.07,120,234.18,120,240a8,8,0,0,0,16,0c0-5.82,16.34-18.93,28.26-28.51C190.88,190.12,224,163.53,224,128V117.83A16,16,0,0,0,232,104ZM80,64h96a40.06,40.06,0,0,1,40,40H40A40,40,0,0,1,80,64Zm74.25,135c-10.62,8.52-20,16-26.25,23.37-6.25-7.32-15.63-14.85-26.25-23.37C77.8,179.79,48,155.86,48,128v-8H208v8C208,155.86,178.2,179.79,154.25,199Z"
+              ></path>
+            </svg>
+            <span class="button-text">Seed</span>
+          </button>
+          <button
+            class="button-primary button-responsive"
+            id="generateBtn"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              fill="currentColor"
+              height="24"
+              viewBox="0 0 256 256"
+              width="23"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <button
-                id="downloadHiResBtn"
-                role="menuitem"
-                tabindex="-1"
-                type="button"
-              >
-                Hi-res
-              </button>
-              <button
-                id="downloadSvgBtn"
-                role="menuitem"
-                tabindex="-1"
-                type="button"
-              >
-                Vector
-              </button>
-              <button
-                id="downloadWebBtn"
-                role="menuitem"
-                tabindex="-1"
-                type="button"
-              >
-                Web
-              </button>
-            </div>
-          </div>
-          <button id="generateBtn" type="button">New</button>
+              <path
+                d="M237.66,178.34a8,8,0,0,1,0,11.32l-24,24a8,8,0,0,1-11.32-11.32L212.69,192H200.94a72.12,72.12,0,0,1-58.59-30.15l-41.72-58.4A56.1,56.1,0,0,0,55.06,80H32a8,8,0,0,1,0-16H55.06a72.12,72.12,0,0,1,58.59,30.15l41.72,58.4A56.1,56.1,0,0,0,200.94,176h11.75l-10.35-10.34a8,8,0,0,1,11.32-11.32ZM143,107a8,8,0,0,0,11.16-1.86l1.2-1.67A56.1,56.1,0,0,1,200.94,80h11.75L202.34,90.34a8,8,0,0,0,11.32,11.32l24-24a8,8,0,0,0,0-11.32l-24-24a8,8,0,0,0-11.32,11.32L212.69,64H200.94a72.12,72.12,0,0,0-58.59,30.15l-1.2,1.67A8,8,0,0,0,143,107Zm-30,42a8,8,0,0,0-11.16,1.86l-1.2,1.67A56.1,56.1,0,0,1,55.06,176H32a8,8,0,0,0,0,16H55.06a72.12,72.12,0,0,0,58.59-30.15l1.2-1.67A8,8,0,0,0,113,149Z"
+              ></path>
+            </svg>
+            <span class="button-text">Randomise</span>
+          </button>
         </div>
       </header>
       <main>

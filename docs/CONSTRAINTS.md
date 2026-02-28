@@ -25,7 +25,7 @@ Define deterministic and probabilistic rules so generated images follow Measured
   - `p` (`4:5`, portrait): preview base `800x1000`
 - Color mode: RGB
 - Seed handling:
-  - `New` randomizes settings and regenerates.
+  - `Randomise` randomizes settings and regenerates.
   - `Seed` creates a new random seed while retaining current settings.
   - Active seed is persisted in URL query param `s`.
   - Loading a URL with a seed reproduces the same output for the same control values.
@@ -181,7 +181,7 @@ Canonical order:
 - In desktop viewport, `Escape` closes sidebar only when focus is inside sidebar and no dropdown/listbox menu is open.
 - `Ratio` menu selects active ratio (`l`, `og`, `s`, `p`).
 - `Reset` restores all controls to defaults.
-- `New` assigns random values to controls and regenerates.
+- `Randomise` assigns random values to controls and regenerates.
 - `Seed` generates a new seed and keeps current settings.
 - Canvas has a descriptive text alternative and the controls panel is a labeled complementary landmark.
 

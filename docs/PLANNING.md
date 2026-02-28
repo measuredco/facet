@@ -26,7 +26,8 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ## Current UX model
 
 - Header actions:
-  - `New` (randomise settings)
+  - `Randomise` (randomise settings)
+  - `Seed` (new seed with current settings)
   - `Ratio` (dropdown with ratio options)
   - `Export` (dropdown with PNG/SVG actions)
   - Settings toggle (sidebar visibility)
@@ -34,7 +35,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
   - Responsive canvas (active ratio)
 - Controls sidebar:
   - `Component` (includes `Mix` radio option), `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`
-  - `Reset`, `Seed`
+  - `Reset`
 
 ## State and persistence
 
@@ -55,7 +56,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Canvas regeneration is deterministic per seed.
 - Runtime controls are fully wired and update URL state.
 - Ratio menu is wired and drives preview/export dimensions.
-- New, Seed, and Reset are implemented.
+- Randomise, Seed, and Reset are implemented.
 - Candidate acceptance has been refactored into a centralized validator helper with no visual regression in manual snapshot checks.
 - Accessibility baseline improvements in place:
   - Labeled controls landmark
@@ -70,8 +71,6 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Later
 
-- Move seed button to header
-- Create mobile nav
 - Color param
 - Consider adding text feature, to optional add a textual element to compositions _values below calculated for a 1200 × 630 OG image_
   - no rich text, string only
@@ -85,7 +84,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ## Acceptance tests
 
 - App runs locally via static server.
-- New randomizes settings and regenerates.
+- Randomise randomizes settings and regenerates.
 - Seed creates new seeded output with current settings.
 - URL params reproduce seeded output and controls.
 - Sidebar controls change composition and persist to URL.
