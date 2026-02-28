@@ -118,6 +118,7 @@ UI controls currently exposed in sidebar:
 - `Weight`
 - `Dots`
 - `Screen`
+- `Color lock` (checkbox)
 
 Current defaults:
 
@@ -137,6 +138,7 @@ Current defaults:
 - `Weight`: 50%
 - `Dots`: 0%
 - `Screen`: 0%
+- `Color lock`: checked
 
 Component values (UI order):
 
@@ -173,6 +175,10 @@ Control semantics:
 - `Flip X` and `Flip Y` are disabled when `Component` is `lt` or `st`, because those two shapes are symmetrical and flips produce no visual difference.
   - In `mx` mix mode, flip controls remain enabled.
 - `Centre` maps to center-biased placement pull during candidate sampling.
+- `Color lock` controls whether `Randomise` can change `Colour`.
+  - checked: `Randomise` keeps current `Colour`
+  - unchecked: `Randomise` can choose a new `Colour` preset
+  - `Reset` always restores `Color lock` to checked.
 
 ## URL parameter persistence
 
@@ -208,7 +214,8 @@ Canonical order:
 - In desktop viewport, `Escape` closes sidebar only when focus is inside sidebar and no dropdown/listbox menu is open.
 - `Ratio` menu selects active ratio (`l`, `og`, `s`, `p`).
 - `Reset` restores all controls to defaults.
-- `Randomise` assigns random values to controls (excluding `Colour`) and regenerates.
+- `Randomise` assigns random values to controls and regenerates.
+  - `Colour` is included only when `Color lock` is unchecked.
 - `Seed` generates a new seed and keeps current settings.
 - Canvas has a descriptive text alternative and the controls panel is a labeled complementary landmark.
 

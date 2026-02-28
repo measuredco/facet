@@ -443,12 +443,11 @@ canvas {
   --mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNjAgMzYwIj48cGF0aCBkPSJNMzYwIDM2MFYyMjRDMzYwIDEwMC41IDI1OS41IDAgMTM2IDBIMHYxNjBoMTM2YzM1LjMgMCA2NCAyOC43IDY0IDY0djEzNmgxNjBaIiBmaWxsPSJjdXJyZW50Q29sb3IiIC8+PC9zdmc+");
   align-items: center;
   aspect-ratio: 1 / 1;
-  border-radius: var(--border-radius-button);
   block-size: 1.875rem;
+  border-radius: var(--border-radius-button);
   display: flex;
   justify-content: center;
   position: relative;
-
 
   &:has(:focus-visible) {
     outline: var(--outline-width) solid var(--color-interactive-focus);
@@ -677,12 +676,13 @@ canvas {
 }
 
 .control-footer {
+  align-items: center;
   background-color: var(--color-background-emphasis);
   border-block-start: var(--border-width) solid var(--color-border-light);
   border-end-end-radius: var(--border-radius-card);
-  /* display: grid;
+  display: grid;
   gap: var(--space-horizontal-04);
-  grid-template-columns: 1fr 1fr; */
+  grid-template-columns: 1fr 1fr;
   inline-size: 100%;
   margin-block-start: auto;
   padding-block: var(--space-vertical-03);
@@ -691,6 +691,52 @@ canvas {
 
 .control-footer button {
   inline-size: 100%;
+}
+
+.control-lock {
+  align-items: center;
+  color: var(--color-interactive-neutral);
+  cursor: pointer;
+  display: flex;
+  gap: var(--space-horizontal-02);
+  inline-size: fit-content;
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-interactive-neutral-hover);
+    }
+  }
+
+  &:active {
+    color: var(--color-interactive-neutral-active);
+  }
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  aspect-ratio: 1 / 1;
+  border: 0.125rem solid var(--color-interactive-neutral);
+  border-radius: var(--border-radius-image);
+  cursor: pointer;
+  inline-size: var(--space-vertical-04);
+  position: relative;
+
+  &::before {
+    background-color: var(--color-interactive);
+    content: "";
+    inset: 0.125rem;
+    position: absolute;
+    transform: scale(0);
+    transition: 100ms transform var(--easing-cubic-bezier-easy-ease);
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
+  &:checked::before {
+    transform: scale(1);
+  }
 }
 
 .logo {

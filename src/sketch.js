@@ -747,10 +747,18 @@ function syncRuntimeControlsToInputs() {
 }
 
 function applyRandomizedSettings() {
+  const colorLockInput = document.getElementById("colorLockInput");
+  const isColorLocked =
+    !(colorLockInput instanceof HTMLInputElement) || colorLockInput.checked;
   const componentValues = [
     ...COMPONENTS.map((component) => component.value),
     MIX_COMPONENT_VALUE,
   ];
+  if (!isColorLocked) {
+    const colorValues = Object.keys(COLOR_SCHEMES);
+    runtimeConfig.colorValue =
+      colorValues[Math.floor(Math.random() * colorValues.length)];
+  }
   runtimeConfig.componentValue =
     componentValues[Math.floor(Math.random() * componentValues.length)];
   runtimeConfig.centrePercent = Math.round(Math.random() * 100);
@@ -798,6 +806,7 @@ function bindRuntimeControls() {
   const spreadInput = document.getElementById("spreadInput");
   const dotSizeInput = document.getElementById("dotSizeInput");
   const halftoneInput = document.getElementById("halftoneInput");
+  const colorLockInput = document.getElementById("colorLockInput");
   const resetBtn = document.getElementById("resetBtn");
   const seedBtn = document.getElementById("seedBtn");
 
@@ -818,6 +827,7 @@ function bindRuntimeControls() {
     !spreadInput ||
     !dotSizeInput ||
     !halftoneInput ||
+    !(colorLockInput instanceof HTMLInputElement) ||
     !resetBtn ||
     !seedBtn
   ) {
@@ -984,6 +994,7 @@ function bindRuntimeControls() {
     runtimeConfig.spreadPercent = UI_SPREAD_PERCENT_DEFAULT;
     runtimeConfig.halftonePercent = UI_HALFTONE_PERCENT_DEFAULT;
     runtimeConfig.dotSizePercent = UI_DOT_SIZE_PERCENT_DEFAULT;
+    colorLockInput.checked = true;
     syncRuntimeControlsToInputs();
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed);

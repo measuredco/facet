@@ -35,7 +35,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
   - Responsive canvas (active ratio)
 - Controls sidebar:
   - `Component` (includes `Mix` radio option), `Colour`, `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`, `Dots`, `Screen`
-  - `Reset`
+  - `Color lock` (checkbox), `Reset`
 
 ## State and persistence
 
@@ -85,6 +85,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 - App runs locally via static server.
 - Randomise randomizes settings and regenerates.
+  - `Colour` randomization is controlled by `Color lock`.
 - Seed creates new seeded output with current settings.
 - URL params reproduce seeded output and controls.
 - Sidebar controls change composition and persist to URL.
