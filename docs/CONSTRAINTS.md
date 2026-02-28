@@ -25,20 +25,34 @@ Define deterministic and probabilistic rules so generated images follow Measured
   - `p` (`4:5`, portrait): preview base `800x1000`
 - Color mode: RGB
 - Seed handling:
-  - `Randomise` randomizes settings and regenerates.
+  - `Randomise` randomizes settings and regenerates (except `Colour`).
   - `Seed` creates a new random seed while retaining current settings.
   - Active seed is persisted in URL query param `s`.
   - Loading a URL with a seed reproduces the same output for the same control values.
 - Default ratio: `l` (`16:9`)
+- Default colour preset: `ad` (`Azure dark`)
 
 ## Palette rules
 
-- Background color: fixed `#031f60`
-- Shape palette:
-  - `#072d75`
-  - `#083c8a`
-  - `#0158ad`
-  - `#3598f8`
+- Colour presets:
+  - `ad` (Azure dark)
+    - Background: `#031f60`
+    - Shape palette: `#072d75`, `#083c8a`, `#0158ad`, `#6db5f8`
+  - `al` (Azure light)
+    - Background: `#edf6fe`
+    - Shape palette: `#083c8a`, `#1666bb`, `#2a84e1`, `#3598f8`
+  - `cy` (Cyan)
+    - Background: `#00161a`
+    - Shape palette: `#00333c`, `#014a53`, `#03636b`, `#55b7bd`
+  - `or` (Orange)
+    - Background: `#fef4e8`
+    - Shape palette: `#773604`, `#ad5601`, `#cb6503`, `#ea7407`
+  - `nd` (Neutral dark)
+    - Background: `#0b0c0d`
+    - Shape palette: `#656667`, `#898a8b`, `#c8c9ca`, `#e3e4e5`
+  - `nl` (Neutral light)
+    - Background: `#ffffff`
+    - Shape palette: `#232424`, `#434444`, `#656667`, `#e3e4e5`
 
 ## Shape rules
 
@@ -89,6 +103,7 @@ Define deterministic and probabilistic rules so generated images follow Measured
 UI controls currently exposed in sidebar:
 
 - `Component`
+- `Colour`
 - `Amount`
 - `Centre`
 - `Edge`
@@ -105,6 +120,7 @@ UI controls currently exposed in sidebar:
 Current defaults:
 
 - `Component`: `The corner` (`tc`)
+- `Colour`: `Azure dark` (`ad`)
 - `Amount`: 0% (maps to 1 max shape)
 - `Centre`: 50%
 - `Edge`: 50%
@@ -130,6 +146,7 @@ Component values (UI order):
 Control semantics:
 
 - `Amount` maps `0..100%` to shape max `1..UI_DENSITY_MAX` (currently 50).
+- `Colour` selects active background + 4-colour palette preset (`ad`, `al`, `cy`, `or`, `nd`, `nl`).
 - `Blend` maps `0..100%` to same-colour overlap rejection strictness.
   - `0%`: reject all same-colour overlaps (strict behavior)
   - `100%`: allow same-colour overlaps
@@ -159,6 +176,7 @@ Canonical order:
 - `s` (seed)
 - `r` (Ratio)
 - `cm` (Component)
+- `cl` (Colour)
 - `a` (Amount)
 - `cn` (Centre)
 - `e` (Edge)
@@ -181,7 +199,7 @@ Canonical order:
 - In desktop viewport, `Escape` closes sidebar only when focus is inside sidebar and no dropdown/listbox menu is open.
 - `Ratio` menu selects active ratio (`l`, `og`, `s`, `p`).
 - `Reset` restores all controls to defaults.
-- `Randomise` assigns random values to controls and regenerates.
+- `Randomise` assigns random values to controls (excluding `Colour`) and regenerates.
 - `Seed` generates a new seed and keeps current settings.
 - Canvas has a descriptive text alternative and the controls panel is a labeled complementary landmark.
 
@@ -197,4 +215,4 @@ Canonical order:
   - `s` (`1:1`): Hi-res `4320x4320`, Web `1600x1600`
   - `p` (`4:5`): Hi-res `4320x5400`, Web `1600x2000`
 - Filename includes seed + control params:
-  - `facet-{seed}{cm}-a{a}cn{cn}e{e}fx{fx}fy{fy}sz{sz}sp{sp}b{b}l{l}op{op}ot{ot}w{w}.{ext}`
+  - `facet-{seed}{cm}-cl{cl}a{a}cn{cn}e{e}fx{fx}fy{fy}sz{sz}sp{sp}b{b}l{l}op{op}ot{ot}w{w}.{ext}`

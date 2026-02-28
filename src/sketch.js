@@ -4,8 +4,32 @@ let currentSeed = null;
 let resizeFrameRequestId = null;
 
 // Global configuration (foundational/default project settings)
-const BACKGROUND_COLOR = "#031f60";
-const PALETTE = ["#072d75", "#083c8a", "#0158ad", "#3598f8"];
+const COLOR_SCHEMES = {
+  ad: {
+    background: "#031f60",
+    palette: ["#072d75", "#083c8a", "#0158ad", "#6db5f8"],
+  },
+  al: {
+    background: "#edf6fe",
+    palette: ["#083c8a", "#1666bb", "#2a84e1", "#3598f8"],
+  },
+  cy: {
+    background: "#00161a",
+    palette: ["#00333c", "#014a53", "#03636b", "#55b7bd"],
+  },
+  or: {
+    background: "#fef4e8",
+    palette: ["#773604", "#ad5601", "#cb6503", "#ea7407"],
+  },
+  nd: {
+    background: "#0b0c0d",
+    palette: ["#656667", "#898a8b", "#c8c9ca", "#e3e4e5"],
+  },
+  nl: {
+    background: "#ffffff",
+    palette: ["#232424", "#434444", "#656667", "#e3e4e5"],
+  },
+};
 const COMPONENTS = [
   {
     name: "The corner",
@@ -78,6 +102,7 @@ const RATIO_SPECS = {
 };
 const DEFAULT_RATIO_VALUE = "l";
 const DEFAULT_SEED = 991712126;
+const DEFAULT_COLOR_VALUE = "ad";
 
 // UI control configuration (defaults + bounds)
 const UI_CENTRE_PERCENT_DEFAULT = 50;
@@ -104,6 +129,7 @@ const MIN_THICK_STROKE_WIDTH = 2;
 const runtimeConfig = {
   ratioValue: DEFAULT_RATIO_VALUE,
   componentValue: DEFAULT_COMPONENT_VALUE,
+  colorValue: DEFAULT_COLOR_VALUE,
   amountPercent: UI_AMOUNT_PERCENT_DEFAULT,
   centrePercent: UI_CENTRE_PERCENT_DEFAULT,
   blendPercent: UI_BLEND_PERCENT_DEFAULT,
@@ -121,6 +147,7 @@ const URL_PARAMS = {
   seed: "s",
   ratio: "r",
   component: "cm",
+  color: "cl",
   amountPct: "a",
   centrePct: "cn",
   edgePct: "e",
@@ -157,6 +184,13 @@ function getActiveComponent() {
   );
 }
 
+function getActiveColorScheme() {
+  return (
+    COLOR_SCHEMES[runtimeConfig.colorValue] ||
+    COLOR_SCHEMES[DEFAULT_COLOR_VALUE]
+  );
+}
+
 function shapesOverlap(a, b) {
   // Approximate overlap using circular bounds based on nominal size.
   const dx = a.x - b.x;
@@ -184,7 +218,8 @@ function drawCompositionToContext(
   offsetY = 0,
 ) {
   ctx.save();
-  ctx.fillStyle = BACKGROUND_COLOR;
+  const activeColorScheme = getActiveColorScheme();
+  ctx.fillStyle = activeColorScheme.background;
   ctx.fillRect(0, 0, renderWidth, renderHeight);
 
   shapes.forEach((s, index) => {
@@ -273,12 +308,13 @@ function downloadBlob(filenameWithExtension, blob) {
 }
 
 function buildSvgExportMarkup(renderWidth, renderHeight) {
+  const activeColorScheme = getActiveColorScheme();
   const svgParts = [];
   svgParts.push(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${renderWidth}" height="${renderHeight}" viewBox="0 0 ${renderWidth} ${renderHeight}">`,
   );
   svgParts.push(
-    `<rect width="${renderWidth}" height="${renderHeight}" fill="${BACKGROUND_COLOR}" />`,
+    `<rect width="${renderWidth}" height="${renderHeight}" fill="${activeColorScheme.background}" />`,
   );
 
   shapes.forEach((shape, index) => {
@@ -332,6 +368,7 @@ function exportCurrentCompositionSvg(filename) {
 function buildExportFilename(seed) {
   const safeSeed = Number.isFinite(seed) ? Math.floor(seed) : "random";
   const component = runtimeConfig.componentValue;
+  const color = runtimeConfig.colorValue;
   const centrePct = Math.round(runtimeConfig.centrePercent);
   const amountPct = Math.round(runtimeConfig.amountPercent);
   const blendPct = Math.round(runtimeConfig.blendPercent);
@@ -346,6 +383,7 @@ function buildExportFilename(seed) {
   const spreadPct = Math.round(runtimeConfig.spreadPercent);
 
   const paramString = [
+    `${URL_PARAMS.color}${color}`,
     `${URL_PARAMS.amountPct}${amountPct}`,
     `${URL_PARAMS.centrePct}${centrePct}`,
     `${URL_PARAMS.edgePct}${edgePct}`,
@@ -417,13 +455,13 @@ function getEdgeOverflowFactors(edgePercent) {
   };
 }
 
-function getPaletteWeights(lightPercent) {
+function getPaletteWeights(lightPercent, palette) {
   const t = clamp(lightPercent, 0, 100) / 100;
-  const count = PALETTE.length;
+  const count = palette.length;
   const uniformWeight = 1 / count;
-  const earlyWeights = PALETTE.map((_, index) => 1 / (index + 1));
+  const earlyWeights = palette.map((_, index) => 1 / (index + 1));
   const earlyTotal = earlyWeights.reduce((sum, value) => sum + value, 0);
-  const lateWeights = PALETTE.map((_, index) => index + 1);
+  const lateWeights = palette.map((_, index) => index + 1);
   const lateTotal = lateWeights.reduce((sum, value) => sum + value, 0);
 
   if (t <= 0.5) {
@@ -441,14 +479,14 @@ function getPaletteWeights(lightPercent) {
   });
 }
 
-function pickPaletteColor(weights) {
+function pickPaletteColor(weights, palette) {
   const threshold = random();
   let sum = 0;
   for (let i = 0; i < weights.length; i += 1) {
     sum += weights[i];
-    if (threshold <= sum) return PALETTE[i];
+    if (threshold <= sum) return palette[i];
   }
-  return PALETTE[PALETTE.length - 1];
+  return palette[palette.length - 1];
 }
 
 function shouldDisableOpacityControl() {
@@ -567,9 +605,15 @@ function syncRuntimeControlsToInputs() {
   const componentInput = document.querySelector(
     `input[name="componentInput"][value="${runtimeConfig.componentValue}"]`,
   );
+  const colorInput = document.querySelector(
+    `input[name="colorInput"][value="${runtimeConfig.colorValue}"]`,
+  );
 
   if (componentInput instanceof HTMLInputElement) {
     componentInput.checked = true;
+  }
+  if (colorInput instanceof HTMLInputElement) {
+    colorInput.checked = true;
   }
   if (centreInput) {
     centreInput.value = String(Math.round(runtimeConfig.centrePercent));
@@ -655,6 +699,7 @@ function bindRuntimeControls() {
   const componentInputs = document.querySelectorAll(
     'input[name="componentInput"]',
   );
+  const colorInputs = document.querySelectorAll('input[name="colorInput"]');
   const centreInput = document.getElementById("centreInput");
   const blendInput = document.getElementById("blendInput");
   const lightInput = document.getElementById("lightInput");
@@ -672,6 +717,7 @@ function bindRuntimeControls() {
 
   if (
     componentInputs.length === 0 ||
+    colorInputs.length === 0 ||
     !centreInput ||
     !blendInput ||
     !lightInput ||
@@ -697,6 +743,18 @@ function bindRuntimeControls() {
     input.addEventListener("change", () => {
       if (!(input instanceof HTMLInputElement) || !input.checked) return;
       runtimeConfig.componentValue = input.value;
+      syncRuntimeControlsToInputs();
+      updateRuntimeControlDisplay();
+      writeUrlState(currentSeed);
+      if (currentSeed !== null) generateFromSeed(currentSeed);
+    });
+  });
+
+  colorInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      if (!(input instanceof HTMLInputElement) || !input.checked) return;
+      if (!Object.hasOwn(COLOR_SCHEMES, input.value)) return;
+      runtimeConfig.colorValue = input.value;
       syncRuntimeControlsToInputs();
       updateRuntimeControlDisplay();
       writeUrlState(currentSeed);
@@ -806,6 +864,7 @@ function bindRuntimeControls() {
 
   resetBtn.addEventListener("click", () => {
     runtimeConfig.componentValue = DEFAULT_COMPONENT_VALUE;
+    runtimeConfig.colorValue = DEFAULT_COLOR_VALUE;
     runtimeConfig.centrePercent = UI_CENTRE_PERCENT_DEFAULT;
     runtimeConfig.blendPercent = UI_BLEND_PERCENT_DEFAULT;
     runtimeConfig.amountPercent = UI_AMOUNT_PERCENT_DEFAULT;
@@ -848,6 +907,11 @@ function readRuntimeConfigFromUrl() {
     runtimeConfig.componentValue = MIX_COMPONENT_VALUE;
   } else if (componentRaw !== null && COMPONENTS_BY_VALUE.has(componentRaw)) {
     runtimeConfig.componentValue = componentRaw;
+  }
+
+  const colorRaw = params.get(URL_PARAMS.color);
+  if (colorRaw !== null && Object.hasOwn(COLOR_SCHEMES, colorRaw)) {
+    runtimeConfig.colorValue = colorRaw;
   }
 
   const centrePctRaw = params.get(URL_PARAMS.centrePct);
@@ -958,6 +1022,7 @@ function writeUrlState(seed) {
   // Keep URL ordering aligned to UI control order.
   orderedParams.set(URL_PARAMS.ratio, runtimeConfig.ratioValue);
   orderedParams.set(URL_PARAMS.component, runtimeConfig.componentValue);
+  orderedParams.set(URL_PARAMS.color, runtimeConfig.colorValue);
   orderedParams.set(
     URL_PARAMS.amountPct,
     String(Math.round(runtimeConfig.amountPercent)),
@@ -1164,7 +1229,8 @@ function generateFromSeed(seed) {
     ? 0
     : runtimeConfig.flipYProbability;
   const edgeOverflow = getEdgeOverflowFactors(runtimeConfig.edgePercent);
-  const paletteWeights = getPaletteWeights(runtimeConfig.lightPercent);
+  const palette = getActiveColorScheme().palette;
+  const paletteWeights = getPaletteWeights(runtimeConfig.lightPercent, palette);
   const minSize = Math.min(width, height) * minSizeRatio;
   const maxSize = Math.min(width, height) * maxSizeRatio;
 
@@ -1174,7 +1240,7 @@ function generateFromSeed(seed) {
     shapes.length < getShapeCountFromPercent(runtimeConfig.amountPercent)
   ) {
     guard += 1;
-    const color = pickPaletteColor(paletteWeights);
+    const color = pickPaletteColor(paletteWeights, palette);
     const componentValue =
       runtimeConfig.componentValue === MIX_COMPONENT_VALUE
         ? COMPONENTS[Math.floor(random(COMPONENTS.length))].value

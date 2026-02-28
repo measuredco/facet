@@ -34,14 +34,14 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Main preview:
   - Responsive canvas (active ratio)
 - Controls sidebar:
-  - `Component` (includes `Mix` radio option), `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`
+  - `Component` (includes `Mix` radio option), `Colour`, `Amount`, `Centre`, `Edge`, `Flip X`, `Flip Y`, `Size`, `Spread`, `Blend`, `Light`, `Opacity`, `Outline`, `Weight`
   - `Reset`
 
 ## State and persistence
 
 - No backend persistence.
 - URL query params persist runtime state:
-  - `s`, `r`, `cm`, `a`, `cn`, `e`, `fx`, `fy`, `sz`, `sp`, `b`, `l`, `op`, `ot`, `w`
+  - `s`, `r`, `cm`, `cl`, `a`, `cn`, `e`, `fx`, `fy`, `sz`, `sp`, `b`, `l`, `op`, `ot`, `w`
   - `cm=mx` enables mixed-component generation.
 - Reload reproduces output for same seed + control state.
 
@@ -55,6 +55,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Sidebar toggle behavior is wired and synchronized with layout.
 - Canvas regeneration is deterministic per seed.
 - Runtime controls are fully wired and update URL state.
+- Colour presets are wired (`ad`, `al`, `cy`, `or`, `nd`, `nl`) and persist via URL and filename.
 - Ratio menu is wired and drives preview/export dimensions.
 - Randomise, Seed, and Reset are implemented.
 - Candidate acceptance has been refactored into a centralized validator helper with no visual regression in manual snapshot checks.
@@ -71,7 +72,6 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Later
 
-- Color param
 - Consider adding text feature, to optional add a textual element to compositions _values below calculated for a 1200 × 630 OG image_
   - no rich text, string only
   - `--color-white` (probably?)
