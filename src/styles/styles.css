@@ -457,6 +457,10 @@ canvas {
 
   &:has(:focus-visible) {
     outline: var(--outline-width) solid var(--color-interactive-focus);
+
+    @media (forced-colors: active) {
+      outline-color: Highlight;
+    }
   }
 
   &::before {
@@ -486,6 +490,10 @@ canvas {
 
   &:has(input:checked)::after {
     background-color: var(--color-interactive-neutral);
+
+    @media (forced-colors: active) {
+      background-color: CanvasText;
+    }
   }
 
   &:has([value="ls"])::after {
@@ -542,6 +550,7 @@ canvas {
     border-radius: 100%;
     content: "";
     cursor: pointer;
+    forced-color-adjust: none;
     inset: calc(var(--space-vertical-01));
     opacity: 0.64;
     position: absolute;
@@ -557,10 +566,18 @@ canvas {
     opacity: 1;
     outline: var(--outline-width) solid var(--color-interactive);
     outline-offset: var(--outline-width);
+
+    @media (forced-colors: active) {
+      outline-color: CanvasText;
+    }
   }
 
   &:has(input:checked):has(:focus-visible)::after {
     outline-color: var(--color-interactive-focus);
+
+    @media (forced-colors: active) {
+      outline-color: Highlight;
+    }
   }
 
   &:has([value="ad"]) {
@@ -724,16 +741,21 @@ input[type="checkbox"] {
   border: 0.125rem solid var(--color-interactive-neutral);
   border-radius: var(--border-radius-image);
   cursor: pointer;
-  inline-size: var(--space-vertical-04);
+  block-size: var(--space-vertical-04);
   position: relative;
 
   &::before {
     background-color: var(--color-interactive);
     content: "";
+    forced-color-adjust: none;
     inset: 0.125rem;
     position: absolute;
     transform: scale(0);
     transition: 100ms transform var(--easing-cubic-bezier-easy-ease);
+
+    @media (forced-colors: active) {
+      background-color: CanvasText;
+    }
 
     @media (prefers-reduced-motion: reduce) {
       transition: none;
