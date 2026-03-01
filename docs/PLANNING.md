@@ -71,7 +71,6 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ### Next
 
 - Tooltip text for sliders
-- Tooltip text for settings button
 - Add a share button
 
 #### Offline-first

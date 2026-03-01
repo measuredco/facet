@@ -271,8 +271,12 @@ footer {
 .header-title {
   align-items: center;
   display: flex;
-  gap: var(--space-horizontal-03);
+  gap: var(--space-horizontal-02);
   margin-inline-start: calc(0rem - var(--space-horizontal-02));
+
+  @container (min-inline-size: 48rem) {
+    gap: var(--space-horizontal-03);
+  }
 }
 
 #settingsBtn {
@@ -281,7 +285,7 @@ footer {
   background-color: transparent;
   block-size: 1.875rem;
   border: 0;
-  color: var(--color-interactive-neutral);
+  color: var(--color-interactive);
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -295,11 +299,11 @@ footer {
 
   @media (hover: hover) {
     &:hover {
-      color: var(--color-interactive-neutral-hover);
+      color: var(--color-interactive-hover);
     }
   }
   &:active {
-    color: var(--color-interactive-neutral-active);
+    color: var(--color-interactive-active);
   }
 
   svg {
