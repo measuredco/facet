@@ -777,13 +777,13 @@ function applyRandomizedSettings() {
   runtimeConfig.dotSizePercent = Math.round(Math.random() * 100);
   syncRuntimeControlsToInputs();
   updateRuntimeControlDisplay();
-  writeUrlState(currentSeed);
+  writeUrlState(currentSeed, "push");
   if (currentSeed !== null) generateFromSeed(currentSeed);
 }
 
 function applySeedVariant() {
   const seed = Math.floor(Math.random() * 1e9);
-  writeUrlState(seed);
+  writeUrlState(seed, "push");
   generateFromSeed(seed);
 }
 
@@ -843,7 +843,7 @@ function bindRuntimeControls() {
       runtimeConfig.componentValue = input.value;
       syncRuntimeControlsToInputs();
       updateRuntimeControlDisplay();
-      writeUrlState(currentSeed);
+      writeUrlState(currentSeed, "replace");
       if (currentSeed !== null) generateFromSeed(currentSeed);
     });
   });
@@ -855,7 +855,7 @@ function bindRuntimeControls() {
       runtimeConfig.colorValue = input.value;
       syncRuntimeControlsToInputs();
       updateRuntimeControlDisplay();
-      writeUrlState(currentSeed);
+      writeUrlState(currentSeed, "replace");
       if (currentSeed !== null) generateFromSeed(currentSeed);
     });
   });
@@ -997,7 +997,7 @@ function bindRuntimeControls() {
     colorLockInput.checked = true;
     syncRuntimeControlsToInputs();
     updateRuntimeControlDisplay();
-    writeUrlState(currentSeed);
+    writeUrlState(currentSeed, "push");
     if (currentSeed !== null) generateFromSeed(currentSeed);
   });
 
@@ -1013,6 +1013,23 @@ function readSeedFromUrl() {
 
 function readRuntimeConfigFromUrl() {
   const params = new URLSearchParams(window.location.search);
+  runtimeConfig.ratioValue = DEFAULT_RATIO_VALUE;
+  runtimeConfig.componentValue = DEFAULT_COMPONENT_VALUE;
+  runtimeConfig.colorValue = DEFAULT_COLOR_VALUE;
+  runtimeConfig.centrePercent = UI_CENTRE_PERCENT_DEFAULT;
+  runtimeConfig.blendPercent = UI_BLEND_PERCENT_DEFAULT;
+  runtimeConfig.amountPercent = UI_AMOUNT_PERCENT_DEFAULT;
+  runtimeConfig.edgePercent = UI_EDGE_PERCENT_DEFAULT;
+  runtimeConfig.lightPercent = UI_LIGHT_PERCENT_DEFAULT;
+  runtimeConfig.strokeOnlyProbability = UI_OUTLINE_PERCENT_DEFAULT / 100;
+  runtimeConfig.flipXProbability = UI_FLIP_X_PERCENT_DEFAULT / 100;
+  runtimeConfig.flipYProbability = UI_FLIP_Y_PERCENT_DEFAULT / 100;
+  runtimeConfig.overlapAlpha = UI_OPACITY_PERCENT_DEFAULT / 100;
+  runtimeConfig.weightProbability = UI_WEIGHT_PERCENT_DEFAULT / 100;
+  runtimeConfig.sizePercent = UI_SIZE_PERCENT_DEFAULT;
+  runtimeConfig.spreadPercent = UI_SPREAD_PERCENT_DEFAULT;
+  runtimeConfig.dotSizePercent = UI_DOT_SIZE_PERCENT_DEFAULT;
+  runtimeConfig.halftonePercent = UI_HALFTONE_PERCENT_DEFAULT;
 
   const ratioRaw = params.get(URL_PARAMS.ratio);
   const resolvedRatio = resolveRatioValue(ratioRaw);
@@ -1145,7 +1162,7 @@ function readRuntimeConfigFromUrl() {
   }
 }
 
-function writeUrlState(seed) {
+function writeUrlState(seed, mode = "replace") {
   const url = new URL(window.location.href);
   const orderedParams = new URLSearchParams();
 
@@ -1215,7 +1232,24 @@ function writeUrlState(seed) {
   );
 
   url.search = orderedParams.toString();
-  window.history.replaceState(null, "", url);
+  const nextUrl = `${url.pathname}?${orderedParams.toString()}`;
+  const currentUrl = `${window.location.pathname}${window.location.search}`;
+  if (nextUrl === currentUrl) return;
+  if (mode === "push") {
+    window.history.pushState(null, "", nextUrl);
+    return;
+  }
+  window.history.replaceState(null, "", nextUrl);
+}
+
+function applyUrlStateAndRender() {
+  readRuntimeConfigFromUrl();
+  syncRuntimeControlsToInputs();
+  updateRuntimeControlDisplay();
+  syncRatioOptionsToInputs();
+  applyResponsiveCanvasSize(false);
+  const nextSeed = readSeedFromUrl() ?? DEFAULT_SEED;
+  generateFromSeed(nextSeed);
 }
 
 function setup() {
@@ -1234,7 +1268,7 @@ function setup() {
   const downloadSvgBtn = document.getElementById("downloadSvgBtn");
   readRuntimeConfigFromUrl();
   syncRatioOptionsToInputs();
-  applyResponsiveCanvasSize();
+  applyResponsiveCanvasSize(false);
   bindRuntimeControls();
 
   if (ratioBtn && ratioMenuPanel) {
@@ -1247,7 +1281,7 @@ function setup() {
       if (!nextRatio) return;
       runtimeConfig.ratioValue = nextRatio;
       syncRatioOptionsToInputs();
-      writeUrlState(currentSeed);
+      writeUrlState(currentSeed, "push");
       applyResponsiveCanvasSize();
     });
   }
@@ -1289,7 +1323,7 @@ function setup() {
 
   // initial generate
   const initialSeed = readSeedFromUrl() ?? DEFAULT_SEED;
-  writeUrlState(initialSeed);
+  writeUrlState(initialSeed, "replace");
   generateFromSeed(initialSeed);
 }
 
@@ -1437,7 +1471,7 @@ function windowResized() {
   });
 }
 
-function applyResponsiveCanvasSize() {
+function applyResponsiveCanvasSize(shouldRegenerate = true) {
   const container = document.getElementById("sketchContainer");
   if (!container) return;
   const main = document.querySelector("main");
@@ -1476,12 +1510,16 @@ function applyResponsiveCanvasSize() {
 
   const w = container.clientWidth || ratioSpec.preview.width;
   resizeCanvas(w, Math.round(w * ratio));
-  if (currentSeed !== null) generateFromSeed(currentSeed);
+  if (shouldRegenerate && currentSeed !== null) generateFromSeed(currentSeed);
 }
 
 // responsive on first layout
 window.addEventListener("load", () => {
   applyResponsiveCanvasSize();
+});
+
+window.addEventListener("popstate", () => {
+  applyUrlStateAndRender();
 });
 
 window.draw = draw;
