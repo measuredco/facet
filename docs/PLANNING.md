@@ -70,6 +70,31 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Next
 
+- Tooltip text for sliders
+- Consider Seed button naming
+- Tooltip text for settings button
+- Add a share button
+
+#### Offline-first
+
+- Goal: app shell and generation flow should work offline after first successful online visit.
+- Implement with `vite-plugin-pwa` (Workbox), not custom service worker logic.
+- Enable service worker only for production builds/deploy; keep it off in local dev to avoid stale-cache iteration issues.
+- Service worker strategy:
+  - Precache hashed JS/CSS assets and key static assets from `public/` (icons, manifest, font).
+  - Use navigation fallback to `index.html` so deep links and URL params still load app offline.
+  - Use `cleanupOutdatedCaches` and auto-update registration to reduce stale asset drift across deploys.
+- Cloudflare cache policy:
+  - `index.html`: short/no-cache (`no-cache`) so fresh asset references are discovered quickly.
+  - Hashed assets (`/assets/*`): long immutable cache.
+- Validation pass before launch:
+  - Build + preview.
+  - Install PWA.
+  - Go offline and confirm app reloads, generates, and exports PNG/SVG.
+  - Deploy update and verify service worker picks up new build without manual cache clearing.
+- Docs updates:
+  - README section for offline behavior, first-load requirement, and update expectations.
+
 ### Later
 
 - Consider adding text feature, to optional add a textual element to compositions _values below calculated for a 1200 × 630 OG image_
