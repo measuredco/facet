@@ -122,7 +122,9 @@
             </fieldset>
             <div class="control-section">
               <div class="control-group">
-                <label for="amountInput">Amount</label>
+                <label for="amountInput" title="Maximum number of shapes"
+                  >Amount</label
+                >
                 <input
                   id="amountInput"
                   max="100"
@@ -133,7 +135,11 @@
                 <span id="amountValue" class="control-value"></span>
               </div>
               <div class="control-group">
-                <label for="centreInput">Centre</label>
+                <label
+                  for="centreInput"
+                  title="Pushes shape placement toward the center"
+                  >Centre</label
+                >
                 <input
                   id="centreInput"
                   max="100"
@@ -144,14 +150,18 @@
                 <span id="centreValue" class="control-value"></span>
               </div>
               <div class="control-group">
-                <label for="edgeInput">Edge</label>
+                <label for="edgeInput" title="Allows more placement beyond canvas edges"
+                  >Edge</label
+                >
                 <input id="edgeInput" max="100" min="0" step="1" type="range" />
                 <span id="edgeValue" class="control-value"></span>
               </div>
             </div>
             <div class="control-section">
               <div class="control-group">
-                <label for="flipXInput">Flip X</label>
+                <label for="flipXInput" title="Chance of horizontal flip"
+                  >Flip X</label
+                >
                 <input
                   id="flipXInput"
                   max="100"
@@ -162,7 +172,9 @@
                 <span id="flipXValue" class="control-value"></span>
               </div>
               <div class="control-group">
-                <label for="flipYInput">Flip Y</label>
+                <label for="flipYInput" title="Chance of vertical flip"
+                  >Flip Y</label
+                >
                 <input
                   id="flipYInput"
                   max="100"
@@ -173,12 +185,14 @@
                 <span id="flipYValue" class="control-value"></span>
               </div>
               <div class="control-group">
-                <label for="sizeInput">Size</label>
+                <label for="sizeInput" title="Overall shape size">Size</label>
                 <input id="sizeInput" max="100" min="0" step="1" type="range" />
                 <span id="sizeValue" class="control-value"></span>
               </div>
               <div class="control-group">
-                <label for="spreadInput">Spread</label>
+                <label for="spreadInput" title="Variation between small and large shapes"
+                  >Spread</label
+                >
                 <input
                   id="spreadInput"
                   max="100"
@@ -191,7 +205,9 @@
             </div>
             <div class="control-section">
               <div class="control-group">
-                <label for="blendInput">Blend</label>
+                <label for="blendInput" title="Allows same-colour overlaps"
+                  >Blend</label
+                >
                 <input
                   id="blendInput"
                   max="100"
@@ -202,7 +218,9 @@
                 <span id="blendValue" class="control-value"></span>
               </div>
               <div class="control-group">
-                <label for="lightInput">Light</label>
+                <label for="lightInput" title="Bias toward lighter palette tones"
+                  >Light</label
+                >
                 <input
                   id="lightInput"
                   max="100"
@@ -213,7 +231,9 @@
                 <span id="lightValue" class="control-value"></span>
               </div>
               <div class="control-group">
-                <label for="opacityInput">Opacity</label>
+                <label for="opacityInput" title="Fill transparency level"
+                  >Opacity</label
+                >
                 <input
                   id="opacityInput"
                   max="100"
@@ -224,7 +244,9 @@
                 <span id="opacityValue" class="control-value"></span>
               </div>
               <div class="control-group">
-                <label for="outlineInput">Outline</label>
+                <label for="outlineInput" title="Chance of stroke-only shapes"
+                  >Outline</label
+                >
                 <input
                   id="outlineInput"
                   max="100"
@@ -235,7 +257,9 @@
                 <span id="outlineValue" class="control-value"></span>
               </div>
               <div class="control-group">
-                <label for="weightInput">Weight</label>
+                <label for="weightInput" title="Chance of thick outlines"
+                  >Weight</label
+                >
                 <input
                   disabled
                   id="weightInput"
@@ -249,7 +273,9 @@
             </div>
             <div class="control-section">
               <div class="control-group">
-                <label for="dotSizeInput">Dots</label>
+                <label for="dotSizeInput" title="Halftone dot size"
+                  >Dots</label
+                >
                 <input
                   id="dotSizeInput"
                   max="100"
@@ -260,7 +286,9 @@
                 <span id="dotSizeValue" class="control-value"></span>
               </div>
               <div class="control-group">
-                <label for="halftoneInput">Screen</label>
+                <label for="halftoneInput" title="Halftone intensity"
+                  >Screen</label
+                >
                 <input
                   id="halftoneInput"
                   max="100"
@@ -273,7 +301,11 @@
             </div>
           </div>
           <div class="control-footer">
-            <label class="control-lock" for="colorLockInput">
+            <label
+              class="control-lock"
+              for="colorLockInput"
+              title="Keep colour fixed when Randomise is used"
+            >
               <input checked id="colorLockInput" type="checkbox" />
               Colour lock
             </label>
