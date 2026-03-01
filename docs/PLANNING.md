@@ -27,7 +27,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 - Header actions:
   - `Randomise` (randomise settings)
-  - `Seed` (new seed with current settings)
+  - `Shuffle` (new seed with current settings)
   - `Ratio` (dropdown with ratio options)
   - `Export` (dropdown with PNG/SVG actions)
   - Settings toggle (sidebar visibility)
@@ -57,7 +57,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - Runtime controls are fully wired and update URL state.
 - Colour presets are wired (`ad`, `al`, `cy`, `or`, `nd`, `nl`) and persist via URL and filename.
 - Ratio menu is wired and drives preview/export dimensions.
-- Randomise, Seed, and Reset are implemented.
+- Randomise, Shuffle, and Reset are implemented.
 - Candidate acceptance has been refactored into a centralized validator helper with no visual regression in manual snapshot checks.
 - Accessibility baseline improvements in place:
   - Labeled controls landmark
@@ -71,7 +71,6 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 ### Next
 
 - Tooltip text for sliders
-- Consider Seed button naming
 - Tooltip text for settings button
 - Add a share button
 
@@ -111,7 +110,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 - App runs locally via static server.
 - Randomise randomizes settings and regenerates.
   - `Colour` randomization is controlled by `Color lock`.
-- Seed creates new seeded output with current settings.
+- Shuffle creates new seeded output with current settings.
 - URL params reproduce seeded output and controls.
 - Sidebar controls change composition and persist to URL.
 - Ratio menu offers `16:9`, `OG`, `1:1`, and `4:5`.

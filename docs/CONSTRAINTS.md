@@ -24,9 +24,10 @@ Define deterministic and probabilistic rules so generated images follow Measured
   - `s` (`1:1`, square): preview base `800x800`
   - `p` (`4:5`, portrait): preview base `800x1000`
 - Color mode: RGB
-- Seed handling:
-  - `Randomise` randomizes settings and regenerates (except `Colour`).
-  - `Seed` creates a new random seed while retaining current settings.
+- Shuffle handling:
+  - `Randomise` randomizes settings and regenerates.
+    - `Colour` is included only when `Color lock` is unchecked.
+  - `Shuffle` creates a new random seed while retaining current settings.
   - Active seed is persisted in URL query param `s`.
   - Loading a URL with a seed reproduces the same output for the same control values.
 - Default ratio: `l` (`16:9`)
@@ -216,7 +217,7 @@ Canonical order:
 - `Reset` restores all controls to defaults.
 - `Randomise` assigns random values to controls and regenerates.
   - `Colour` is included only when `Color lock` is unchecked.
-- `Seed` generates a new seed and keeps current settings.
+- `Shuffle` generates a new seed and keeps current settings.
 - Canvas has a descriptive text alternative and the controls panel is a labeled complementary landmark.
 
 ## Output behavior
