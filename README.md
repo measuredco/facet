@@ -2,6 +2,12 @@
 
 Measured abstract brand image generator.
 
+![Screenshot of the Facet interface, with adjustment sliders for things like Amount, Size, and Opacity, alongside a preview canvas displaying a procedurally generated blue geometric pattern.](https://res.cloudinary.com/measuredco/image/upload/v1772540562/articles/facet/facet-article-app_jl9j0b.png)
+
+## About
+
+[Introducing Facet](https://measured.co/blog/introducing-facet): a procedural brand image system built with agentic coding.
+
 ## Run locally
 
 Install dependencies:
