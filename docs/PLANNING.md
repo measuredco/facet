@@ -70,8 +70,6 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Next
 
-- Add a share button
-
 #### Offline-first
 
 - Goal: app shell and generation flow should work offline after first successful online visit.
@@ -94,6 +92,7 @@ A lightweight p5.js app for generating seeded, constraint-driven brand compositi
 
 ### Later
 
+- Consider a share button
 - Consider adding text feature, to optional add a textual element to compositions _values below calculated for a 1200 × 630 OG image_
   - no rich text, string only
   - `--color-white` (probably?)
