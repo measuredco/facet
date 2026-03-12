@@ -10,7 +10,7 @@ const COLOR_SCHEMES = {
     palette: ["#072d75", "#083c8a", "#0158ad", "#6db5f8"],
   },
   al: {
-    background: "#edf6fe",
+    background: "#eef7fe",
     palette: ["#083c8a", "#1666bb", "#2a84e1", "#3598f8"],
   },
   cy: {
