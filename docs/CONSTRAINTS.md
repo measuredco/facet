@@ -30,7 +30,7 @@ Define deterministic and probabilistic rules so generated images follow Measured
   - `Shuffle` creates a new random seed while retaining current settings.
   - Active seed is persisted in URL query param `s`.
   - Loading a URL with a seed reproduces the same output for the same control values.
-- Default ratio: `l` (`16:9`)
+- Default ratio: `p` (`4:5`)
 - Default colour preset: `ad` (`Azure dark`)
 
 ## Palette rules
@@ -139,7 +139,7 @@ Current defaults:
 - `Weight`: 50%
 - `Dots`: 0%
 - `Screen`: 0%
-- `Color lock`: checked
+- `Color lock`: unchecked
 
 Component values (UI order):
 
@@ -179,7 +179,7 @@ Control semantics:
 - `Color lock` controls whether `Randomise` can change `Colour`.
   - checked: `Randomise` keeps current `Colour`
   - unchecked: `Randomise` can choose a new `Colour` preset
-  - `Reset` always restores `Color lock` to checked.
+  - `Reset` always restores `Color lock` to unchecked.
 
 ## URL parameter persistence
 

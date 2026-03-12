@@ -344,7 +344,7 @@
               for="colorLockInput"
               title="Keep colour fixed when Randomise is used"
             >
-              <input checked id="colorLockInput" type="checkbox" />
+              <input id="colorLockInput" type="checkbox" />
               Colour lock
             </label>
             <button id="resetBtn" type="button">Reset</button>
@@ -415,7 +415,7 @@
               translate="no"
               type="button"
             >
-              16:9
+              4:5
             </button>
             <div
               class="dropdown-menu-panel"
@@ -426,11 +426,11 @@
               tabindex="-1"
             >
               <div
-                aria-selected="true"
+                aria-selected="false"
                 data-ratio="l"
                 id="ratio-opt-l"
                 role="option"
-                tabindex="0"
+                tabindex="-1"
               >
                 16:9
               </div>
@@ -458,7 +458,7 @@
                 data-ratio="p"
                 id="ratio-opt-p"
                 role="option"
-                tabindex="-1"
+                tabindex="0"
               >
                 4:5
               </div>

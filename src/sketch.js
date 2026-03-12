@@ -100,7 +100,7 @@ const RATIO_SPECS = {
     standard: { width: 1600, height: 2000 },
   },
 };
-const DEFAULT_RATIO_VALUE = "l";
+const DEFAULT_RATIO_VALUE = "p";
 const DEFAULT_SEED = 991712126;
 const DEFAULT_COLOR_VALUE = "ad";
 
@@ -994,7 +994,7 @@ function bindRuntimeControls() {
     runtimeConfig.spreadPercent = UI_SPREAD_PERCENT_DEFAULT;
     runtimeConfig.halftonePercent = UI_HALFTONE_PERCENT_DEFAULT;
     runtimeConfig.dotSizePercent = UI_DOT_SIZE_PERCENT_DEFAULT;
-    colorLockInput.checked = true;
+    colorLockInput.checked = false;
     syncRuntimeControlsToInputs();
     updateRuntimeControlDisplay();
     writeUrlState(currentSeed, "push");
