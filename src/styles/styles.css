@@ -30,6 +30,10 @@
   outline-offset: var(--outline-width);
 }
 
+:where(svg:not([fill])) {
+  fill: currentColor;
+}
+
 html,
 body {
   block-size: 100%;
@@ -70,7 +74,7 @@ button {
   align-items: center;
   background: var(--color-button-background);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--border-radius-button);
+  border-radius: calc(1.875rem * 0.16);
   color: var(--color-interactive-neutral);
   cursor: pointer;
   display: flex;
@@ -82,8 +86,9 @@ button {
   padding-inline: calc(var(--space-horizontal-04) - var(--border-width));
 
   &:focus-visible {
-    border-radius: var(--border-radius-button);
+    border-radius: calc(2.375rem * 0.16);
   }
+
   @media (hover: hover) {
     &:hover {
       color: var(--color-interactive-neutral-hover);
@@ -130,7 +135,13 @@ button.button-responsive {
   aspect-ratio: 1 / 1;
   block-size: 1.875rem;
   line-height: 1;
-  padding: 0;
+  padding-block: var(--space-vertical-01);
+  padding-inline: 0;
+
+  & svg {
+    aspect-ratio: 1 / 1;
+    block-size: 100%;
+  }
 
   & .button-text {
     block-size: 0.0625rem;
@@ -294,7 +305,8 @@ footer {
   padding-inline: 0;
 
   &:focus-visible {
-    border-radius: var(--border-radius-focus);
+    border-radius: calc(1.875rem * 0.16);
+    outline-offset: 0;
   }
 
   @media (hover: hover) {
@@ -325,7 +337,7 @@ h1 {
 }
 
 .dropdown-menu {
-  border-radius: var(--border-radius-button);
+  border-radius: calc(1.875rem * 0.16);
   position: relative;
 
   &:has([aria-expanded="true"]) {
@@ -352,8 +364,8 @@ h1 {
   background-color: var(--color-background-emphasis);
   border: var(--border-width) solid var(--color-border);
   border-block-start: 0;
-  border-end-end-radius: var(--border-radius-button);
-  border-end-start-radius: var(--border-radius-button);
+  border-end-end-radius: calc(1.875rem * 0.16);
+  border-end-start-radius: calc(1.875rem * 0.16);
   display: grid;
   inline-size: 100%;
   inset-block-start: 100%;
@@ -377,7 +389,6 @@ h1 {
 .dropdown-menu-panel [role="option"] {
   background-color: transparent;
   border: none;
-  border-radius: var(--border-radius-focus);
   cursor: pointer;
   font-variant-numeric: tabular-nums;
   inline-size: 100%;
@@ -388,7 +399,7 @@ h1 {
   white-space: nowrap;
 
   &:focus-visible {
-    border-radius: var(--border-radius-button);
+    border-radius: calc(1.375rem * 0.16);
     outline-offset: calc(-2 * var(--outline-width));
   }
 
@@ -454,7 +465,7 @@ canvas {
   align-items: center;
   aspect-ratio: 1 / 1;
   block-size: 1.875rem;
-  border-radius: var(--border-radius-button);
+  border-radius: calc(2.375rem * 0.16);
   display: flex;
   justify-content: center;
   position: relative;
@@ -646,7 +657,7 @@ canvas {
 
 .control-section {
   background-color: var(--color-background-emphasis);
-  border-radius: var(--border-radius-button);
+  border-radius: calc(1.5rem * 0.16);
   display: flex;
   flex-direction: column;
   gap: var(--space-vertical-03);
@@ -743,13 +754,18 @@ input[type="checkbox"] {
   appearance: none;
   aspect-ratio: 1 / 1;
   border: 0.125rem solid var(--color-interactive-neutral);
-  border-radius: var(--border-radius-image);
+  border-radius: calc(1.125rem * 0.16);
   cursor: pointer;
   block-size: var(--space-vertical-04);
   position: relative;
 
+  &:focus-visible {
+    border-radius: calc(1.625rem * 0.16);
+  }
+
   &::before {
     background-color: var(--color-interactive);
+    border-radius: calc(0.625rem * 0.16);
     content: "";
     forced-color-adjust: none;
     inset: 0.125rem;
@@ -772,6 +788,7 @@ input[type="checkbox"] {
 }
 
 .logo {
+  border-radius: calc(2rem * 0.16);
   color: var(--color-logo-neutral);
   display: flex;
 }
