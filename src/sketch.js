@@ -73,6 +73,8 @@ const COMPONENTS_BY_VALUE = new Map(
 );
 const DEFAULT_COMPONENT_VALUE = "tc";
 const MIX_COMPONENT_VALUE = "mx";
+const MX_PROPORTIONAL_REFERENCE_VIEW_BOX_SIZE =
+  COMPONENTS_BY_VALUE.get(DEFAULT_COMPONENT_VALUE).viewBoxSize; // 360
 const STROKE_WIDTH_RATIOS = [0.0037, 0.0148];
 const RATIO_SPECS = {
   l: {
@@ -243,7 +245,11 @@ function drawCompositionToContext(
     const drawY = offsetY + s.y * positionScale;
     const drawSize = s.size * sizeScale;
 
-    const scale = drawSize / activeComponent.viewBoxSize;
+    const isMixMode = runtimeConfig.componentValue === MIX_COMPONENT_VALUE;
+    const renderViewBoxSize = isMixMode
+      ? MX_PROPORTIONAL_REFERENCE_VIEW_BOX_SIZE
+      : activeComponent.viewBoxSize;
+    const scale = drawSize / renderViewBoxSize;
     const signX = s.flipX ? -1 : 1;
     const signY = s.flipY ? -1 : 1;
 
@@ -384,7 +390,11 @@ function buildSvgExportMarkup(renderWidth, renderHeight) {
       );
     const alpha = hasLowerOverlap ? runtimeConfig.overlapAlpha : 1;
 
-    const scale = shape.size / activeComponent.viewBoxSize;
+    const isMixMode = runtimeConfig.componentValue === MIX_COMPONENT_VALUE;
+    const renderViewBoxSize = isMixMode
+      ? MX_PROPORTIONAL_REFERENCE_VIEW_BOX_SIZE
+      : activeComponent.viewBoxSize;
+    const scale = shape.size / renderViewBoxSize;
     const signX = shape.flipX ? -1 : 1;
     const signY = shape.flipY ? -1 : 1;
     const transform = `translate(${shape.x} ${shape.y}) scale(${scale * signX} ${scale * signY}) translate(${-viewBoxHalf} ${-viewBoxHalf})`;
@@ -1423,7 +1433,10 @@ function generateFromSeed(seed) {
         : runtimeConfig.componentValue;
     const styleMode =
       random() < runtimeConfig.strokeOnlyProbability ? "stroke" : "fill";
-    const size = lerp(minSize, maxSize, Math.pow(random(), 0.35));
+    const size =
+      runtimeConfig.componentValue === MIX_COMPONENT_VALUE
+        ? (minSize + maxSize) * 0.5
+        : lerp(minSize, maxSize, Math.pow(random(), 0.35));
     const uniformX = random(
       -size * edgeOverflow.negative,
       width + size * edgeOverflow.positive,
